@@ -2,9 +2,7 @@
 
   <% apps.each do |app| %>
 
-    <% background = app["status"] == "OUTDATED" ? "bg-danger" : "bg-success" %>
-
-    <div class="card text-white <%= background %> mb-3 mr-3" style="max-width: 18rem;">
+    <div class="card text-white bg-<%= app["trafficLight"] %> mb-3 mr-3" style="max-width: 18rem;">
       <div class="card-header">
         <h5 class="card-title"><%= app["releaseName"] %></h5>
       </div>
