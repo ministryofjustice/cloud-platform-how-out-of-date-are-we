@@ -1,3 +1,22 @@
-<h1>
-  Hello, World!
-</h1>
+<div class="row">
+
+  <% apps.each do |app| %>
+
+    <% background = app["status"] == "OUTDATED" ? "bg-danger" : "bg-success" %>
+
+    <div class="card text-white <%= background %> mb-3 mr-3" style="max-width: 18rem;">
+      <div class="card-header">
+        <h5 class="card-title"><%= app["releaseName"] %></h5>
+      </div>
+      <div class="card-body">
+        <ul>
+          <li>chart: <%= app["chartName"] %></li>
+          <li>installed: <%= app["installedVersion"] %></li>
+          <li>latest: <%= app["latestVersion"] %></li>
+        </ul>
+      </div>
+    </div>
+
+  <% end %>
+
+</div>

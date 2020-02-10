@@ -9,6 +9,8 @@ if development?
   require "pry-byebug"
 end
 
+WHATUP_JSON_FILE = "data/helm-whatup.json"
+
 ############################################################
 
 get "/" do
@@ -16,6 +18,6 @@ get "/" do
 end
 
 get "/helm_whatup" do
-  erb :helm_whatup
+  apps = JSON.parse(File.read WHATUP_JSON_FILE)
+  erb :helm_whatup, locals: { apps: apps }
 end
-
