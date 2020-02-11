@@ -37,9 +37,14 @@ get "/" do
 end
 
 get "/helm_whatup" do
-  apps = JSON.parse(File.read WHATUP_JSON_FILE)
+  data = JSON.parse(File.read WHATUP_JSON_FILE)
+  apps = data.fetch("apps")
+  updated_at = data.fetch("updated_at")
   apps.map { |app| app["trafficLight"] = version_lag_traffic_light(app) }
-  erb :helm_whatup, locals: { apps: apps }
+  erb :helm_whatup, locals: {
+    apps: apps,
+    updated_at: updated_at
+  }
 end
 
 post "/update-data" do
@@ -48,7 +53,11 @@ post "/update-data" do
 
   if expected_key == provided_key
     payload = request.body.read
-    File.open(WHATUP_JSON_FILE, "w") {|f| f.puts(payload)}
+    data = {
+      "apps" => JSON.parse(payload),
+      "updated_at" => Time.now.strftime("%Y-%m-%d %H:%M:%S")
+    }
+    File.open(WHATUP_JSON_FILE, "w") {|f| f.puts(data.to_json)}
     status 200
   else
     status 403
