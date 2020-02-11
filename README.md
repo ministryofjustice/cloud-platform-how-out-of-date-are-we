@@ -20,3 +20,14 @@ If the supplied API key matches the expected value, the locally stored JSON data
 
 If the API key doesn't match, the app. will return a 403 error.
 
+## Updating the docker image
+
+Pre-requisites: You need push access to the `ministryofjustice` repo on [docker hub]
+
+To update the docker image:
+
+ * make and commit your changes
+ * update the tag value of `IMAGE` in the `makefile`
+ * run `make`
+
+This will build the docker image and push it to docker hub, using the updated tag value.
