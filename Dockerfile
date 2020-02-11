@@ -5,11 +5,12 @@ RUN addgroup -g 1000 -S appgroup && \
 
 RUN apk update
 RUN gem install bundler
+RUN bundle config set without 'development'
 
 WORKDIR /app
 
 COPY Gemfile Gemfile.lock ./
-RUN bundle install --without development
+RUN bundle install
 
 COPY app.rb ./
 COPY public/ ./public
