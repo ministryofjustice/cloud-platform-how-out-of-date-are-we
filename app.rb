@@ -9,7 +9,7 @@ if development?
   require "pry-byebug"
 end
 
-WHATUP_JSON_FILE = "data/helm-whatup.json"
+WHATUP_JSON_FILE = "./data/helm-whatup.json"
 
 # Return success/warning/danger, depending on
 # how far behind latest the installed version
