@@ -1,4 +1,4 @@
-IMAGE := ministryofjustice/cloud-platform-how-outdated-are-we:0.1
+IMAGE := ministryofjustice/cloud-platform-how-out-of-date-are-we:0.1
 
 build: .built-image
 

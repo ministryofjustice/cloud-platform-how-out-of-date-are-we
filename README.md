@@ -1,4 +1,4 @@
-# How outdated are we?
+# How out of date are we?
 
 Simple web app. to display a traffic light view of how far our installed software is behind the current versions.
 
