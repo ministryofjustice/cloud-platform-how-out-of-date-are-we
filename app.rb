@@ -43,7 +43,14 @@ get "/helm_whatup" do
 end
 
 post "/update-data" do
-  payload = request.body.read
-  File.open(WHATUP_JSON_FILE, "w") {|f| f.puts(payload)}
-  status 200
+  expected_key = ENV.fetch("API_KEY")
+  provided_key = request.env.fetch("HTTP_X_API_KEY", "dontsetthisvalueastheapikey")
+
+  if expected_key == provided_key
+    payload = request.body.read
+    File.open(WHATUP_JSON_FILE, "w") {|f| f.puts(payload)}
+    status 200
+  else
+    status 403
+  end
 end
