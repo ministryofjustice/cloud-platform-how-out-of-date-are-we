@@ -4,7 +4,7 @@ build: .built-image
 
 .built-image: app.rb Gemfile* makefile views/*
 	docker build -t $(IMAGE) .
-	# docker push $(IMAGE)
+	docker push $(IMAGE)
 	touch .built-image
 
 run: build
