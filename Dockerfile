@@ -13,7 +13,6 @@ COPY Gemfile Gemfile.lock ./
 RUN bundle install
 
 COPY app.rb ./
-COPY public/ ./public
 COPY views/ ./views
 RUN mkdir /app/data
 
