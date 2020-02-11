@@ -8,7 +8,15 @@ Initially, this will consume JSON created by [Helm Whatup](https://github.com/ba
 
 To provision data to the app, make an HTTP post, like this:
 
-    curl -d "$(helm whatup -o json)" http://localhost:4567/update-data
+    curl -H "X-API-KEY: foobar" -d "$(helm whatup -o json)" http://localhost:4567/update-data
 
 Once data has been posted, visit the app at `http://localhost:4567`
+
+The app. will only accept posted JSON data when the HTTP POST supplies the correct API key.
+
+'correct' means the value of the 'X-API-KEY' header in the HTTP POST must match the value of the 'API_KEY' environment variable that was in scope when the app. was started.
+
+If the supplied API key matches the expected value, the locally stored JSON data file will be overwritten with the request body supplied in the POST.
+
+If the API key doesn't match, the app. will return a 403 error.
 
