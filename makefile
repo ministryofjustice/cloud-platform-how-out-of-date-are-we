@@ -19,4 +19,4 @@ run: build
 # change files. Most changes will not be picked up by
 # just reloading the web page.
 dev-server:
-	./app.rb -o 0.0.0.0
+	API_KEY=soopersekrit ./app.rb -o 0.0.0.0
