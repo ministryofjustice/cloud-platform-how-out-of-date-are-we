@@ -41,3 +41,9 @@ get "/helm_whatup" do
   apps.map { |app| app["trafficLight"] = version_lag_traffic_light(app) }
   erb :helm_whatup, locals: { apps: apps }
 end
+
+post "/update-data" do
+  payload = request.body.read
+  File.open(WHATUP_JSON_FILE, "w") {|f| f.puts(payload)}
+  status 200
+end
