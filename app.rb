@@ -23,7 +23,7 @@ def version_lag_traffic_light(app)
 
   if major_diff > 1
     "danger"
-  elsif minor_diff > 5
+  elsif minor_diff > 4
     "warning"
   else
     "success"
