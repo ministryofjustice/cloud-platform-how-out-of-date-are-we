@@ -42,6 +42,7 @@ get "/helm_whatup" do
   updated_at = data.fetch("updated_at")
   apps.map { |app| app["trafficLight"] = version_lag_traffic_light(app) }
   erb :helm_whatup, locals: {
+    active_nav: "helm_whatup",
     apps: apps,
     updated_at: updated_at
   }
