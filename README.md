@@ -22,14 +22,20 @@ If the supplied API key matches the expected value, the locally stored JSON data
 
 If the API key doesn't match, the app. will return a 403 error.
 
-## Updating the docker image
+### Updater image
+
+The `updater-image/` directory maintains a docker image which can be used to update the JSON data in the app. See the `makefile` in that directory for a usage example.
+
+## Updating the docker images
 
 Pre-requisites: You need push access to the `ministryofjustice` repo on [docker hub]
 
-To update the docker image:
+To update the app. docker image:
 
  * make and commit your changes
  * update the tag value of `IMAGE` in the `makefile`
  * run `make`
 
-This will build the docker image and push it to docker hub, using the updated tag value.
+To update the updater image, repeat these steps in the `updater-image/` directory.
+
+This will build the docker images and push them to docker hub, using the updated tag values.
