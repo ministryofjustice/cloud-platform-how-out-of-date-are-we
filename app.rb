@@ -10,6 +10,7 @@ if development?
 end
 
 WHATUP_JSON_FILE = "./data/helm-whatup.json"
+TF_MODULES_JSON_FILE = "./data/module-versions.json"
 
 # Return success/warning/danger, depending on
 # how far behind latest the installed version
@@ -49,9 +50,19 @@ get "/helm_whatup" do
 end
 
 get "/terraform_modules" do
+  modules = []
+  updated_at = ""
+
+  if FileTest.exists?(TF_MODULES_JSON_FILE)
+    data = JSON.parse(File.read TF_MODULES_JSON_FILE)
+    updated_at = data.fetch("updated_at")
+    modules = data.fetch("out_of_date_modules")
+  end
+
   erb :terraform_modules, locals: {
     active_nav: "terraform_modules",
-    updated_at: Time.now
+    modules: modules,
+    updated_at: updated_at
   }
 end
 

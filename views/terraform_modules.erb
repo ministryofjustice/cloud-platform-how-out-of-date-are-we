@@ -1,5 +1,26 @@
-<h1>Terraform Modules</h1>
+<h1>Terraform Modules (<%= modules.size %>)</h1>
 
-<div class="row">
+<% if modules.any? %>
+  <div class="row">
+    <% modules.each do |mod| %>
 
-</div>
+      <div class="card text-white bg-danger mb-3 mr-3" style="max-width: 18rem;">
+        <div class="card-header">
+          <h5 class="card-title"><%= mod["namespace"] %></h5>
+        </div>
+        <div class="card-body">
+          <ul>
+            <li><%= mod["module"] %></li>
+            <li>installed: <%= mod["version"] %></li>
+            <li>latest: <%= mod["latest"] %></li>
+          </ul>
+        </div>
+      </div>
+
+    <% end %>
+  </div>
+<% else %>
+  <h1>
+    Awaiting data
+  </h1>
+<% end %>
