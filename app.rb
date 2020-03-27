@@ -48,6 +48,13 @@ get "/helm_whatup" do
   }
 end
 
+get "/terraform_modules" do
+  erb :terraform_modules, locals: {
+    active_nav: "terraform_modules",
+    updated_at: Time.now
+  }
+end
+
 post "/update-data" do
   expected_key = ENV.fetch("API_KEY")
   provided_key = request.env.fetch("HTTP_X_API_KEY", "dontsetthisvalueastheapikey")
