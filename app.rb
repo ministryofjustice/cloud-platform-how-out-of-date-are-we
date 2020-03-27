@@ -31,6 +31,13 @@ def version_lag_traffic_light(app)
   end
 end
 
+def correct_api_key?(request)
+  expected_key = ENV.fetch("API_KEY")
+  provided_key = request.env.fetch("HTTP_X_API_KEY", "dontsetthisvalueastheapikey")
+
+  expected_key == provided_key
+end
+
 ############################################################
 
 get "/" do
@@ -67,10 +74,7 @@ get "/terraform_modules" do
 end
 
 post "/update-data" do
-  expected_key = ENV.fetch("API_KEY")
-  provided_key = request.env.fetch("HTTP_X_API_KEY", "dontsetthisvalueastheapikey")
-
-  if expected_key == provided_key
+  if correct_api_key?(request)
     payload = request.body.read
     data = {
       "apps" => JSON.parse(payload),
