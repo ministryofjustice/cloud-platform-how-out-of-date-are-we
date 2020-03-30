@@ -23,3 +23,7 @@ RUN helm plugin install https://github.com/bacongobbler/helm-whatup
 WORKDIR /app
 COPY update.sh /app/
 
+RUN apk add ruby
+RUN gem install json_pure --no-rdoc --no-ri
+COPY module-versions.rb /app/
+
