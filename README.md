@@ -8,9 +8,24 @@ Initially, this will consume JSON created by [Helm Whatup](https://github.com/ba
 
 ## Updating the JSON data
 
+### Helm releases
+
 To provision data to the app, make an HTTP post, like this:
 
-    curl -H "X-API-KEY: foobar" -d "$(helm whatup -o json)" http://localhost:4567/update-data
+    curl -H "X-API-KEY: soopersekrit" -d "$(helm whatup -o json)" http://localhost:4567/update-data
+
+### Terraform Modules
+
+To provision data to the app, make an HTTP post, like this:
+
+    curl -H "X-API-KEY: soopersekrit" -d "[JSON data]" http://localhost:4567/update-data
+
+JSON data should be the output of the [terraform modules version checker script](updater-image/module-versions.rb)
+
+To run the script, you need a `GITHUB_TOKEN` environment variable, containing a
+GitHub personal access token which has had single sign-on (SSO) enabled for the
+ministryofjustice GitHub organisation. The token does not need any scopes
+enabled, since all our repos are public.
 
 Once data has been posted, visit the app at `http://localhost:4567`
 
