@@ -5,12 +5,14 @@ IMAGE := ministryofjustice/cloud-platform-how-out-of-date-are-we:0.2
 	docker push $(IMAGE)
 	touch .built-image
 
-run: .built-image
-	docker run --rm \
-		-p 4567:4567 \
-		-e API_KEY=soopersekrit \
-		-e RACK_ENV=production \
-		-it $(IMAGE)
+build: .built-image
+	cd updater-image/; make build
+
+run:
+	docker-compose up --build
+
+updater:
+	docker-compose run updater ./update.sh
 
 # Ensure you have a data/helm-whatup.json file
 # NB: you will have to restart this process when you
