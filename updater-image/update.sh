@@ -17,7 +17,7 @@ set_api_key() {
 
 helm_releases() {
   helm repo update
-  curl -H "X-API-KEY: ${API_KEY}" -d "$(helm whatup -o json)" ${HTTP_ENDPOINT}
+  curl -H "X-API-KEY: ${API_KEY}" -d "$(helm whatup -o json)" ${DATA_URL}/helm_whatup
 }
 
 terraform_modules() {

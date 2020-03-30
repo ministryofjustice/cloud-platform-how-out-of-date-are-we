@@ -15,6 +15,5 @@ run: .built-image
 		-e KUBECONFIG_S3_KEY=$${KUBECONFIG_S3_KEY} \
 		-e KUBECONFIG=$${KUBECONFIG} \
 		-e KUBE_CLUSTER=$${KUBE_CLUSTER} \
-		-e HTTP_ENDPOINT=$${HTTP_ENDPOINT} \
 	  --rm -it $(IMAGE) \
 		./update.sh

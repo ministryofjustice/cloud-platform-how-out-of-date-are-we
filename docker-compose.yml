@@ -36,5 +36,4 @@ services:
       KUBECONFIG_S3_KEY: kubeconfig
       KUBECONFIG: /tmp/kubeconfig
       KUBE_CLUSTER: live-1.cloud-platform.service.justice.gov.uk
-      HTTP_ENDPOINT: http://web:4567/helm_whatup
       DATA_URL: http://web:4567
