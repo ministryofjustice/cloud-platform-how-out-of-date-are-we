@@ -86,3 +86,12 @@ post "/update-data" do
     status 403
   end
 end
+
+post "/terraform_modules" do
+  if correct_api_key?(request)
+    File.open(TF_MODULES_JSON_FILE, "w") {|f| f.puts(request.body.read)}
+    status 200
+  else
+    status 403
+  end
+end
