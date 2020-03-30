@@ -1,4 +1,4 @@
-IMAGE := ministryofjustice/cloud-platform-how-out-of-date-are-we-updater:1.1
+IMAGE := ministryofjustice/cloud-platform-how-out-of-date-are-we-updater:1.2
 
 .built-image: Dockerfile makefile update.sh module-versions.rb
 	docker build -t $(IMAGE) .
