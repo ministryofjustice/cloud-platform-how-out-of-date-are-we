@@ -1,6 +1,6 @@
 IMAGE := ministryofjustice/cloud-platform-how-out-of-date-are-we-updater:1.0
 
-.built-image: Dockerfile makefile update.sh
+.built-image: Dockerfile makefile update.sh module-versions.rb
 	docker build -t $(IMAGE) .
 	docker push $(IMAGE)
 	touch .built-image
