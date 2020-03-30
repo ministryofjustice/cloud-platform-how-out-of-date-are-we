@@ -18,7 +18,7 @@ To provision data to the app, make an HTTP post, like this:
 
 To provision data to the app, make an HTTP post, like this:
 
-    curl -H "X-API-KEY: soopersekrit" -d "[JSON data]" http://localhost:4567/update-data
+    curl -H "X-API-KEY: soopersekrit" -d "[JSON data]" http://localhost:4567/terraform_modules
 
 JSON data should be the output of the [terraform modules version checker script](updater-image/module-versions.rb)
 
