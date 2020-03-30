@@ -1,0 +1,40 @@
+version: '3'
+
+# This file allows you to test the app and updater in a development environment.
+#
+# The updater script fetches the API key from a kubernetes secret in the live-1 cluster.
+# So, in order to function correctly in your development environment, you need to use the same
+# value of API_KEY as the secret.
+# See updater-image/update.sh for details of the namespace and secret.
+#
+# Pre-requisites:
+#
+#   .env.prod-api-key - defining API_KEY
+#   .env.docker-compose - defining AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, and GITHUB_TOKEN
+
+services:
+  web:
+    build: .
+    ports:
+      - "4567:4567"
+    env_file:
+      - .env.prod-api-key  # API_KEY matching the secret in live-1
+    environment:
+      RACK_ENV: production
+
+  # This service will usually do nothing on `docker-compose up`, but defining it here means
+  # you can run `docker-compose run updater update.sh` manually.
+  updater:
+    build: updater-image
+    depends_on:
+      - web
+    env_file:
+      - .env.prod-api-key  # API_KEY matching the secret in live-1
+      - .env.docker-compose  # AWS creds & GitHub API token
+    environment:
+      KUBECONFIG_S3_BUCKET: cloud-platform-concourse-kubeconfig
+      KUBECONFIG_S3_KEY: kubeconfig
+      KUBECONFIG: /tmp/kubeconfig
+      KUBE_CLUSTER: live-1.cloud-platform.service.justice.gov.uk
+      HTTP_ENDPOINT: http://web:4567/helm_whatup
+      DATA_URL: http://web:4567

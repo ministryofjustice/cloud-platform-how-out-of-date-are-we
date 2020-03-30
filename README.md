@@ -37,6 +37,10 @@ If the supplied API key matches the expected value, the locally stored JSON data
 
 If the API key doesn't match, the app. will return a 403 error.
 
+### Developing
+
+See the `docker-compose.yml` file for details of how to run this app. and the updater script locally.
+
 ### Updater image
 
 The `updater-image/` directory maintains a docker image which can be used to update the JSON data in the app. See the `makefile` in that directory for a usage example.
