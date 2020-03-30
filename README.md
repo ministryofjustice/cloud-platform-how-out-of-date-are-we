@@ -12,7 +12,7 @@ Initially, this will consume JSON created by [Helm Whatup](https://github.com/ba
 
 To provision data to the app, make an HTTP post, like this:
 
-    curl -H "X-API-KEY: soopersekrit" -d "$(helm whatup -o json)" http://localhost:4567/update-data
+    curl -H "X-API-KEY: soopersekrit" -d "$(helm whatup -o json)" http://localhost:4567/helm_whatup
 
 ### Terraform Modules
 

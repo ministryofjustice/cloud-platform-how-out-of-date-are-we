@@ -73,7 +73,7 @@ get "/terraform_modules" do
   }
 end
 
-post "/update-data" do
+post "/helm_whatup" do
   if correct_api_key?(request)
     payload = request.body.read
     data = {
