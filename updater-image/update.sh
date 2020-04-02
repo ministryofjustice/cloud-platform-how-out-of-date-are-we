@@ -24,7 +24,7 @@ terraform_modules() {
   git clone --depth 1 https://github.com/ministryofjustice/cloud-platform-environments.git
   (
     cd cloud-platform-environments
-    curl -H "X-API-KEY: ${API_KEY}" -d "$(../module-versions.rb)" ${DATA_URL}/terraform_modules
+    curl -H "X-API-KEY: ${API_KEY}" -d "$(/app/module-versions.rb)" ${DATA_URL}/terraform_modules
   )
 }
 
