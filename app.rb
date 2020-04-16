@@ -38,6 +38,17 @@ get "/helm_whatup" do
   }
 end
 
+post "/helm_whatup" do
+  require_api_key(request) do
+    payload = request.body.read
+    data = {
+      "apps" => JSON.parse(payload),
+      "updated_at" => Time.now.strftime("%Y-%m-%d %H:%M:%S")
+    }
+    File.open(WHATUP_JSON_FILE, "w") {|f| f.puts(data.to_json)}
+  end
+end
+
 get "/terraform_modules" do
   modules = []
   updated_at = ""
@@ -53,17 +64,6 @@ get "/terraform_modules" do
     modules: modules,
     updated_at: updated_at
   }
-end
-
-post "/helm_whatup" do
-  require_api_key(request) do
-    payload = request.body.read
-    data = {
-      "apps" => JSON.parse(payload),
-      "updated_at" => Time.now.strftime("%Y-%m-%d %H:%M:%S")
-    }
-    File.open(WHATUP_JSON_FILE, "w") {|f| f.puts(data.to_json)}
-  end
 end
 
 post "/terraform_modules" do
