@@ -13,6 +13,15 @@ end
 WHATUP_JSON_FILE = "./data/helm-whatup.json"
 TF_MODULES_JSON_FILE = "./data/module-versions.json"
 
+def require_api_key(request)
+  if correct_api_key?(request)
+    yield
+    status 200
+  else
+    status 403
+  end
+end
+
 get "/" do
   redirect "/helm_whatup"
 end
@@ -47,24 +56,18 @@ get "/terraform_modules" do
 end
 
 post "/helm_whatup" do
-  if correct_api_key?(request)
+  require_api_key(request) do
     payload = request.body.read
     data = {
       "apps" => JSON.parse(payload),
       "updated_at" => Time.now.strftime("%Y-%m-%d %H:%M:%S")
     }
     File.open(WHATUP_JSON_FILE, "w") {|f| f.puts(data.to_json)}
-    status 200
-  else
-    status 403
   end
 end
 
 post "/terraform_modules" do
-  if correct_api_key?(request)
+  require_api_key(request) do
     File.open(TF_MODULES_JSON_FILE, "w") {|f| f.puts(request.body.read)}
-    status 200
-  else
-    status 403
   end
 end
