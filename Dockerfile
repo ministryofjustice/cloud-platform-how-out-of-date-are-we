@@ -11,7 +11,7 @@ WORKDIR /app
 COPY Gemfile Gemfile.lock ./
 RUN bundle install
 
-COPY app.rb ./
+COPY app.rb helpers.rb ./
 COPY views/ ./views
 COPY data/ ./data
 
