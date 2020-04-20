@@ -98,3 +98,22 @@ RSpec.configure do |config|
   Kernel.srand config.seed
 =end
 end
+
+require "net/http"
+require "uri"
+require "json"
+require "pry-byebug"
+
+def fetch_url(url)
+  uri = URI.parse(url)
+  Net::HTTP.get_response(uri)
+end
+
+def post_to_url(url, body, api_key = nil)
+  uri = URI.parse(url)
+  http = Net::HTTP.new(uri.host, uri.port)
+  request = Net::HTTP::Post.new(uri.request_uri)
+  request["X-API-KEY"] = api_key unless api_key.nil?
+  request.body = body
+  http.request(request)
+end
