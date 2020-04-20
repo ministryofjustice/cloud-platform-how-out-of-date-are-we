@@ -1,0 +1,22 @@
+<h1>Documentation pages to review (<%= pages.size %>)</h1>
+
+<% if pages.any? %>
+  <div class="row">
+    <% pages.each do |page| %>
+      <a href="<%= page["url"] %>">
+        <div class="card text-white bg-danger mb-3 mr-3" style="max-width: 18rem;">
+          <div class="card-header">
+            <h5 class="card-title"><%= page["title"] %></h5>
+          </div>
+          <div class="card-body">
+            <%= page["site"] %>
+          </div>
+        </div>
+      </a>
+    <% end %>
+  </div>
+<% else %>
+  <h1>
+    Awaiting data
+  </h1>
+<% end %>
