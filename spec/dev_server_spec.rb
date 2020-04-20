@@ -11,10 +11,12 @@ describe "local dev server" do
 
   let(:helm_whatup_url) { [base_url, "helm_whatup"].join("/") }
   let(:terraform_modules_url) { [base_url, "terraform_modules"].join("/") }
+  let(:documentation_url) { [base_url, "documentation"].join("/") }
 
   let(:urls) { [
     helm_whatup_url,
     terraform_modules_url,
+    documentation_url,
   ] }
 
   it "redirects / to /helm_whatup" do
@@ -53,6 +55,16 @@ describe "local dev server" do
         }.to_json
 
         response = post_to_url(terraform_modules_url, json, api_key)
+        expect(response.code).to eq("200")
+      end
+
+      it "accepts documentation json" do
+        json = {
+          pages: [],
+          updated_at: "2020-04-20",
+        }.to_json
+
+        response = post_to_url(documentation_url, json, api_key)
         expect(response.code).to eq("200")
       end
     end
