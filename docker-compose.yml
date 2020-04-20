@@ -23,7 +23,7 @@ services:
       RACK_ENV: production
 
   # This service will usually do nothing on `docker-compose up`, but defining it here means
-  # you can run `docker-compose run updater update.sh` manually.
+  # you can run `docker-compose run updater /app/update.sh` manually.
   updater:
     build: updater-image
     depends_on:
@@ -37,3 +37,4 @@ services:
       KUBECONFIG: /tmp/kubeconfig
       KUBE_CLUSTER: live-1.cloud-platform.service.justice.gov.uk
       DATA_URL: http://web:4567
+      DOCUMENTATION_SITES: "https://runbooks.cloud-platform.service.justice.gov.uk https://user-guide.cloud-platform.service.justice.gov.uk"

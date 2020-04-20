@@ -24,6 +24,9 @@
           <li class="nav-item <%= active_nav == "terraform_modules" ? "active" : "" %>">
             <a class="nav-link" href="/terraform_modules">Terraform Modules</a>
           </li>
+          <li class="nav-item <%= active_nav == "documentation" ? "active" : "" %>">
+            <a class="nav-link" href="/documentation">Documentation</a>
+          </li>
         </ul>
 
         <ul class="navbar-nav justify-content-end">
@@ -38,7 +41,7 @@
       <section class="jumbotron text-center">
         <div class="container">
           <h1>How out of date are we?</h1>
-          <p class="lead text-muted">Updated: <%= updated_at %></p>
+          <p class="lead text-muted">Updated: <%= updated_at %> UTC</p>
         </div>
       </section>
 

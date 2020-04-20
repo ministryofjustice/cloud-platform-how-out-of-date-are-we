@@ -3,6 +3,7 @@
 require "bundler/setup"
 require "json"
 require "sinatra"
+require "./helpers"
 
 if development?
   require "sinatra/reloader"
@@ -11,34 +12,16 @@ end
 
 WHATUP_JSON_FILE = "./data/helm-whatup.json"
 TF_MODULES_JSON_FILE = "./data/module-versions.json"
+DOCUMENTATION_JSON_FILE = "./data/pages-to-review.json"
 
-# Return success/warning/danger, depending on
-# how far behind latest the installed version
-# is.
-def version_lag_traffic_light(app)
-  installed = app.fetch("installedVersion").split(".")
-  latest = app.fetch("latestVersion").split(".")
-
-  major_diff = latest[0].to_i - installed[0].to_i
-  minor_diff = latest[1].to_i - installed[1].to_i
-
-  if major_diff > 1
-    "danger"
-  elsif minor_diff > 4
-    "warning"
+def require_api_key(request)
+  if correct_api_key?(request)
+    yield
+    status 200
   else
-    "success"
+    status 403
   end
 end
-
-def correct_api_key?(request)
-  expected_key = ENV.fetch("API_KEY")
-  provided_key = request.env.fetch("HTTP_X_API_KEY", "dontsetthisvalueastheapikey")
-
-  expected_key == provided_key
-end
-
-############################################################
 
 get "/" do
   redirect "/helm_whatup"
@@ -54,6 +37,17 @@ get "/helm_whatup" do
     apps: apps,
     updated_at: updated_at
   }
+end
+
+post "/helm_whatup" do
+  require_api_key(request) do
+    payload = request.body.read
+    data = {
+      "apps" => JSON.parse(payload),
+      "updated_at" => Time.now.strftime("%Y-%m-%d %H:%M:%S")
+    }
+    File.open(WHATUP_JSON_FILE, "w") {|f| f.puts(data.to_json)}
+  end
 end
 
 get "/terraform_modules" do
@@ -73,25 +67,36 @@ get "/terraform_modules" do
   }
 end
 
-post "/helm_whatup" do
-  if correct_api_key?(request)
-    payload = request.body.read
-    data = {
-      "apps" => JSON.parse(payload),
-      "updated_at" => Time.now.strftime("%Y-%m-%d %H:%M:%S")
-    }
-    File.open(WHATUP_JSON_FILE, "w") {|f| f.puts(data.to_json)}
-    status 200
-  else
-    status 403
+post "/terraform_modules" do
+  require_api_key(request) do
+    File.open(TF_MODULES_JSON_FILE, "w") {|f| f.puts(request.body.read)}
   end
 end
 
-post "/terraform_modules" do
-  if correct_api_key?(request)
-    File.open(TF_MODULES_JSON_FILE, "w") {|f| f.puts(request.body.read)}
-    status 200
-  else
-    status 403
+get "/documentation" do
+  pages = []
+  updated_at = ""
+
+  if FileTest.exists?(DOCUMENTATION_JSON_FILE)
+    data = JSON.parse(File.read DOCUMENTATION_JSON_FILE)
+    updated_at = data.fetch("updated_at")
+    pages = data.fetch("pages").inject([]) do |arr, url|
+      # Turn the URL into site/title/url tuples e.g.
+      #   "https://runbooks.cloud-platform.service.justice.gov.uk/create-cluster.html" -> site: "runbooks", title: "create-cluster"
+      site, _, _, _, _, title = url.split(".").map { |s| s.sub(/.*\//, '') }
+      arr << { "site" => site, "title" => title, "url" => url }
+    end
+  end
+
+  erb :documentation, locals: {
+    active_nav: "documentation",
+    pages: pages,
+    updated_at: updated_at
+  }
+end
+
+post "/documentation" do
+  require_api_key(request) do
+    File.open(DOCUMENTATION_JSON_FILE, "w") {|f| f.puts(request.body.read)}
   end
 end

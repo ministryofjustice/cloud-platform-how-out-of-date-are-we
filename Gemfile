@@ -8,5 +8,6 @@ gem "sinatra"
 gem "sinatra-contrib"
 
 group :development do
+  gem "rspec"
   gem "pry-byebug"
 end

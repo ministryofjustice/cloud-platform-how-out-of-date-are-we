@@ -7,6 +7,7 @@ main() {
   set_api_key
   helm_releases
   terraform_modules
+  documentation
 }
 
 set_api_key() {
@@ -26,6 +27,10 @@ terraform_modules() {
     cd cloud-platform-environments
     curl -H "X-API-KEY: ${API_KEY}" -d "$(/app/module-versions.rb)" ${DATA_URL}/terraform_modules
   )
+}
+
+documentation() {
+  curl -H "X-API-KEY: ${API_KEY}" -d "$(/app/documentation-pages-to-review.rb)" ${DATA_URL}/documentation
 }
 
 main

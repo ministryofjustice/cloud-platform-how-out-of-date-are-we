@@ -1,4 +1,4 @@
-IMAGE := ministryofjustice/cloud-platform-how-out-of-date-are-we:1.2
+IMAGE := ministryofjustice/cloud-platform-how-out-of-date-are-we:1.3
 
 .built-image: app.rb Gemfile* makefile views/*
 	docker build -t $(IMAGE) .
@@ -20,3 +20,7 @@ updater:
 # just reloading the web page.
 dev-server:
 	API_KEY=soopersekrit ./app.rb -o 0.0.0.0
+
+# These tests require the dev-server above to be running
+test:
+	rspec

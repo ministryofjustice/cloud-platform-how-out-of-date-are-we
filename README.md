@@ -37,6 +37,12 @@ If the supplied API key matches the expected value, the locally stored JSON data
 
 If the API key doesn't match, the app. will return a 403 error.
 
+### Documentation pages
+
+This uses the `updater-image/documentation-pages-to-review.rb` script in a similar way to the terraform_modules script.
+
+In addition to the API key, this script uses the value of the `DOCUMENTATION_SITES` environment variable to decide what sites to crawl, looking for documentation pages which are past their "review by" dates.
+
 ### Developing
 
 See the `docker-compose.yml` file for details of how to run this app. and the updater script locally.
