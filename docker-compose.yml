@@ -23,7 +23,7 @@ services:
       RACK_ENV: production
 
   # This service will usually do nothing on `docker-compose up`, but defining it here means
-  # you can run `docker-compose run updater update.sh` manually.
+  # you can run `docker-compose run updater /app/update.sh` manually.
   updater:
     build: updater-image
     depends_on:
