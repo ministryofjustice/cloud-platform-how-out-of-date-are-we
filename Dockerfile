@@ -1,11 +1,10 @@
 FROM ruby:2.6-alpine
 
-RUN addgroup -g 1000 -S appgroup && \
-    adduser -u 1000 -S appuser -G appgroup
-
-RUN apk update
-RUN gem install bundler
-RUN bundle config set without 'development'
+RUN addgroup -g 1000 -S appgroup \
+  && adduser -u 1000 -S appuser -G appgroup \
+  && apk update \
+  && gem install bundler \
+  && bundle config set without 'development'
 
 WORKDIR /app
 
