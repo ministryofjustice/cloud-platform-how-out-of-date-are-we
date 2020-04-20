@@ -20,11 +20,12 @@ RUN helm init --client-only
 RUN helm repo add jetstack https://charts.jetstack.io
 RUN helm plugin install https://github.com/bacongobbler/helm-whatup
 
+RUN apk add ruby ruby-nokogiri
+RUN gem install json_pure --no-rdoc --no-ri
+
 WORKDIR /app
 COPY update.sh /app/
-COPY module-versions.rb /app/
+COPY module-versions.rb documentation-pages-to-review.rb /app/
 
-RUN apk add ruby
-RUN gem install json_pure --no-rdoc --no-ri
 COPY module-versions.rb /app/
 
