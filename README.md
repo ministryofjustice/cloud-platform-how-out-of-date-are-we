@@ -1,10 +1,10 @@
 # How out of date are we?
 
-Simple web app. to display a traffic light view of how far our installed software is behind the current versions.
+Simple web app. to display a traffic light view of how far our installed software is behind the current versions, and how many of our documentation pages are overdue for review.
 
 ![Screenshot of the app](screenshot.png?raw=true "Example screenshot")
 
-Initially, this will consume JSON created by [Helm Whatup](https://github.com/bacongobbler/helm-whatup)
+The app. accepts posted JSON data from an updater image, defined in the [updater-image] directory.
 
 ## Updating the JSON data
 
@@ -13,6 +13,8 @@ Initially, this will consume JSON created by [Helm Whatup](https://github.com/ba
 To provision data to the app, make an HTTP post, like this:
 
     curl -H "X-API-KEY: soopersekrit" -d "$(helm whatup -o json)" http://localhost:4567/helm_whatup
+
+JSON data should be the output of [Helm Whatup](https://github.com/bacongobbler/helm-whatup)
 
 ### Terraform Modules
 
@@ -47,20 +49,14 @@ In addition to the API key, this script uses the value of the `DOCUMENTATION_SIT
 
 See the `docker-compose.yml` file for details of how to run this app. and the updater script locally.
 
-### Updater image
-
-The `updater-image/` directory maintains a docker image which can be used to update the JSON data in the app. See the `makefile` in that directory for a usage example.
-
 ## Updating the docker images
 
 Pre-requisites: You need push access to the `ministryofjustice` repo on [docker hub]
 
 To update the app. docker image:
 
- * make and commit your changes
- * update the tag value of `IMAGE` in the `makefile`
+ * commit your code changes
+ * update the tag value of `IMAGE` in `makefile` and/or `updater-image/makefile`
  * run `make`
-
-To update the updater image, repeat these steps in the `updater-image/` directory.
 
 This will build the docker images and push them to docker hub, using the updated tag values.
