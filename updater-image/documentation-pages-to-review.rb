@@ -82,5 +82,5 @@ pages = sites.map { |url| page_urls_overdue_for_review(url) }.flatten
 
 puts({
   pages: pages,
-  updated_at: Date.today
+  updated_at: Time.now
 }.to_json)
