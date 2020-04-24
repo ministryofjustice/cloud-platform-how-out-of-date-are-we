@@ -11,7 +11,7 @@ build: .built-image
 run:
 	docker-compose up --build
 
-updater:
+update:
 	docker-compose run updater ./update.sh
 
 # Ensure you have a data/helm-whatup.json file
