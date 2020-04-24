@@ -28,10 +28,16 @@ get "/" do
 end
 
 get "/helm_whatup" do
-  data = JSON.parse(File.read WHATUP_JSON_FILE)
-  apps = data.fetch("apps")
-  updated_at = string_to_formatted_time(data.fetch("updated_at"))
-  apps.map { |app| app["trafficLight"] = version_lag_traffic_light(app) }
+  apps = []
+  updated_at = nil
+
+  if FileTest.exists?(WHATUP_JSON_FILE)
+    data = JSON.parse(File.read WHATUP_JSON_FILE)
+    apps = data.fetch("apps")
+    updated_at = string_to_formatted_time(data.fetch("updated_at"))
+    apps.map { |app| app["trafficLight"] = version_lag_traffic_light(app) }
+  end
+
   erb :helm_whatup, locals: {
     active_nav: "helm_whatup",
     apps: apps,
