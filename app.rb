@@ -14,6 +14,12 @@ WHATUP_JSON_FILE = "./data/helm-whatup.json"
 TF_MODULES_JSON_FILE = "./data/module-versions.json"
 DOCUMENTATION_JSON_FILE = "./data/pages-to-review.json"
 
+def update_json_datafile(file, request)
+  require_api_key(request) do
+    File.open(file, "w") {|f| f.puts(request.body.read)}
+  end
+end
+
 def require_api_key(request)
   if correct_api_key?(request)
     yield
@@ -48,9 +54,7 @@ get "/helm_whatup" do
 end
 
 post "/helm_whatup" do
-  require_api_key(request) do
-    File.open(WHATUP_JSON_FILE, "w") {|f| f.puts(request.body.read)}
-  end
+  update_json_datafile(WHATUP_JSON_FILE, request)
 end
 
 get "/terraform_modules" do
@@ -71,9 +75,7 @@ get "/terraform_modules" do
 end
 
 post "/terraform_modules" do
-  require_api_key(request) do
-    File.open(TF_MODULES_JSON_FILE, "w") {|f| f.puts(request.body.read)}
-  end
+  update_json_datafile(TF_MODULES_JSON_FILE, request)
 end
 
 get "/documentation" do
@@ -99,7 +101,5 @@ get "/documentation" do
 end
 
 post "/documentation" do
-  require_api_key(request) do
-    File.open(DOCUMENTATION_JSON_FILE, "w") {|f| f.puts(request.body.read)}
-  end
+  update_json_datafile(DOCUMENTATION_JSON_FILE, request)
 end
