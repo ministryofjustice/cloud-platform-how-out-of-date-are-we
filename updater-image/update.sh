@@ -10,13 +10,26 @@ main() {
   documentation
 }
 
-set_api_key() {
+set_kube_context() {
   aws s3 cp s3://${KUBECONFIG_S3_BUCKET}/${KUBECONFIG_S3_KEY} /tmp/kubeconfig
   kubectl config use-context ${KUBE_CLUSTER}
-  export API_KEY=$(kubectl -n ${NAMESPACE} get secrets ${API_KEY_SECRET} -o jsonpath='{.data.token}' | base64 -d)
+  export KUBE_CONTEXT=${KUBE_CLUSTER} # So that we can tell if this function has been called
+}
+
+# Fetch the API key from a kubernetes secret in the live-1 cluster, if no API_KEY environment variable is set.
+# This allows us to bypass the kubernetes secret lookup in development, but setting an API_KEY env. var.
+set_api_key() {
+  if [[ -z "${API_KEY}" ]]; then
+    echo "Fetching API_KEY from kubernetes secret"
+    set_kube_context
+    export API_KEY=$(kubectl -n ${NAMESPACE} get secrets ${API_KEY_SECRET} -o jsonpath='{.data.token}' | base64 -d)
+  fi
 }
 
 helm_releases() {
+  if [[ -z "${KUBE_CONTEXT}" ]]; then
+    set_kube_context
+  fi
   helm repo update
   curl -H "X-API-KEY: ${API_KEY}" -d "$(/app/helm-releases.rb)" ${DATA_URL}/helm_whatup
 }
