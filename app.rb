@@ -28,19 +28,21 @@ get "/" do
 end
 
 get "/helm_whatup" do
-  apps = []
+  clusters = []
   updated_at = nil
 
   if FileTest.exists?(WHATUP_JSON_FILE)
     data = JSON.parse(File.read WHATUP_JSON_FILE)
-    apps = data.fetch("apps")
     updated_at = string_to_formatted_time(data.fetch("updated_at"))
-    apps.map { |app| app["trafficLight"] = version_lag_traffic_light(app) }
+    clusters = data.fetch("clusters")
+    clusters.each do |cluster|
+      cluster.fetch("apps").map { |app| app["trafficLight"] = version_lag_traffic_light(app) }
+    end
   end
 
   erb :helm_whatup, locals: {
     active_nav: "helm_whatup",
-    apps: apps,
+    clusters: clusters,
     updated_at: updated_at
   }
 end
@@ -63,7 +65,10 @@ post "/helm_whatup" do
       # the JSON was posted as a bare list (i.e. the raw 'helm whatup'
       # JSON), so we need to convert it to the structure we want.
       data = {
-        "apps" => posted,
+        "clusters" => [
+          "name" => "live-1",
+          "apps" => posted,
+        ],
         "updated_at" => Time.now.strftime("%Y-%m-%d %H:%M:%S")
       }
       File.open(WHATUP_JSON_FILE, "w") {|f| f.puts(data.to_json)}

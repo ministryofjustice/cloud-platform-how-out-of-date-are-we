@@ -1,21 +1,26 @@
-<h1>Helm Releases</h1>
+<% clusters.each do |cluster| %>
+  <h1>Helm Releases: <%= cluster["name"] %></h1>
 
-<div class="row">
-  <% apps.each do |app| %>
+  <div class="row">
+    <% cluster["apps"].each do |app| %>
 
-    <div class="card text-white bg-<%= app["trafficLight"] %> mb-3 mr-3" style="max-width: 18rem;">
-      <div class="card-header">
-        <h5 class="card-title"><%= app["releaseName"] %></h5>
+      <div class="card text-white bg-<%= app["trafficLight"] %> mb-3 mr-3" style="max-width: 18rem;">
+
+        <div class="card-header">
+          <h5 class="card-title"><%= app["releaseName"] %></h5>
+        </div>
+
+        <div class="card-body">
+          <ul>
+            <li>chart: <%= app["chartName"] %></li>
+            <li>installed: <%= app["installedVersion"] %></li>
+            <li>latest: <%= app["latestVersion"] %></li>
+          </ul>
+        </div>
+
       </div>
-      <div class="card-body">
-        <ul>
-          <li>chart: <%= app["chartName"] %></li>
-          <li>installed: <%= app["installedVersion"] %></li>
-          <li>latest: <%= app["latestVersion"] %></li>
-        </ul>
-      </div>
-    </div>
 
-  <% end %>
+    <% end %>
 
-</div>
+  </div>
+<% end %>

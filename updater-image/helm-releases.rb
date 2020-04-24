@@ -7,5 +7,11 @@ require "open3"
 
 stdout, _, _ = Open3.capture3("helm whatup -o json")
 apps = JSON.parse(stdout)
-data = { apps: apps, updated_at: Time.now }
+data = {
+  clusters: [
+    name: "live-1",
+    apps: apps,
+  ],
+  updated_at: Time.now
+}
 puts data.to_json
