@@ -47,32 +47,9 @@ get "/helm_whatup" do
   }
 end
 
-# TODO: after the updater has been upgraded to
-# always post the correct JSON structure, make
-# this work the same as the other POST methods.
 post "/helm_whatup" do
   require_api_key(request) do
-    payload = request.body.read
-
-    # If the data is a hash, then it was posted in the correct format, i.e. with
-    # 'app' and 'updated_at' keys, so leave it alone.
-
-    posted = JSON.parse(payload)
-
-    if posted.is_a?(Hash)
-      File.open(WHATUP_JSON_FILE, "w") {|f| f.puts(payload)}
-    else
-      # the JSON was posted as a bare list (i.e. the raw 'helm whatup'
-      # JSON), so we need to convert it to the structure we want.
-      data = {
-        "clusters" => [
-          "name" => "live-1",
-          "apps" => posted,
-        ],
-        "updated_at" => Time.now.strftime("%Y-%m-%d %H:%M:%S")
-      }
-      File.open(WHATUP_JSON_FILE, "w") {|f| f.puts(data.to_json)}
-    end
+    File.open(WHATUP_JSON_FILE, "w") {|f| f.puts(request.body.read)}
   end
 end
 
