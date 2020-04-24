@@ -15,4 +15,4 @@ RUN pip install awscli \
   && helm plugin install https://github.com/bacongobbler/helm-whatup
 
 WORKDIR /app
-COPY update.sh module-versions.rb documentation-pages-to-review.rb /app/
+COPY *.sh *.rb /app/
