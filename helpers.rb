@@ -24,4 +24,8 @@ helpers do
 
     expected_key == provided_key
   end
+
+  def string_to_formatted_time(str)
+    DateTime.parse(str).strftime("%Y-%m-%d %H:%M:%S")
+  end
 end

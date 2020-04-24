@@ -30,7 +30,7 @@ end
 get "/helm_whatup" do
   data = JSON.parse(File.read WHATUP_JSON_FILE)
   apps = data.fetch("apps")
-  updated_at = data.fetch("updated_at")
+  updated_at = string_to_formatted_time(data.fetch("updated_at"))
   apps.map { |app| app["trafficLight"] = version_lag_traffic_light(app) }
   erb :helm_whatup, locals: {
     active_nav: "helm_whatup",
@@ -56,7 +56,7 @@ get "/terraform_modules" do
 
   if FileTest.exists?(TF_MODULES_JSON_FILE)
     data = JSON.parse(File.read TF_MODULES_JSON_FILE)
-    updated_at = data.fetch("updated_at")
+    updated_at = string_to_formatted_time(data.fetch("updated_at"))
     modules = data.fetch("out_of_date_modules")
   end
 
@@ -79,7 +79,7 @@ get "/documentation" do
 
   if FileTest.exists?(DOCUMENTATION_JSON_FILE)
     data = JSON.parse(File.read DOCUMENTATION_JSON_FILE)
-    updated_at = data.fetch("updated_at")
+    updated_at = string_to_formatted_time(data.fetch("updated_at"))
     pages = data.fetch("pages").inject([]) do |arr, url|
       # Turn the URL into site/title/url tuples e.g.
       #   "https://runbooks.cloud-platform.service.justice.gov.uk/create-cluster.html" -> site: "runbooks", title: "create-cluster"
