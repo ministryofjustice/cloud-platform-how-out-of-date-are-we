@@ -31,6 +31,7 @@ services:
       - .env.docker-compose  # AWS creds & GitHub API token
     environment:
       API_KEY: wibble
+      AWS_REGION: eu-west-2
       KUBECONFIG_S3_BUCKET: cloud-platform-concourse-kubeconfig
       KUBECONFIG_S3_KEY: kubeconfig
       KUBECONFIG: /tmp/kubeconfig
