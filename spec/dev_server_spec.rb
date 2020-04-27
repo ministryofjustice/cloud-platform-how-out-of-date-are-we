@@ -44,7 +44,14 @@ describe "local dev server" do
 
     context "with correct API key" do
       it "accepts helm_whatup json" do
-        response = post_to_url(helm_whatup_url, "[]", api_key)
+        json = {
+          clusters: [
+            name: "live-1",
+            apps: []
+          ],
+          updated_at: Time.now
+        }.to_json
+        response = post_to_url(helm_whatup_url, json, api_key)
         expect(response.code).to eq("200")
       end
 
