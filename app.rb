@@ -29,70 +29,55 @@ def require_api_key(request)
   end
 end
 
+# key is the name of the key in our datafile which contains the list of
+# elements we're interested in.
+def fetch_data(docpath, key)
+  file = datafile(docpath)
+  if FileTest.exists?(file)
+    data = JSON.parse(File.read file)
+    updated_at = string_to_formatted_time(data.fetch("updated_at"))
+    list = data.fetch(key)
+
+    # Do any pre-processing to the list we get from the data file
+    yield list if block_given?
+
+    template = docpath.to_sym
+    locals = {
+      active_nav: docpath,
+      updated_at: updated_at
+    }
+    # Set the list to whatever name the template wants to iterate over
+    locals[key.to_sym] = list
+
+    erb template, locals: locals
+  end
+end
+
 get "/" do
   redirect "/helm_whatup"
 end
 
 get "/helm_whatup" do
-  clusters = []
-  updated_at = nil
-
-  file = datafile("helm_whatup")
-  if FileTest.exists?(file)
-    data = JSON.parse(File.read file)
-    updated_at = string_to_formatted_time(data.fetch("updated_at"))
-    clusters = data.fetch("clusters")
+  fetch_data("helm_whatup", "clusters") do |clusters|
     clusters.each do |cluster|
       cluster.fetch("apps").map { |app| app["trafficLight"] = version_lag_traffic_light(app) }
     end
   end
-
-  erb :helm_whatup, locals: {
-    active_nav: "helm_whatup",
-    clusters: clusters,
-    updated_at: updated_at
-  }
-end
-
-get "/terraform_modules" do
-  modules = []
-  updated_at = ""
-
-  file = datafile("terraform_modules")
-  if FileTest.exists?(file)
-    data = JSON.parse(File.read file)
-    updated_at = string_to_formatted_time(data.fetch("updated_at"))
-    modules = data.fetch("out_of_date_modules")
-  end
-
-  erb :terraform_modules, locals: {
-    active_nav: "terraform_modules",
-    modules: modules,
-    updated_at: updated_at
-  }
 end
 
 get "/documentation" do
-  pages = []
-  updated_at = ""
-
-  file = datafile("documentation")
-  if FileTest.exists?(file)
-    data = JSON.parse(File.read file)
-    updated_at = string_to_formatted_time(data.fetch("updated_at"))
-    pages = data.fetch("pages").inject([]) do |arr, url|
+  fetch_data("documentation", "pages") do |list|
+    list.each_with_index do |url, i|
       # Turn the URL into site/title/url tuples e.g.
       #   "https://runbooks.cloud-platform.service.justice.gov.uk/create-cluster.html" -> site: "runbooks", title: "create-cluster"
       site, _, _, _, _, title = url.split(".").map { |s| s.sub(/.*\//, '') }
-      arr << { "site" => site, "title" => title, "url" => url }
+      list[i] = { "site" => site, "title" => title, "url" => url }
     end
   end
+end
 
-  erb :documentation, locals: {
-    active_nav: "documentation",
-    pages: pages,
-    updated_at: updated_at
-  }
+get "/terraform_modules" do
+  fetch_data("terraform_modules", "out_of_date_modules")
 end
 
 post "/:docpath" do
