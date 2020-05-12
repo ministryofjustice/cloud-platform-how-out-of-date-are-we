@@ -80,6 +80,12 @@ get "/terraform_modules" do
   fetch_data("terraform_modules", "out_of_date_modules")
 end
 
+get "/repositories" do
+  fetch_data("repositories", "repositories") do |list|
+    list.reject! { |repo| repo["status"] == "PASS" }
+  end
+end
+
 post "/:docpath" do
   update_json_datafile(params.fetch("docpath"), request)
 end
