@@ -54,10 +54,6 @@ get "/helm_whatup" do
   }
 end
 
-post "/helm_whatup" do
-  update_json_datafile("helm_whatup", request)
-end
-
 get "/terraform_modules" do
   modules = []
   updated_at = ""
@@ -74,10 +70,6 @@ get "/terraform_modules" do
     modules: modules,
     updated_at: updated_at
   }
-end
-
-post "/terraform_modules" do
-  update_json_datafile("terraform_modules", request)
 end
 
 get "/documentation" do
@@ -103,6 +95,6 @@ get "/documentation" do
   }
 end
 
-post "/documentation" do
-  update_json_datafile("documentation", request)
+post "/:docpath" do
+  update_json_datafile(params.fetch("docpath"), request)
 end
