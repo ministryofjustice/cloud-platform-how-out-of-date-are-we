@@ -10,14 +10,14 @@ if development?
   require "pry-byebug"
 end
 
-WHATUP_JSON_FILE = "./data/helm-whatup.json"
-TF_MODULES_JSON_FILE = "./data/module-versions.json"
-DOCUMENTATION_JSON_FILE = "./data/pages-to-review.json"
-
-def update_json_datafile(file, request)
+def update_json_datafile(docpath, request)
   require_api_key(request) do
-    File.open(file, "w") {|f| f.puts(request.body.read)}
+    File.open(datafile(docpath), "w") {|f| f.puts(request.body.read)}
   end
+end
+
+def datafile(docpath)
+  "./data/#{docpath}.json"
 end
 
 def require_api_key(request)
@@ -37,8 +37,9 @@ get "/helm_whatup" do
   clusters = []
   updated_at = nil
 
-  if FileTest.exists?(WHATUP_JSON_FILE)
-    data = JSON.parse(File.read WHATUP_JSON_FILE)
+  file = datafile("helm_whatup")
+  if FileTest.exists?(file)
+    data = JSON.parse(File.read file)
     updated_at = string_to_formatted_time(data.fetch("updated_at"))
     clusters = data.fetch("clusters")
     clusters.each do |cluster|
@@ -54,15 +55,16 @@ get "/helm_whatup" do
 end
 
 post "/helm_whatup" do
-  update_json_datafile(WHATUP_JSON_FILE, request)
+  update_json_datafile("helm_whatup", request)
 end
 
 get "/terraform_modules" do
   modules = []
   updated_at = ""
 
-  if FileTest.exists?(TF_MODULES_JSON_FILE)
-    data = JSON.parse(File.read TF_MODULES_JSON_FILE)
+  file = datafile("terraform_modules")
+  if FileTest.exists?(file)
+    data = JSON.parse(File.read file)
     updated_at = string_to_formatted_time(data.fetch("updated_at"))
     modules = data.fetch("out_of_date_modules")
   end
@@ -75,15 +77,16 @@ get "/terraform_modules" do
 end
 
 post "/terraform_modules" do
-  update_json_datafile(TF_MODULES_JSON_FILE, request)
+  update_json_datafile("terraform_modules", request)
 end
 
 get "/documentation" do
   pages = []
   updated_at = ""
 
-  if FileTest.exists?(DOCUMENTATION_JSON_FILE)
-    data = JSON.parse(File.read DOCUMENTATION_JSON_FILE)
+  file = datafile("documentation")
+  if FileTest.exists?(file)
+    data = JSON.parse(File.read file)
     updated_at = string_to_formatted_time(data.fetch("updated_at"))
     pages = data.fetch("pages").inject([]) do |arr, url|
       # Turn the URL into site/title/url tuples e.g.
@@ -101,5 +104,5 @@ get "/documentation" do
 end
 
 post "/documentation" do
-  update_json_datafile(DOCUMENTATION_JSON_FILE, request)
+  update_json_datafile("documentation", request)
 end
