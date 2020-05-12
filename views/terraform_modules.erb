@@ -1,8 +1,8 @@
-<h1>Terraform Modules (<%= out_of_date_modules.size %>)</h1>
+<h1>Terraform Modules (<%= list.size %>)</h1>
 
-<% if out_of_date_modules.any? %>
+<% if list.any? %>
   <div class="row">
-    <% out_of_date_modules.each do |mod| %>
+    <% list.each do |mod| %>
 
       <div class="card text-white bg-danger mb-3 mr-3" style="max-width: 18rem;">
         <div class="card-header">

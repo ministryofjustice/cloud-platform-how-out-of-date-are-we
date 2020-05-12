@@ -42,12 +42,12 @@ def fetch_data(docpath, key)
     yield list if block_given?
 
     template = docpath.to_sym
+
     locals = {
       active_nav: docpath,
-      updated_at: updated_at
+      updated_at: updated_at,
+      list: list
     }
-    # Set the list to whatever name the template wants to iterate over
-    locals[key.to_sym] = list
 
     erb template, locals: locals
   end
