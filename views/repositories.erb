@@ -9,13 +9,12 @@
           <h5 class="card-title"><%= repo["name"] %></h5>
         </div>
         <div class="card-body">
-          <ul>
-            <% repo["report"].each do |key, value| %>
-              <% if !value %>
-                <li><%= key %></li>
-              <% end %>
+          <h6>Failed checks:</h6>
+          <% repo["report"].each do |key, value| %>
+            <% if !value %>
+              <%= key %><br/>
             <% end %>
-          </ul>
+          <% end %>
         </div>
       </div>
 
