@@ -13,7 +13,7 @@ RUN bundle install
 
 COPY app.rb helpers.rb ./
 COPY views/ ./views
-COPY data/ ./data
+RUN mkdir /app/data
 
 RUN chown -R appuser:appgroup /app
 
