@@ -17,10 +17,3 @@ RUN pip install awscli \
 
 WORKDIR /app
 COPY *.sh *.rb /app/
-
-RUN addgroup -g 1000 -S appgroup \
-  && adduser -u 1000 -S appuser -G appgroup \
-  && chown -R appuser:appgroup /app
-
-USER 1000
-
