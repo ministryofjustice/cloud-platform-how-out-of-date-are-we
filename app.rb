@@ -33,6 +33,13 @@ end
 # elements we're interested in.
 def fetch_data(docpath, key)
   file = datafile(docpath)
+  template = docpath.to_sym
+  locals = {
+    active_nav: docpath,
+    updated_at: nil,
+    list: []
+  }
+
   if FileTest.exists?(file)
     data = JSON.parse(File.read file)
     updated_at = string_to_formatted_time(data.fetch("updated_at"))
@@ -41,16 +48,13 @@ def fetch_data(docpath, key)
     # Do any pre-processing to the list we get from the data file
     yield list if block_given?
 
-    template = docpath.to_sym
-
-    locals = {
-      active_nav: docpath,
+    locals.merge!(
       updated_at: updated_at,
       list: list
-    }
-
-    erb template, locals: locals
+    )
   end
+
+  erb template, locals: locals
 end
 
 get "/" do
