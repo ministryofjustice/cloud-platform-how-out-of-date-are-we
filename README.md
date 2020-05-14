@@ -45,6 +45,12 @@ This uses the `updater-image/documentation-pages-to-review.rb` script in a simil
 
 In addition to the API key, this script uses the value of the `DOCUMENTATION_SITES` environment variable to decide what sites to crawl, looking for documentation pages which are past their "review by" dates.
 
+### Repositories
+
+This uses: https://github.com/ministryofjustice/cloud-platform-repository-checker
+
+It requires a github personal access token with `public_repo` scope.
+
 ### Developing
 
 See the `docker-compose.yml` file for details of how to run this app. and the updater script locally.

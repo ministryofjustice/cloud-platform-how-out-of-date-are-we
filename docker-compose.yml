@@ -38,3 +38,6 @@ services:
       KUBE_CLUSTER: live-1.cloud-platform.service.justice.gov.uk
       DATA_URL: http://web:4567
       DOCUMENTATION_SITES: "https://runbooks.cloud-platform.service.justice.gov.uk https://user-guide.cloud-platform.service.justice.gov.uk"
+      ORGANIZATION: ministryofjustice
+      REGEXP: "^cloud-platform-*"
+      TEAM: WebOps

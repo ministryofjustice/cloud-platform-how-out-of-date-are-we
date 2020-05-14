@@ -1,8 +1,8 @@
-<h1>Documentation pages to review (<%= pages.size %>)</h1>
+<h1>Documentation pages to review (<%= list.size %>)</h1>
 
-<% if pages.any? %>
+<% if list.any? %>
   <div class="row">
-    <% pages.each do |page| %>
+    <% list.each do |page| %>
       <a href="<%= page["url"] %>">
         <div class="card text-white bg-danger mb-3 mr-3" style="max-width: 18rem;">
           <div class="card-header">

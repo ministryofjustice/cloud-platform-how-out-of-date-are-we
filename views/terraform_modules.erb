@@ -1,8 +1,8 @@
-<h1>Terraform Modules (<%= modules.size %>)</h1>
+<h1>Terraform Modules (<%= list.size %>)</h1>
 
-<% if modules.any? %>
+<% if list.any? %>
   <div class="row">
-    <% modules.each do |mod| %>
+    <% list.each do |mod| %>
 
       <div class="card text-white bg-danger mb-3 mr-3" style="max-width: 18rem;">
         <div class="card-header">

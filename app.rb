@@ -10,14 +10,14 @@ if development?
   require "pry-byebug"
 end
 
-WHATUP_JSON_FILE = "./data/helm-whatup.json"
-TF_MODULES_JSON_FILE = "./data/module-versions.json"
-DOCUMENTATION_JSON_FILE = "./data/pages-to-review.json"
-
-def update_json_datafile(file, request)
+def update_json_datafile(docpath, request)
   require_api_key(request) do
-    File.open(file, "w") {|f| f.puts(request.body.read)}
+    File.open(datafile(docpath), "w") {|f| f.puts(request.body.read)}
   end
+end
+
+def datafile(docpath)
+  "./data/#{docpath}.json"
 end
 
 def require_api_key(request)
@@ -29,77 +29,67 @@ def require_api_key(request)
   end
 end
 
+# key is the name of the key in our datafile which contains the list of
+# elements we're interested in.
+def fetch_data(docpath, key)
+  file = datafile(docpath)
+  template = docpath.to_sym
+  locals = {
+    active_nav: docpath,
+    updated_at: nil,
+    list: []
+  }
+
+  if FileTest.exists?(file)
+    data = JSON.parse(File.read file)
+    updated_at = string_to_formatted_time(data.fetch("updated_at"))
+    list = data.fetch(key)
+
+    # Do any pre-processing to the list we get from the data file
+    yield list if block_given?
+
+    locals.merge!(
+      updated_at: updated_at,
+      list: list
+    )
+  end
+
+  erb template, locals: locals
+end
+
 get "/" do
   redirect "/helm_whatup"
 end
 
 get "/helm_whatup" do
-  clusters = []
-  updated_at = nil
-
-  if FileTest.exists?(WHATUP_JSON_FILE)
-    data = JSON.parse(File.read WHATUP_JSON_FILE)
-    updated_at = string_to_formatted_time(data.fetch("updated_at"))
-    clusters = data.fetch("clusters")
+  fetch_data("helm_whatup", "clusters") do |clusters|
     clusters.each do |cluster|
       cluster.fetch("apps").map { |app| app["trafficLight"] = version_lag_traffic_light(app) }
     end
   end
-
-  erb :helm_whatup, locals: {
-    active_nav: "helm_whatup",
-    clusters: clusters,
-    updated_at: updated_at
-  }
-end
-
-post "/helm_whatup" do
-  update_json_datafile(WHATUP_JSON_FILE, request)
-end
-
-get "/terraform_modules" do
-  modules = []
-  updated_at = ""
-
-  if FileTest.exists?(TF_MODULES_JSON_FILE)
-    data = JSON.parse(File.read TF_MODULES_JSON_FILE)
-    updated_at = string_to_formatted_time(data.fetch("updated_at"))
-    modules = data.fetch("out_of_date_modules")
-  end
-
-  erb :terraform_modules, locals: {
-    active_nav: "terraform_modules",
-    modules: modules,
-    updated_at: updated_at
-  }
-end
-
-post "/terraform_modules" do
-  update_json_datafile(TF_MODULES_JSON_FILE, request)
 end
 
 get "/documentation" do
-  pages = []
-  updated_at = ""
-
-  if FileTest.exists?(DOCUMENTATION_JSON_FILE)
-    data = JSON.parse(File.read DOCUMENTATION_JSON_FILE)
-    updated_at = string_to_formatted_time(data.fetch("updated_at"))
-    pages = data.fetch("pages").inject([]) do |arr, url|
+  fetch_data("documentation", "pages") do |list|
+    list.each_with_index do |url, i|
       # Turn the URL into site/title/url tuples e.g.
       #   "https://runbooks.cloud-platform.service.justice.gov.uk/create-cluster.html" -> site: "runbooks", title: "create-cluster"
       site, _, _, _, _, title = url.split(".").map { |s| s.sub(/.*\//, '') }
-      arr << { "site" => site, "title" => title, "url" => url }
+      list[i] = { "site" => site, "title" => title, "url" => url }
     end
   end
-
-  erb :documentation, locals: {
-    active_nav: "documentation",
-    pages: pages,
-    updated_at: updated_at
-  }
 end
 
-post "/documentation" do
-  update_json_datafile(DOCUMENTATION_JSON_FILE, request)
+get "/terraform_modules" do
+  fetch_data("terraform_modules", "out_of_date_modules")
+end
+
+get "/repositories" do
+  fetch_data("repositories", "repositories") do |list|
+    list.reject! { |repo| repo["status"] == "PASS" }
+  end
+end
+
+post "/:docpath" do
+  update_json_datafile(params.fetch("docpath"), request)
 end
