@@ -48,14 +48,7 @@ documentation() {
 }
 
 repositories() {
-  json=$(docker run --rm \
-    -e GITHUB_TOKEN=${GITHUB_TOKEN} \
-    -e ORGANIZATION=${ORGANIZATION} \
-    -e TEAM=${TEAM} \
-    -e REGEXP=${REGEXP} \
-    ministryofjustice/cloud-platform-repository-checker:1.1)
-
-  curl -H "X-API-KEY: ${API_KEY}" -d "${json}" ${DATA_URL}/repositories
+  curl -H "X-API-KEY: ${API_KEY}" -d "$(cloud-platform-repository-checker)" ${DATA_URL}/repositories
 }
 
 main
