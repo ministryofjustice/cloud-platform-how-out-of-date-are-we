@@ -12,7 +12,7 @@ RUN pip install awscli \
   && chmod 755 /usr/local/bin/kubectl \
   && helm init --client-only \
   && helm repo add jetstack https://charts.jetstack.io \
-  && helm plugin install https://github.com/bacongobbler/helm-whatup \
+  && helm plugin install https://github.com/fabmation-gmbh/helm-whatup \
   && gem install cloud-platform-repository-checker -v 1.0.4 --no-rdoc --no-doc
 
 WORKDIR /app
