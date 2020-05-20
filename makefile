@@ -1,4 +1,4 @@
-IMAGE := ministryofjustice/cloud-platform-how-out-of-date-are-we:2.1
+IMAGE := ministryofjustice/cloud-platform-how-out-of-date-are-we:2.2
 
 .built-image: app.rb Gemfile* makefile views/*
 	docker build -t $(IMAGE) .

@@ -41,9 +41,17 @@ def fetch_data(docpath, key)
   }
 
   if FileTest.exists?(file)
-    data = JSON.parse(File.read file)
-    updated_at = string_to_formatted_time(data.fetch("updated_at"))
-    list = data.fetch(key)
+    data = {}
+    list = []
+    updated_at = nil
+
+    begin
+      data = JSON.parse(File.read file)
+      updated_at = string_to_formatted_time(data.fetch("updated_at"))
+      list = data.fetch(key)
+    rescue JSON::ParserError
+      logger.info "Malformed JSON file: #{file}"
+    end
 
     # Do any pre-processing to the list we get from the data file
     yield list if block_given?

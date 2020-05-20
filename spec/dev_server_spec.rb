@@ -5,6 +5,8 @@ require "spec_helper"
 #     make dev-server
 #
 
+HELM_RELEASE_DATA_FILE = "data/helm_whatup.json"
+
 describe "local dev server" do
   let(:base_url) { "http://localhost:4567" }
   let(:api_key) { "soopersekrit" } # specified in makefile
@@ -28,6 +30,17 @@ describe "local dev server" do
   it "serves pages" do
     urls.each do |url|
       response = fetch_url(url)
+      expect(response.code).to eq("200")
+    end
+  end
+
+  context "with malformed json data" do
+    before do
+      File.write(HELM_RELEASE_DATA_FILE, " ")
+    end
+
+    it "does not crash" do
+      response = fetch_url(helm_whatup_url)
       expect(response.code).to eq("200")
     end
   end
