@@ -72,7 +72,7 @@ end
 get "/helm_whatup" do
   fetch_data("helm_whatup", "clusters") do |clusters|
     clusters.each do |cluster|
-      cluster.fetch("apps").map { |app| app["trafficLight"] = version_lag_traffic_light(app) }
+      cluster.fetch("apps").map { |app| app["traffic_light"] = version_lag_traffic_light(app) }
     end
   end
 end
