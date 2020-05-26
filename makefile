@@ -1,4 +1,4 @@
-IMAGE := ministryofjustice/cloud-platform-how-out-of-date-are-we:2.2
+IMAGE := ministryofjustice/cloud-platform-how-out-of-date-are-we:2.3
 
 .built-image: app.rb Gemfile* makefile views/*
 	docker build -t $(IMAGE) .
@@ -12,6 +12,7 @@ run:
 	docker-compose up --build
 
 update:
+	docker-compose build updater
 	docker-compose run updater ./update.sh
 
 # Ensure you have a data/helm-whatup.json file

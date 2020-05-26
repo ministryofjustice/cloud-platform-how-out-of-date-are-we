@@ -1,33 +1,59 @@
 #!/usr/bin/env ruby
 
-# Output the results of `helm whatup` as JSON, with 'apps' and 'updated_at' keys.
+# Output the results of `helm whatup` as JSON, for each production cluster
 
 require "json"
 require "open3"
 
-# This script expects to be invoked once the kube context for live-1 has been set up.
+def data
+  # assume the kube context for live-1 has already been set up
+  clusters = [
+    name: "live-1",
+    apps: get_all_helm_releases,
+  ]
 
-def get_helm_release_data
-  stdout, _, _ = Open3.capture3("helm whatup -o json")
-  JSON.parse(stdout)
+  # Switch to the manager cluster and repeat
+  region = ENV.fetch("AWS_REGION")
+  execute "aws eks --region #{region} update-kubeconfig --name manager --alias manager"
+  execute "kubectl config use-context manager"
+
+  clusters << { name: "manager", apps: get_all_helm_releases }
+
+  {
+    clusters: clusters,
+    updated_at: Time.now
+  }
 end
 
-clusters = [
-  name: "live-1",
-  apps: get_helm_release_data,
-]
+def get_all_helm_releases
+  namespaces_with_helm_releases.inject([]) do |list, namespace|
+    list = list + helm_releases_in_namespace(namespace)
+  end
+end
 
-# Switch to the manager cluster and repeat
+def namespaces_with_helm_releases
+  json = execute("helm list --all-namespaces -o json")
+  data = JSON.parse(json)
+  data.map {|h| h["namespace"] }.uniq.sort
+end
 
-region = ENV.fetch("AWS_REGION")
-Open3.capture3("aws eks --region #{region} update-kubeconfig --name manager --alias manager")
-Open3.capture3("kubectl config use-context manager")
+def helm_releases_in_namespace(namespace)
+  JSON.parse(execute("helm whatup -n #{namespace} -o json", true))
+rescue JSON::ParserError
+  []
+end
 
-clusters << { name: "manager", apps: get_helm_release_data }
+def execute(cmd, allowed_to_fail = false)
+  $stderr.puts "Running: #{cmd}"
+  stdout, stderr, status = Open3.capture3(cmd)
 
-data = {
-  clusters: clusters,
-  updated_at: Time.now
-}
+  unless(allowed_to_fail || status.success?)
+    raise "Command failed: #{cmd}\n#{stderr}\n"
+  end
+
+  stdout
+end
+
+############################################################
 
 puts data.to_json
