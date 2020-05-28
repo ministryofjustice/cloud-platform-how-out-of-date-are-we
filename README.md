@@ -57,12 +57,9 @@ See the `docker-compose.yml` file for details of how to run this app. and the up
 
 ## Updating the docker images
 
-Pre-requisites: You need push access to the `ministryofjustice` repo on [docker hub]
+After code changes, create a new [release] via the github web interface.
 
-To update the app. docker image:
+This will trigger a github action to build both the web app. and updater docker
+images, and push them to docker hub tagged with the release name.
 
- * commit your code changes
- * update the tag value of `IMAGE` in `makefile` and/or `updater-image/makefile`
- * run `make`
-
-This will build the docker images and push them to docker hub, using the updated tag values.
+[release]: https://github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/releases
