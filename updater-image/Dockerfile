@@ -15,7 +15,7 @@ RUN pip install awscli \
   && helm repo add concourse https://concourse-charts.storage.googleapis.com/ \
   && helm repo add cloud-platform https://ministryofjustice.github.io/cloud-platform-helm-charts \
   && helm plugin install https://github.com/fabmation-gmbh/helm-whatup \
-  && gem install cloud-platform-repository-checker -v 1.1.0 --no-rdoc --no-doc
+  && gem install cloud-platform-repository-checker -v 1.2.0 --no-rdoc --no-doc
 
 WORKDIR /app
 COPY *.sh *.rb /app/
