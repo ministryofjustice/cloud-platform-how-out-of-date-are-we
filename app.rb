@@ -72,7 +72,16 @@ end
 get "/dashboard" do
   locals = {
     active_nav: "/dashboard",
-    updated_at: nil
+    updated_at: nil,
+    data: {
+      action_items: {
+        helm_whatup: 1,
+        terraform_modules: 2,
+        documentation: 0,
+        repositories: 3
+      },
+      action_required: true
+    }
   }
   erb :dashboard, locals: locals
 end

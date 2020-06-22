@@ -1,12 +1,25 @@
-<h1>Dashboard</h1>
+<h2>Action Items</h2>
 
-<div class="row">
-  <div class="card text-white bg-danger mb-3 mr-3" style="max-width: 18rem;">
-    <div class="card-header">
-      <h5 class="card-title">Something</h5>
-    </div>
-    <div class="card-body">
-      Whatever
-    </div>
-  </div>
-</div>
+<% action_items = locals[:data][:action_items] %>
+
+<table class="table">
+  <tr>
+    <td>Helm Releases</td>
+    <td><%= action_items[:helm_whatup] %></td>
+  </tr>
+
+  <tr>
+    <td>Terraform Modules</td>
+    <td><%= action_items[:terraform_modules] %></td>
+  </tr>
+
+  <tr>
+    <td>Documentation Pages</td>
+    <td><%= action_items[:documentation] %></td>
+  </tr>
+
+  <tr>
+    <td>GitHub Repositories</td>
+    <td><%= action_items[:repositories] %></td>
+  </tr>
+</table>
