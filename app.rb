@@ -41,7 +41,6 @@ def fetch_data(docpath, key)
   }
 
   if FileTest.exists?(file)
-    data = {}
     list = []
     updated_at = nil
 
