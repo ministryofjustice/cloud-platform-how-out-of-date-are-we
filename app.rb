@@ -66,7 +66,15 @@ def fetch_data(docpath, key)
 end
 
 get "/" do
-  redirect "/helm_whatup"
+  redirect "/dashboard"
+end
+
+get "/dashboard" do
+  locals = {
+    active_nav: "/dashboard",
+    updated_at: nil
+  }
+  erb :dashboard, locals: locals
 end
 
 get "/helm_whatup" do
