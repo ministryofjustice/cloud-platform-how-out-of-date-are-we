@@ -41,16 +41,7 @@ def fetch_data(docpath, key)
   }
 
   if FileTest.exists?(file)
-    list = []
-    updated_at = nil
-
-    begin
-      data = JSON.parse(File.read file)
-      updated_at = string_to_formatted_time(data.fetch("updated_at"))
-      list = data.fetch(key)
-    rescue JSON::ParserError
-      logger.info "Malformed JSON file: #{file}"
-    end
+    list, updated_at = get_list_and_updated_at(file, key)
 
     # Do any pre-processing to the list we get from the data file
     yield list if block_given?
@@ -62,6 +53,21 @@ def fetch_data(docpath, key)
   end
 
   erb template, locals: locals
+end
+
+def get_list_and_updated_at(file, key)
+  list = []
+  updated_at = nil
+
+  begin
+    data = JSON.parse(File.read file)
+    updated_at = string_to_formatted_time(data.fetch("updated_at"))
+    list = data.fetch(key)
+  rescue JSON::ParserError
+    logger.info "Malformed JSON file: #{file}"
+  end
+
+  [list, updated_at]
 end
 
 get "/" do
