@@ -55,6 +55,19 @@ It requires a github personal access token with `public_repo` scope.
 
 See the `docker-compose.yml` file for details of how to run this app. and the updater script locally.
 
+If you're just working on the web application, another option is to run:
+
+```
+bundle install
+make fetch-live-json-datafiles
+make dev-server
+```
+
+This will launch a local instance of the web server, and populate the data
+directory with the latest JSON files from the live instance.
+
+NB: You will need a workin ruby environment.
+
 ## Updating the docker images
 
 After code changes, create a new [release] via the github web interface.
