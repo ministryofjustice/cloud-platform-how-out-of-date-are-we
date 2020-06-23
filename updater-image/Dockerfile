@@ -2,7 +2,8 @@ FROM python:alpine3.10
 
 ENV \
   HELM_VERSION=3.2.1 \
-  KUBECTL_VERSION=1.15.0
+  KUBECTL_VERSION=1.15.0 \
+  REPO_CHECKER_VERSION=1.3.0
 
 RUN pip install awscli \
   && apk add curl libc6-compat git bash ruby ruby-nokogiri \
@@ -15,7 +16,7 @@ RUN pip install awscli \
   && helm repo add concourse https://concourse-charts.storage.googleapis.com/ \
   && helm repo add cloud-platform https://ministryofjustice.github.io/cloud-platform-helm-charts \
   && helm plugin install https://github.com/fabmation-gmbh/helm-whatup \
-  && gem install cloud-platform-repository-checker -v 1.2.0 --no-rdoc --no-doc
+  && gem install cloud-platform-repository-checker -v ${REPO_CHECKER_VERSION} --no-rdoc --no-doc
 
 WORKDIR /app
 COPY *.sh *.rb /app/
