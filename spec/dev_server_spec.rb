@@ -11,20 +11,22 @@ describe "local dev server" do
   let(:base_url) { "http://localhost:4567" }
   let(:api_key) { "soopersekrit" } # specified in makefile
 
+  let(:dashboard_url) { [base_url, "dashboard"].join("/") }
   let(:helm_whatup_url) { [base_url, "helm_whatup"].join("/") }
   let(:terraform_modules_url) { [base_url, "terraform_modules"].join("/") }
   let(:documentation_url) { [base_url, "documentation"].join("/") }
 
   let(:urls) { [
+    dashboard_url,
     helm_whatup_url,
     terraform_modules_url,
     documentation_url,
   ] }
 
-  it "redirects / to /helm_whatup" do
+  it "redirects / to /dashboard" do
     response = fetch_url(base_url)
     expect(response.code).to eq("302")
-    expect(response["location"]).to eq(helm_whatup_url)
+    expect(response["location"]).to eq(dashboard_url)
   end
 
   it "serves pages" do
