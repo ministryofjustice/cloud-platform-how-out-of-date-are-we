@@ -29,6 +29,39 @@ def require_api_key(request)
   end
 end
 
+def dashboard_data
+  # TODO: there is a lot of duplication here from the code for the individual docpaths. Fix that.
+  updated = []
+
+  terraform_modules, updated_at = get_list_and_updated_at(datafile("terraform_modules"), "out_of_date_modules")
+  updated << updated_at
+
+  documentation_pages, updated_at = get_list_and_updated_at(datafile("documentation"), "pages")
+  updated << updated_at
+
+  repositories, updated_at = get_list_and_updated_at(datafile("repositories"), "repositories")
+  repositories.reject! { |repo| repo["status"] == "PASS" }
+  updated << updated_at
+
+  clusters, updated_at = get_list_and_updated_at(datafile("helm_whatup"), "clusters")
+  out_of_date_apps = clusters.map { |cluster| cluster.fetch("apps") }.flatten
+    .filter { |app| version_lag_traffic_light(app) == "danger" }
+  updated << updated_at
+
+  {
+    updated_at: updated.sort.first,
+    data: {
+      action_items: {
+        helm_whatup: out_of_date_apps.length,
+        terraform_modules: terraform_modules.length,
+        documentation: documentation_pages.length,
+        repositories: repositories.length,
+      },
+      action_required: true
+    }
+  }
+end
+
 # key is the name of the key in our datafile which contains the list of
 # elements we're interested in.
 def fetch_data(docpath, key)
@@ -41,17 +74,7 @@ def fetch_data(docpath, key)
   }
 
   if FileTest.exists?(file)
-    data = {}
-    list = []
-    updated_at = nil
-
-    begin
-      data = JSON.parse(File.read file)
-      updated_at = string_to_formatted_time(data.fetch("updated_at"))
-      list = data.fetch(key)
-    rescue JSON::ParserError
-      logger.info "Malformed JSON file: #{file}"
-    end
+    list, updated_at = get_list_and_updated_at(file, key)
 
     # Do any pre-processing to the list we get from the data file
     yield list if block_given?
@@ -65,8 +88,30 @@ def fetch_data(docpath, key)
   erb template, locals: locals
 end
 
+def get_list_and_updated_at(file, key)
+  list = []
+  updated_at = nil
+
+  begin
+    data = JSON.parse(File.read file)
+    updated_at = string_to_formatted_time(data.fetch("updated_at"))
+    list = data.fetch(key)
+  rescue JSON::ParserError
+    logger.info "Malformed JSON file: #{file}"
+  end
+
+  [list, updated_at]
+end
+
 get "/" do
-  redirect "/helm_whatup"
+  redirect "/dashboard"
+end
+
+get "/dashboard" do
+  locals = dashboard_data.merge(
+    active_nav: "/dashboard",
+  )
+  erb :dashboard, locals: locals
 end
 
 get "/helm_whatup" do

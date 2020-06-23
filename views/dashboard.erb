@@ -1,0 +1,33 @@
+<h2>Action Items</h2>
+
+<% action_items = locals[:data][:action_items] %>
+
+<table class="table table-striped">
+  <tr>
+    <td>
+      <a href="/helm_whatup">Helm Releases</a>
+    </td>
+    <td><%= action_items[:helm_whatup] %></td>
+  </tr>
+
+  <tr>
+    <td>
+      <a href="/terraform_modules">Terraform Modules</a>
+    </td>
+    <td><%= action_items[:terraform_modules] %></td>
+  </tr>
+
+  <tr>
+    <td>
+      <a href="/documentation">Documentation Pages</a>
+    </td>
+    <td><%= action_items[:documentation] %></td>
+  </tr>
+
+  <tr>
+    <td>
+      <a href="/repositories">GitHub Repositories</a>
+    </td>
+    <td><%= action_items[:repositories] %></td>
+  </tr>
+</table>
