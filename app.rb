@@ -49,7 +49,7 @@ def dashboard_data
   updated << updated_at
 
   {
-    updated_at: updated.sort.first,
+    updated_at: updated.compact.sort.first,
     data: {
       action_items: {
         helm_whatup: out_of_date_apps.length,
