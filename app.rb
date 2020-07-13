@@ -116,7 +116,7 @@ get "/dashboard" do
     dashboard_data.to_json
   else
     locals = dashboard_data.merge(
-      active_nav: "/dashboard",
+      active_nav: "dashboard",
     )
     erb :dashboard, locals: locals
   end
