@@ -5,6 +5,8 @@ require "json"
 require "sinatra"
 require "./helpers"
 
+CONTENT_TYPE_JSON = "application/json"
+
 if development?
   require "sinatra/reloader"
   require "pry-byebug"
@@ -108,10 +110,16 @@ get "/" do
 end
 
 get "/dashboard" do
-  locals = dashboard_data.merge(
-    active_nav: "/dashboard",
-  )
-  erb :dashboard, locals: locals
+  accept = request.env["HTTP_ACCEPT"]
+
+  if accept == CONTENT_TYPE_JSON
+    dashboard_data.to_json
+  else
+    locals = dashboard_data.merge(
+      active_nav: "/dashboard",
+    )
+    erb :dashboard, locals: locals
+  end
 end
 
 get "/helm_whatup" do

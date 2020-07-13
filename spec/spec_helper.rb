@@ -104,9 +104,12 @@ require "uri"
 require "json"
 require "pry-byebug"
 
-def fetch_url(url)
+def fetch_url(url, accept = nil)
   uri = URI.parse(url)
   req = Net::HTTP::Get.new(uri)
+  unless accept.nil?
+    req["Accept"] = accept
+  end
   Net::HTTP.start(uri.hostname, uri.port) {|http|
     http.request(req)
   }

@@ -36,6 +36,14 @@ describe "local dev server" do
     end
   end
 
+  it "serves dashboard json" do
+    response = fetch_url(dashboard_url, "application/json")
+    expect(response.code).to eq("200")
+    expect {
+      JSON.parse(response.body)
+    }.to_not raise_error
+  end
+
   context "with malformed json data" do
     before do
       File.write(HELM_RELEASE_DATA_FILE, " ")
