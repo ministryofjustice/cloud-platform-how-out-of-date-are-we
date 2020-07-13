@@ -106,7 +106,10 @@ require "pry-byebug"
 
 def fetch_url(url)
   uri = URI.parse(url)
-  Net::HTTP.get_response(uri)
+  req = Net::HTTP::Get.new(uri)
+  Net::HTTP.start(uri.hostname, uri.port) {|http|
+    http.request(req)
+  }
 end
 
 def post_to_url(url, body, api_key = nil)
