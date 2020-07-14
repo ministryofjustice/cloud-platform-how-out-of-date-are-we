@@ -33,18 +33,18 @@ def require_api_key(request)
 end
 
 def dashboard_data
-  # TODO: there is a lot of duplication here from the code for the individual docpaths. Fix that.
   updated = []
 
-  terraform_modules, updated_at = get_list_and_updated_at(datafile("terraform_modules"), "out_of_date_modules")
-  updated << updated_at
+  item_list = get_data_from_json_file("terraform_modules", "out_of_date_modules", ItemList)
+  terraform_modules = item_list.list
+  updated << item_list.updated_at
 
   documentation_pages, updated_at = get_list_and_updated_at(datafile("documentation"), "pages")
   updated << updated_at
 
-  repositories, updated_at = get_list_and_updated_at(datafile("repositories"), "repositories")
-  repositories.reject! { |repo| repo["status"] == "PASS" }
-  updated << updated_at
+  item_list = get_data_from_json_file("repositories", "repositories", GithubRepositories)
+  repositories = item_list.list
+  updated_at << item_list.updated_at
 
   clusters, updated_at = get_list_and_updated_at(datafile("helm_whatup"), "clusters")
   out_of_date_apps = clusters.map { |cluster| cluster.fetch("apps") }.flatten
@@ -70,11 +70,7 @@ end
 def render_item_list(docpath, key, klass = ItemList)
   template = docpath.to_sym
 
-  item_list = klass.new(
-    file: datafile(docpath),
-    key: key,
-    logger: logger,
-  )
+  item_list = get_data_from_json_file(docpath, key, klass)
 
   locals = {
     active_nav: docpath,
@@ -83,6 +79,14 @@ def render_item_list(docpath, key, klass = ItemList)
   }
 
   erb template, locals: locals
+end
+
+def get_data_from_json_file(docpath, key, klass)
+  klass.new(
+    file: datafile(docpath),
+    key: key,
+    logger: logger,
+  )
 end
 
 # key is the name of the key in our datafile which contains the list of
