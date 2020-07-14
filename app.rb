@@ -33,34 +33,32 @@ def require_api_key(request)
 end
 
 def dashboard_data
-  updated = []
+  info = {
+    documentation: get_data_from_json_file("documentation", "pages", Documentation),
+    helm_whatup: get_data_from_json_file("helm_whatup", "clusters", HelmWhatup),
+    repositories: get_data_from_json_file("repositories", "repositories", GithubRepositories),
+    terraform_modules: get_data_from_json_file("terraform_modules", "out_of_date_modules", ItemList),
+  }
 
-  item_list = get_data_from_json_file("terraform_modules", "out_of_date_modules", ItemList)
-  terraform_modules = item_list.list
-  updated << item_list.updated_at
+  updated_at = info.values.map { |i| i.updated_at }.sort.first
 
-  item_list = get_data_from_json_file("documentation", "pages", Documentation)
-  documentation_pages = item_list.list
-  updated << item_list.updated_at
-
-  item_list = get_data_from_json_file("repositories", "repositories", GithubRepositories)
-  repositories = item_list.list
-  updated << item_list.updated_at
-
-  helm_whatup = get_data_from_json_file("helm_whatup", "clusters", HelmWhatup)
-  out_of_date_apps = helm_whatup.out_of_date_apps
-  updated << item_list.updated_at
+  todo_count = [
+    info[:documentation].list.length,
+    info[:helm_whatup].out_of_date_apps.length,
+    info[:repositories].list.length,
+    info[:terraform_modules].list.length,
+  ].sum
 
   {
-    updated_at: updated.compact.sort.first,
+    updated_at: updated_at,
     data: {
       action_items: {
-        helm_whatup: out_of_date_apps.length,
-        terraform_modules: terraform_modules.length,
-        documentation: documentation_pages.length,
-        repositories: repositories.length,
+        documentation: info[:documentation].list.length,
+        helm_whatup: info[:helm_whatup].out_of_date_apps.length,
+        repositories: info[:repositories].list.length,
+        terraform_modules: info[:terraform_modules].list.length,
       },
-      action_required: true
+      action_required: (todo_count > 0),
     }
   }
 end
