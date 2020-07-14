@@ -4,6 +4,7 @@ require "bundler/setup"
 require "json"
 require "sinatra"
 require "./helpers"
+require "./lib/hoodaw"
 
 CONTENT_TYPE_JSON = "application/json"
 
@@ -62,6 +63,26 @@ def dashboard_data
       action_required: true
     }
   }
+end
+
+# key is the name of the key in our datafile which contains the list of
+# elements we're interested in.
+def render_item_list(docpath, key)
+  template = docpath.to_sym
+
+  item_list = ItemList.new(
+    file: datafile(docpath),
+    key: key,
+    logger: logger,
+  )
+
+  locals = {
+    active_nav: docpath,
+    updated_at: item_list.updated_at,
+    list: item_list.list,
+  }
+
+  erb template, locals: locals
 end
 
 # key is the name of the key in our datafile which contains the list of
@@ -142,7 +163,7 @@ get "/documentation" do
 end
 
 get "/terraform_modules" do
-  fetch_data_and_render_template("terraform_modules", "out_of_date_modules")
+  render_item_list("terraform_modules", "out_of_date_modules")
 end
 
 get "/repositories" do
