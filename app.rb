@@ -67,10 +67,10 @@ end
 
 # key is the name of the key in our datafile which contains the list of
 # elements we're interested in.
-def render_item_list(docpath, key)
+def render_item_list(docpath, key, klass = ItemList)
   template = docpath.to_sym
 
-  item_list = ItemList.new(
+  item_list = klass.new(
     file: datafile(docpath),
     key: key,
     logger: logger,
@@ -167,9 +167,7 @@ get "/terraform_modules" do
 end
 
 get "/repositories" do
-  fetch_data_and_render_template("repositories", "repositories") do |list|
-    list.reject! { |repo| repo["status"] == "PASS" }
-  end
+  render_item_list("repositories", "repositories", GithubRepositories)
 end
 
 post "/:docpath" do
