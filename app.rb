@@ -66,7 +66,7 @@ end
 
 # key is the name of the key in our datafile which contains the list of
 # elements we're interested in.
-def fetch_data(docpath, key)
+def fetch_data_and_render_template(docpath, key)
   file = datafile(docpath)
   template = docpath.to_sym
   locals = {
@@ -123,7 +123,7 @@ get "/dashboard" do
 end
 
 get "/helm_whatup" do
-  fetch_data("helm_whatup", "clusters") do |clusters|
+  fetch_data_and_render_template("helm_whatup", "clusters") do |clusters|
     clusters.each do |cluster|
       cluster.fetch("apps").map { |app| app["traffic_light"] = version_lag_traffic_light(app) }
     end
@@ -131,7 +131,7 @@ get "/helm_whatup" do
 end
 
 get "/documentation" do
-  fetch_data("documentation", "pages") do |list|
+  fetch_data_and_render_template("documentation", "pages") do |list|
     list.each_with_index do |url, i|
       # Turn the URL into site/title/url tuples e.g.
       #   "https://runbooks.cloud-platform.service.justice.gov.uk/create-cluster.html" -> site: "runbooks", title: "create-cluster"
@@ -142,11 +142,11 @@ get "/documentation" do
 end
 
 get "/terraform_modules" do
-  fetch_data("terraform_modules", "out_of_date_modules")
+  fetch_data_and_render_template("terraform_modules", "out_of_date_modules")
 end
 
 get "/repositories" do
-  fetch_data("repositories", "repositories") do |list|
+  fetch_data_and_render_template("repositories", "repositories") do |list|
     list.reject! { |repo| repo["status"] == "PASS" }
   end
 end
