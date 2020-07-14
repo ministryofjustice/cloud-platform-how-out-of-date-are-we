@@ -47,10 +47,9 @@ def dashboard_data
   repositories = item_list.list
   updated << item_list.updated_at
 
-  clusters, updated_at = get_list_and_updated_at(datafile("helm_whatup"), "clusters")
-  out_of_date_apps = clusters.map { |cluster| cluster.fetch("apps") }.flatten
-    .filter { |app| version_lag_traffic_light(app) == "danger" }
-  updated << updated_at
+  helm_whatup = get_data_from_json_file("helm_whatup", "clusters", HelmWhatup)
+  out_of_date_apps = helm_whatup.out_of_date_apps
+  updated << item_list.updated_at
 
   {
     updated_at: updated.compact.sort.first,
@@ -149,11 +148,7 @@ get "/dashboard" do
 end
 
 get "/helm_whatup" do
-  fetch_data_and_render_template("helm_whatup", "clusters") do |clusters|
-    clusters.each do |cluster|
-      cluster.fetch("apps").map { |app| app["traffic_light"] = version_lag_traffic_light(app) }
-    end
-  end
+  render_item_list("helm_whatup", "clusters", HelmWhatup)
 end
 
 get "/documentation" do
