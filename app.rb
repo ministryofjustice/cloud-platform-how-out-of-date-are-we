@@ -39,8 +39,9 @@ def dashboard_data
   terraform_modules = item_list.list
   updated << item_list.updated_at
 
-  documentation_pages, updated_at = get_list_and_updated_at(datafile("documentation"), "pages")
-  updated << updated_at
+  item_list = get_data_from_json_file("documentation", "pages", Documentation)
+  documentation_pages = item_list.list
+  updated << item_list.updated_at
 
   item_list = get_data_from_json_file("repositories", "repositories", GithubRepositories)
   repositories = item_list.list
@@ -156,14 +157,7 @@ get "/helm_whatup" do
 end
 
 get "/documentation" do
-  fetch_data_and_render_template("documentation", "pages") do |list|
-    list.each_with_index do |url, i|
-      # Turn the URL into site/title/url tuples e.g.
-      #   "https://runbooks.cloud-platform.service.justice.gov.uk/create-cluster.html" -> site: "runbooks", title: "create-cluster"
-      site, _, _, _, _, title = url.split(".").map { |s| s.sub(/.*\//, '') }
-      list[i] = { "site" => site, "title" => title, "url" => url }
-    end
-  end
+  render_item_list("documentation", "pages", Documentation)
 end
 
 get "/terraform_modules" do
