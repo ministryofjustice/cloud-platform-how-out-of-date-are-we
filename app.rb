@@ -3,7 +3,6 @@
 require "bundler/setup"
 require "json"
 require "sinatra"
-require "./helpers"
 require "./lib/hoodaw"
 
 CONTENT_TYPE_JSON = "application/json"
@@ -26,6 +25,13 @@ def require_api_key(request)
   else
     status 403
   end
+end
+
+def correct_api_key?(request)
+  expected_key = ENV.fetch("API_KEY")
+  provided_key = request.env.fetch("HTTP_X_API_KEY", "dontsetthisvalueastheapikey")
+
+  expected_key == provided_key
 end
 
 def datafile(docpath)
