@@ -42,21 +42,16 @@ def dashboard_data
 
   updated_at = info.values.map { |i| i.updated_at }.sort.first
 
-  todo_count = [
-    info[:documentation].list.length,
-    info[:helm_whatup].out_of_date_apps.length,
-    info[:repositories].list.length,
-    info[:terraform_modules].list.length,
-  ].sum
+  todo_count = info.values.map(&:todo_count).sum
 
   {
     updated_at: updated_at,
     data: {
       action_items: {
-        documentation: info[:documentation].list.length,
-        helm_whatup: info[:helm_whatup].out_of_date_apps.length,
-        repositories: info[:repositories].list.length,
-        terraform_modules: info[:terraform_modules].list.length,
+        documentation: info[:documentation].todo_count,
+        helm_whatup: info[:helm_whatup].todo_count,
+        repositories: info[:repositories].todo_count,
+        terraform_modules: info[:terraform_modules].todo_count,
       },
       action_required: (todo_count > 0),
     }

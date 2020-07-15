@@ -8,6 +8,10 @@ class HelmWhatup < ItemList
     helm_charts.filter { |chart| version_lag_traffic_light(chart) == DANGER }
   end
 
+  def todo_count
+    out_of_date_apps.length
+  end
+
   private
 
   def helm_charts

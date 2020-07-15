@@ -15,6 +15,10 @@ class ItemList
     @updated_at ||= data.nil? ? "" : string_to_formatted_time(data.fetch("updated_at"))
   end
 
+  def todo_count
+    list.length
+  end
+
   private
 
   def data
