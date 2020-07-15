@@ -19,10 +19,6 @@ def update_json_datafile(docpath, request)
   end
 end
 
-def datafile(docpath)
-  "./data/#{docpath}.json"
-end
-
 def require_api_key(request)
   if correct_api_key?(request)
     yield
@@ -30,6 +26,10 @@ def require_api_key(request)
   else
     status 403
   end
+end
+
+def datafile(docpath)
+  "./data/#{docpath}.json"
 end
 
 def dashboard_data
@@ -57,6 +57,14 @@ def dashboard_data
   }
 end
 
+def get_data_from_json_file(docpath, key, klass)
+  klass.new(
+    file: datafile(docpath),
+    key: key,
+    logger: logger,
+  )
+end
+
 # key is the name of the key in our datafile which contains the list of
 # elements we're interested in.
 def render_item_list(docpath, key, klass = ItemList)
@@ -73,13 +81,7 @@ def render_item_list(docpath, key, klass = ItemList)
   erb template, locals: locals
 end
 
-def get_data_from_json_file(docpath, key, klass)
-  klass.new(
-    file: datafile(docpath),
-    key: key,
-    logger: logger,
-  )
-end
+############################################################
 
 get "/" do
   redirect "/dashboard"
