@@ -81,47 +81,6 @@ def get_data_from_json_file(docpath, key, klass)
   )
 end
 
-# key is the name of the key in our datafile which contains the list of
-# elements we're interested in.
-def fetch_data_and_render_template(docpath, key)
-  file = datafile(docpath)
-  template = docpath.to_sym
-  locals = {
-    active_nav: docpath,
-    updated_at: nil,
-    list: []
-  }
-
-  if FileTest.exists?(file)
-    list, updated_at = get_list_and_updated_at(file, key)
-
-    # Do any pre-processing to the list we get from the data file
-    yield list if block_given?
-
-    locals.merge!(
-      updated_at: updated_at,
-      list: list
-    )
-  end
-
-  erb template, locals: locals
-end
-
-def get_list_and_updated_at(file, key)
-  list = []
-  updated_at = nil
-
-  begin
-    data = JSON.parse(File.read file)
-    updated_at = string_to_formatted_time(data.fetch("updated_at"))
-    list = data.fetch(key)
-  rescue JSON::ParserError
-    logger.info "Malformed JSON file: #{file}"
-  end
-
-  [list, updated_at]
-end
-
 get "/" do
   redirect "/dashboard"
 end
