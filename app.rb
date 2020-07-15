@@ -40,8 +40,7 @@ def dashboard_data
     terraform_modules: get_data_from_json_file("terraform_modules", "out_of_date_modules", ItemList),
   }
 
-  updated_at = info.values.map { |i| i.updated_at }.sort.first
-
+  updated_at = info.values.map(&:updated_at).sort.first
   todo_count = info.values.map(&:todo_count).sum
 
   {
