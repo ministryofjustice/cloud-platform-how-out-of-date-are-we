@@ -8,11 +8,11 @@ class ItemList
   end
 
   def list
-    @list ||= data.fetch(@key)
+    @list ||= data.nil? ? [] : data.fetch(@key)
   end
 
   def updated_at
-    @updated_at ||= string_to_formatted_time(data.fetch("updated_at"))
+    @updated_at ||= data.nil? ? "" : string_to_formatted_time(data.fetch("updated_at"))
   end
 
   private
