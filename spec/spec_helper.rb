@@ -103,10 +103,18 @@ require "net/http"
 require "uri"
 require "json"
 require "pry-byebug"
+require "sinatra"
+require "./lib/hoodaw"
 
-def fetch_url(url)
+def fetch_url(url, accept = nil)
   uri = URI.parse(url)
-  Net::HTTP.get_response(uri)
+  req = Net::HTTP::Get.new(uri)
+  unless accept.nil?
+    req["Accept"] = accept
+  end
+  Net::HTTP.start(uri.hostname, uri.port) {|http|
+    http.request(req)
+  }
 end
 
 def post_to_url(url, body, api_key = nil)

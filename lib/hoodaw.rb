@@ -1,0 +1,5 @@
+require "json"
+require_relative "./item_list"
+require_relative "./github_repositories"
+require_relative "./documentation"
+require_relative "./helm_whatup"
