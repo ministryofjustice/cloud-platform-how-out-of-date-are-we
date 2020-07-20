@@ -1,6 +1,11 @@
 # How out of date are we?
 
-Simple web app. to display a traffic light view of how far our installed software is behind the current versions, and how many of our documentation pages are overdue for review.
+Simple web app. to display various status information including:
+
+* a traffic light view of how far our installed helm charts are behind the latest versions
+* documentation pages which are overdue for review.
+* namespaces in the environments repository which use versions of our terraform modules which are not the latest
+* ministryofjustice/cloud-platform-\* github repositories whose settings do not match our requirements
 
 ![Screenshot of the app](screenshot.png?raw=true "Example screenshot")
 
