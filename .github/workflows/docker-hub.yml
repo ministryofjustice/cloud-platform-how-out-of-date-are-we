@@ -11,23 +11,8 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v2
-      - name: Push webapp to docker hub
-        uses: docker/build-push-action@v1
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-          repository: ministryofjustice/cloud-platform-how-out-of-date-are-we
-          tag_with_ref: true
-      - name: Push updater to docker hub
-        uses: docker/build-push-action@v1
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-          path: updater-image
-          repository: ministryofjustice/cloud-platform-how-out-of-date-are-we-updater
-          tag_with_ref: true
       - name: Compile the dashboard-reporter script
-        run: make
+        run: cd dashboard-reporter/; make
       - name: Push dashboard-reporter to docker hub
         uses: docker/build-push-action@v1
         with:
