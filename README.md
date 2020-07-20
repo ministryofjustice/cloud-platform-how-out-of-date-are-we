@@ -11,6 +11,18 @@ Simple web app. to display various status information including:
 
 The app. accepts posted JSON data from an updater image, defined in the [updater-image] directory.
 
+## Dashboard Reporter
+
+The `dashboard-reporter` directory maintains a script which will
+generate a report, formatted for use as a slack message,
+containing the information on the dashboard page of the web
+application.
+
+The code in the reporter script is built from classes defined in the main
+project, purely so that we can keep the Dockerfile simple and just add a single
+ruby script to the default ruby alpine image without having to install gems
+etc.
+
 ## Updating the JSON data
 
 ### Helm releases
