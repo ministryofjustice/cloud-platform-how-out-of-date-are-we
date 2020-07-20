@@ -36,7 +36,7 @@ terraform_modules: 0
     let(:action_required) { false }
 
     it "returns empty string" do
-      expect(dr.report).to eq("")
+      expect(dr.slack_formatted_report).to eq("")
     end
   end
 
@@ -44,7 +44,7 @@ terraform_modules: 0
     let(:action_required) { true }
 
     it "formats the report for posting to slack" do
-      expect(dr.report).to eq(formatted_message)
+      expect(dr.slack_formatted_report).to eq(formatted_message)
     end
   end
 
@@ -53,7 +53,7 @@ terraform_modules: 0
 
     it "raises an error" do
       expect{
-        dr.report
+        dr.slack_formatted_report
       }.to raise_error(KeyError)
     end
   end

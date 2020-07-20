@@ -8,16 +8,23 @@ class DashboardReporter
     @dashboard_url = url
   end
 
-  def report
+  def slack_formatted_report
     return "" unless action_required?
+
+    items = data.fetch("data").fetch("action_items")
+    item_keys = items.keys.sort
+    max_key_length = item_keys.map(&:length).max
+
+    action_items = item_keys.map do |key|
+      value = items[key]
+      label = "#{key}:".ljust(max_key_length + 1)
+      [label, value].join(" ")
+    end
 
     %(
 How out of date are we - action required:
 ```
-documentation:     1
-helm_whatup:       1
-repositories:      3
-terraform_modules: 0
+#{action_items.join("\n")}
 ```
     ).strip
   end
