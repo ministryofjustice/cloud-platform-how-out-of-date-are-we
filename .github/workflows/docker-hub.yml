@@ -27,7 +27,7 @@ jobs:
           repository: ministryofjustice/cloud-platform-how-out-of-date-are-we-updater
           tag_with_ref: true
       - name: Compile the dashboard-reporter script
-        run: make
+        run: cd dashboard-reporter/; make
       - name: Push dashboard-reporter to docker hub
         uses: docker/build-push-action@v1
         with:
