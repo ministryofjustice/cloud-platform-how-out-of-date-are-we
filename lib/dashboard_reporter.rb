@@ -37,7 +37,7 @@ How out of date are we - action required:
 
   def data
     @data ||= begin
-      json = URI.open(url, "Accept" => "application/json") { |f| f.read }
+      json = URI.open(dashboard_url, "Accept" => "application/json") { |f| f.read }
       JSON.parse(json)
     end
   end
