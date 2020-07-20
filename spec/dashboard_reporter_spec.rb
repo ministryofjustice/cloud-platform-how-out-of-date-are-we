@@ -1,7 +1,6 @@
 require "spec_helper"
 
 describe DashboardReporter do
-
   let(:data) { {
     "updated_at" =>"2020-07-20 09:27:44",
     "data" => {
@@ -15,10 +14,12 @@ describe DashboardReporter do
     }
   } }
 
-  subject(:dr) { described_class.new }
+  let(:dashboard_url) { "" }
+
+  subject(:dr) { described_class.new(dashboard_url) }
 
   before do
-    allow(dr).to receive(:fetch_data).and_return(data)
+    allow(dr).to receive(:data).and_return(data)
   end
 
   describe "action_required?" do
