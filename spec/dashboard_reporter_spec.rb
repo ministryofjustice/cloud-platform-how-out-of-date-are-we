@@ -15,7 +15,7 @@ describe DashboardReporter do
   } }
 
   let(:formatted_message) { %(
-How out of date are we - action required:
+Action items:
 ```
 documentation:     1
 helm_whatup:       1

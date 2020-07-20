@@ -22,7 +22,7 @@ class DashboardReporter
     end
 
     %(
-How out of date are we - action required:
+Action items:
 ```
 #{action_items.join("\n")}
 ```
