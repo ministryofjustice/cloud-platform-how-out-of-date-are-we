@@ -1,10 +1,27 @@
 # How out of date are we?
 
-Simple web app. to display a traffic light view of how far our installed software is behind the current versions, and how many of our documentation pages are overdue for review.
+Simple web app. to display various status information including:
+
+* a traffic light view of how far our installed helm charts are behind the latest versions
+* documentation pages which are overdue for review.
+* namespaces in the environments repository which use versions of our terraform modules which are not the latest
+* ministryofjustice/cloud-platform-\* github repositories whose settings do not match our requirements
 
 ![Screenshot of the app](screenshot.png?raw=true "Example screenshot")
 
 The app. accepts posted JSON data from an updater image, defined in the [updater-image] directory.
+
+## Dashboard Reporter
+
+The `dashboard-reporter` directory maintains a script which will
+generate a report, formatted for use as a slack message,
+containing the information on the dashboard page of the web
+application.
+
+The code in the reporter script is built from classes defined in the main
+project, purely so that we can keep the Dockerfile simple and just add a single
+ruby script to the default ruby alpine image without having to install gems
+etc.
 
 ## Updating the JSON data
 

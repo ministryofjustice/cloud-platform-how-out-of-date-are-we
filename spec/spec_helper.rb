@@ -105,6 +105,7 @@ require "json"
 require "pry-byebug"
 require "sinatra"
 require "./lib/hoodaw"
+require "./lib/dashboard_reporter"
 
 def fetch_url(url, accept = nil)
   uri = URI.parse(url)
