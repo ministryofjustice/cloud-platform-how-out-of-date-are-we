@@ -138,7 +138,12 @@ get "/terraform_modules" do
 end
 
 get "/repositories" do
-  render_item_list("repositories", "repositories", GithubRepositories)
+  accept = request.env["HTTP_ACCEPT"]
+  if accept == CONTENT_TYPE_JSON
+     serve_json_data(:repositories)
+  else
+    render_item_list("repositories", "repositories", GithubRepositories)
+  end
 end
 
 post "/:docpath" do

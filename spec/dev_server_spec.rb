@@ -59,6 +59,10 @@ describe "local dev server" do
     expect_json_data(documentation_url, "pages")
   end
 
+  it "serves repositories json" do
+    expect_json_data(repositories_url, "repositories")
+  end
+
   it "serves dashboard json" do
     expect_json_data(dashboard_url, "data")
   end
