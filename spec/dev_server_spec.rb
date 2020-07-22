@@ -24,12 +24,14 @@ describe "local dev server" do
   let(:helm_whatup_url) { [base_url, "helm_whatup"].join("/") }
   let(:terraform_modules_url) { [base_url, "terraform_modules"].join("/") }
   let(:documentation_url) { [base_url, "documentation"].join("/") }
+  let(:repositories_url) { [base_url, "repositories"].join("/") }
 
   let(:urls) { [
     dashboard_url,
     helm_whatup_url,
     terraform_modules_url,
     documentation_url,
+    repositories_url,
   ] }
 
   it "redirects / to /dashboard" do
