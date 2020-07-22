@@ -71,6 +71,10 @@ def get_data_from_json_file(docpath, key, klass)
   )
 end
 
+def serve_json_data(docpath)
+  File.read(datafile(docpath))
+end
+
 # key is the name of the key in our datafile which contains the list of
 # elements we're interested in.
 def render_item_list(docpath, key, klass = ItemList)
@@ -87,6 +91,11 @@ def render_item_list(docpath, key, klass = ItemList)
   erb template, locals: locals
 end
 
+def accept_json?(request)
+  accept = request.env["HTTP_ACCEPT"]
+  accept == CONTENT_TYPE_JSON
+end
+
 ############################################################
 
 get "/" do
@@ -94,9 +103,7 @@ get "/" do
 end
 
 get "/dashboard" do
-  accept = request.env["HTTP_ACCEPT"]
-
-  if accept == CONTENT_TYPE_JSON
+  if accept_json?(request)
     dashboard_data.to_json
   else
     locals = dashboard_data.merge(
@@ -107,19 +114,35 @@ get "/dashboard" do
 end
 
 get "/helm_whatup" do
-  render_item_list("helm_whatup", "clusters", HelmWhatup)
+  if accept_json?(request)
+     serve_json_data(:helm_whatup)
+  else
+    render_item_list("helm_whatup", "clusters", HelmWhatup)
+  end
 end
 
 get "/documentation" do
-  render_item_list("documentation", "pages", Documentation)
+  if accept_json?(request)
+     serve_json_data(:documentation)
+  else
+    render_item_list("documentation", "pages", Documentation)
+  end
 end
 
 get "/terraform_modules" do
-  render_item_list("terraform_modules", "out_of_date_modules")
+  if accept_json?(request)
+     serve_json_data(:terraform_modules)
+  else
+    render_item_list("terraform_modules", "out_of_date_modules")
+  end
 end
 
 get "/repositories" do
-  render_item_list("repositories", "repositories", GithubRepositories)
+  if accept_json?(request)
+     serve_json_data(:repositories)
+  else
+    render_item_list("repositories", "repositories", GithubRepositories)
+  end
 end
 
 post "/:docpath" do

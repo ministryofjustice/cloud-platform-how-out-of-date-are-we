@@ -7,6 +7,15 @@ require "spec_helper"
 
 HELM_RELEASE_DATA_FILE = "data/helm_whatup.json"
 
+def expect_json_data(url, key)
+  response = fetch_url(url, "application/json")
+  expect(response.code).to eq("200")
+  expect {
+    data = JSON.parse(response.body)
+    expect(data).to have_key(key)
+  }.to_not raise_error
+end
+
 describe "local dev server" do
   let(:base_url) { "http://localhost:4567" }
   let(:api_key) { "soopersekrit" } # specified in makefile
@@ -15,12 +24,14 @@ describe "local dev server" do
   let(:helm_whatup_url) { [base_url, "helm_whatup"].join("/") }
   let(:terraform_modules_url) { [base_url, "terraform_modules"].join("/") }
   let(:documentation_url) { [base_url, "documentation"].join("/") }
+  let(:repositories_url) { [base_url, "repositories"].join("/") }
 
   let(:urls) { [
     dashboard_url,
     helm_whatup_url,
     terraform_modules_url,
     documentation_url,
+    repositories_url,
   ] }
 
   it "redirects / to /dashboard" do
@@ -36,12 +47,24 @@ describe "local dev server" do
     end
   end
 
+  it "serves helm_whatup json" do
+    expect_json_data(helm_whatup_url, "clusters")
+  end
+
+  it "serves terraform_modules json" do
+    expect_json_data(terraform_modules_url, "out_of_date_modules")
+  end
+
+  it "serves documentation json" do
+    expect_json_data(documentation_url, "pages")
+  end
+
+  it "serves repositories json" do
+    expect_json_data(repositories_url, "repositories")
+  end
+
   it "serves dashboard json" do
-    response = fetch_url(dashboard_url, "application/json")
-    expect(response.code).to eq("200")
-    expect {
-      JSON.parse(response.body)
-    }.to_not raise_error
+    expect_json_data(dashboard_url, "data")
   end
 
   context "with malformed json data" do
