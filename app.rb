@@ -71,6 +71,10 @@ def get_data_from_json_file(docpath, key, klass)
   )
 end
 
+def serve_json_data(docpath)
+  File.read(datafile(:helm_whatup))
+end
+
 # key is the name of the key in our datafile which contains the list of
 # elements we're interested in.
 def render_item_list(docpath, key, klass = ItemList)
@@ -107,7 +111,12 @@ get "/dashboard" do
 end
 
 get "/helm_whatup" do
-  render_item_list("helm_whatup", "clusters", HelmWhatup)
+  accept = request.env["HTTP_ACCEPT"]
+  if accept == CONTENT_TYPE_JSON
+     serve_json_data(:helm_whatup)
+  else
+    render_item_list("helm_whatup", "clusters", HelmWhatup)
+  end
 end
 
 get "/documentation" do

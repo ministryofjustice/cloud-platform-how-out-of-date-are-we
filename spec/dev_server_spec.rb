@@ -7,6 +7,15 @@ require "spec_helper"
 
 HELM_RELEASE_DATA_FILE = "data/helm_whatup.json"
 
+def expect_json_data(url, key)
+  response = fetch_url(url, "application/json")
+  expect(response.code).to eq("200")
+  expect {
+    data = JSON.parse(response.body)
+    expect(data).to have_key(key)
+  }.to_not raise_error
+end
+
 describe "local dev server" do
   let(:base_url) { "http://localhost:4567" }
   let(:api_key) { "soopersekrit" } # specified in makefile
@@ -34,6 +43,10 @@ describe "local dev server" do
       response = fetch_url(url)
       expect(response.code).to eq("200")
     end
+  end
+
+  it "serves helm_whatup json" do
+    expect_json_data(helm_whatup_url, "clusters")
   end
 
   it "serves dashboard json" do
