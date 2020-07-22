@@ -50,11 +50,7 @@ describe "local dev server" do
   end
 
   it "serves dashboard json" do
-    response = fetch_url(dashboard_url, "application/json")
-    expect(response.code).to eq("200")
-    expect {
-      JSON.parse(response.body)
-    }.to_not raise_error
+    expect_json_data(dashboard_url, "data")
   end
 
   context "with malformed json data" do
