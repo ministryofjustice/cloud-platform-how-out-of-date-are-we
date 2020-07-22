@@ -49,6 +49,14 @@ describe "local dev server" do
     expect_json_data(helm_whatup_url, "clusters")
   end
 
+  it "serves terraform_modules json" do
+    expect_json_data(terraform_modules_url, "out_of_date_modules")
+  end
+
+  it "serves documentation json" do
+    expect_json_data(documentation_url, "pages")
+  end
+
   it "serves dashboard json" do
     expect_json_data(dashboard_url, "data")
   end

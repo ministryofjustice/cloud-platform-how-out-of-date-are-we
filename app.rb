@@ -120,11 +120,21 @@ get "/helm_whatup" do
 end
 
 get "/documentation" do
-  render_item_list("documentation", "pages", Documentation)
+  accept = request.env["HTTP_ACCEPT"]
+  if accept == CONTENT_TYPE_JSON
+     serve_json_data(:documentation)
+  else
+    render_item_list("documentation", "pages", Documentation)
+  end
 end
 
 get "/terraform_modules" do
-  render_item_list("terraform_modules", "out_of_date_modules")
+  accept = request.env["HTTP_ACCEPT"]
+  if accept == CONTENT_TYPE_JSON
+     serve_json_data(:terraform_modules)
+  else
+    render_item_list("terraform_modules", "out_of_date_modules")
+  end
 end
 
 get "/repositories" do
