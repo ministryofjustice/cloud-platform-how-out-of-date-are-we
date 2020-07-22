@@ -72,7 +72,7 @@ def get_data_from_json_file(docpath, key, klass)
 end
 
 def serve_json_data(docpath)
-  File.read(datafile(:helm_whatup))
+  File.read(datafile(docpath))
 end
 
 # key is the name of the key in our datafile which contains the list of
