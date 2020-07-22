@@ -91,6 +91,11 @@ def render_item_list(docpath, key, klass = ItemList)
   erb template, locals: locals
 end
 
+def accept_json?(request)
+  accept = request.env["HTTP_ACCEPT"]
+  accept == CONTENT_TYPE_JSON
+end
+
 ############################################################
 
 get "/" do
@@ -98,9 +103,7 @@ get "/" do
 end
 
 get "/dashboard" do
-  accept = request.env["HTTP_ACCEPT"]
-
-  if accept == CONTENT_TYPE_JSON
+  if accept_json?(request)
     dashboard_data.to_json
   else
     locals = dashboard_data.merge(
@@ -111,8 +114,7 @@ get "/dashboard" do
 end
 
 get "/helm_whatup" do
-  accept = request.env["HTTP_ACCEPT"]
-  if accept == CONTENT_TYPE_JSON
+  if accept_json?(request)
      serve_json_data(:helm_whatup)
   else
     render_item_list("helm_whatup", "clusters", HelmWhatup)
@@ -120,8 +122,7 @@ get "/helm_whatup" do
 end
 
 get "/documentation" do
-  accept = request.env["HTTP_ACCEPT"]
-  if accept == CONTENT_TYPE_JSON
+  if accept_json?(request)
      serve_json_data(:documentation)
   else
     render_item_list("documentation", "pages", Documentation)
@@ -129,8 +130,7 @@ get "/documentation" do
 end
 
 get "/terraform_modules" do
-  accept = request.env["HTTP_ACCEPT"]
-  if accept == CONTENT_TYPE_JSON
+  if accept_json?(request)
      serve_json_data(:terraform_modules)
   else
     render_item_list("terraform_modules", "out_of_date_modules")
@@ -138,8 +138,7 @@ get "/terraform_modules" do
 end
 
 get "/repositories" do
-  accept = request.env["HTTP_ACCEPT"]
-  if accept == CONTENT_TYPE_JSON
+  if accept_json?(request)
      serve_json_data(:repositories)
   else
     render_item_list("repositories", "repositories", GithubRepositories)
