@@ -3,7 +3,7 @@ FROM python:alpine3.10
 ENV \
   HELM_VERSION=3.2.1 \
   KUBECTL_VERSION=1.15.0 \
-  REPO_CHECKER_VERSION=1.4.0
+  REPO_CHECKER_VERSION=1.4.1
 
 RUN pip install awscli \
   && apk add curl libc6-compat git bash ruby ruby-nokogiri \
