@@ -5,11 +5,10 @@ API_KEY_SECRET="how-out-of-date-are-we-api-key"
 
 main() {
   set_api_key
-  helm_releases &
-  terraform_modules &
-  documentation &
-  repositories &
-  wait # Wait until all background jobs have completed
+  helm_releases
+  terraform_modules
+  documentation
+  repositories
 }
 
 set_kube_context() {
