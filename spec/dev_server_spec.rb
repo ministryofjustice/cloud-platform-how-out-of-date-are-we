@@ -25,6 +25,7 @@ describe "local dev server" do
   let(:terraform_modules_url) { [base_url, "terraform_modules"].join("/") }
   let(:documentation_url) { [base_url, "documentation"].join("/") }
   let(:repositories_url) { [base_url, "repositories"].join("/") }
+  let(:orphaned_resources_url) { [base_url, "orphaned_resources"].join("/") }
 
   let(:urls) { [
     dashboard_url,
@@ -32,6 +33,7 @@ describe "local dev server" do
     terraform_modules_url,
     documentation_url,
     repositories_url,
+    orphaned_resources_url,
   ] }
 
   it "redirects / to /dashboard" do
@@ -61,6 +63,10 @@ describe "local dev server" do
 
   it "serves repositories json" do
     expect_json_data(repositories_url, "repositories")
+  end
+
+  it "serves orphaned_resources json" do
+    expect_json_data(orphaned_resources_url, "orphaned_aws_resources")
   end
 
   it "serves dashboard json" do
