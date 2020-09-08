@@ -44,6 +44,7 @@ def dashboard_data
     helm_whatup: get_data_from_json_file("helm_whatup", "clusters", HelmWhatup),
     repositories: get_data_from_json_file("repositories", "repositories", GithubRepositories),
     terraform_modules: get_data_from_json_file("terraform_modules", "out_of_date_modules", ItemList),
+    orphaned_resources: get_data_from_json_file("orphaned_resources", "orphaned_aws_resources", OrphanedResources),
   }
 
   updated_at = info.values.map(&:updated_at).sort.first
@@ -57,6 +58,7 @@ def dashboard_data
         helm_whatup: info[:helm_whatup].todo_count,
         repositories: info[:repositories].todo_count,
         terraform_modules: info[:terraform_modules].todo_count,
+        orphaned_resources: info[:orphaned_resources].todo_count,
       },
       action_required: (todo_count > 0),
     }
@@ -142,6 +144,14 @@ get "/repositories" do
      serve_json_data(:repositories)
   else
     render_item_list("repositories", "repositories", GithubRepositories)
+  end
+end
+
+get "/orphaned_resources" do
+  if accept_json?(request)
+     serve_json_data(:orphaned_resources)
+  else
+    render_item_list("orphaned_resources", "orphaned_aws_resources", OrphanedResources)
   end
 end
 
