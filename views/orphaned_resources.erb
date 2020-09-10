@@ -5,7 +5,10 @@
   <h2><%= snake_case_to_capitalised(resource_type) %></h2>
   <ul>
     <% list[resource_type].each do |item| %>
-      <li><%= item %></li>
+      <li>
+        <%= item["id"] %>
+        <%= item["cluster"] == "" ? "" : "(#{item["cluster"]})"%>
+      </li>
     <% end %>
   </ul>
 <% end %>

@@ -15,8 +15,15 @@ describe OrphanedResources do
   let(:data) {
     {
       "orphaned_aws_resources" => {
-        "hosted_zones" => ["z1", "z2", "z3"],
-        "vpcs" => ["vpc1", "vpc2"]
+        "hosted_zones" => [
+          {"id" => "z1", "cluster" => "" },
+          {"id" => "z2", "cluster" => "" },
+          {"id" => "z3", "cluster" => "" },
+        ],
+        "vpcs" => [
+          {"id" => "v1", "cluster" => "test-1" },
+          {"id" => "v2", "cluster" => "test-2" },
+        ]
       }
     }
   }
