@@ -159,6 +159,20 @@ get "/orphaned_resources" do
   end
 end
 
+get "/namespace_costs" do
+  if accept_json?(request)
+     # TODO: figure out what to do here
+  else
+    nc = NamespaceCosts.new(dir: "data/namespace/costs")
+    locals = {
+      active_nav: "namespace_costs",
+      updated_at: nc.updated_at,
+      list: nc.list,
+    }
+    erb :namespace_costs, locals: locals
+  end
+end
+
 post "/:docpath" do
   update_json_datafile(params.fetch("docpath"), request)
 end

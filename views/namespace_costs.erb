@@ -1,0 +1,16 @@
+<table>
+  <thead>
+    <tr>
+      <th>Namespace</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% list.each do |ns| %>
+      <tr>
+        <td>ns.fetch(:name)</td>
+      </tr>
+    <% end %>
+  </tbody>
+  <tfoot>
+  </tfoot>
+</table>
