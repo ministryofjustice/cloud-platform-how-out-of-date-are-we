@@ -1,13 +1,25 @@
-<table>
+<h2>Namespace Costs</h2>
+
+<p>
+These are costs as reported by <a href="https://infracost.io">infracost</a>.
+Only AWS resources belonging to the namespace are included (i.e. shared resources
+including cluster running and support costs are not included), and only where
+infracost reports on resources of that type (see their list of
+<a href="https://www.infracost.io/docs/supported_resources">supported resources</a>).
+</p>
+
+<table class="table table-striped">
   <thead>
     <tr>
       <th>Namespace</th>
+      <th>Monthly Cost ($)</th>
     </tr>
   </thead>
   <tbody>
     <% list.each do |ns| %>
       <tr>
-        <td>ns.fetch(:name)</td>
+        <td><%= ns.fetch(:name) %></td>
+        <td class="text-right"><%= commify ns.fetch(:total) %></td>
       </tr>
     <% end %>
   </tbody>
