@@ -173,6 +173,20 @@ get "/namespace_costs" do
   end
 end
 
+get "/namespace_cost/:namespace" do
+  if accept_json?(request)
+     # TODO: figure out what to do here
+  else
+    namespace_cost = NamespaceCost.new(file: "data/namespace/costs/#{params.fetch("namespace")}.json")
+    locals = {
+      active_nav: "namespace_costs",
+      namespace_cost: namespace_cost,
+      updated_at: namespace_cost.updated_at,
+    }
+    erb :namespace_cost, locals: locals
+  end
+end
+
 post "/:docpath" do
   update_json_datafile(params.fetch("docpath"), request)
 end

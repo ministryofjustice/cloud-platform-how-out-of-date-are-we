@@ -15,6 +15,17 @@ class NamespaceCost
     File.stat(@file).mtime
   end
 
+  def resources
+    @resources ||= begin
+                     data.map do |resource|
+                       {
+                         name: resource["name"],
+                         monthly_cost: resource["monthlyCost"].to_f
+                       }
+                     end
+                   end
+  end
+
   # file contains the output of `infracost --tfdir .` for each namespace
   def total
     @total ||= data.map { |item| item["monthlyCost"].to_f }.sum

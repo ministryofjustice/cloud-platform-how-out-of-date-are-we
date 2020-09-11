@@ -1,4 +1,4 @@
-<h2>Namespace Costs</h2>
+<h2><%= namespace_cost.namespace %></h2>
 
 <p>
 These are costs as reported by <a href="https://infracost.io">infracost</a>.
@@ -11,22 +11,22 @@ infracost reports on resources of that type (see their list of
 <table class="table table-striped">
   <thead>
     <tr>
-      <th>Namespace</th>
+      <th>Resource</th>
       <th>Monthly Cost ($)</th>
     </tr>
   </thead>
   <tbody>
-    <% list.each do |ns| %>
+    <% namespace_cost.resources.each do |resource| %>
       <tr>
-        <td>
-          <a href="/namespace_cost/<%= ns.fetch(:namespace) %>">
-            <%= ns.fetch(:namespace) %>
-          </a>
-        </td>
-        <td class="text-right"><%= commify ns.fetch(:total) %></td>
+        <td><%= resource.fetch(:name) %></td>
+        <td class="text-right"><%= commify resource.fetch(:monthly_cost) %></td>
       </tr>
     <% end %>
   </tbody>
   <tfoot>
+    <tr>
+      <th>Total</th>
+      <th class="text-right"><%= commify namespace_cost.total %></th>
+    </tr>
   </tfoot>
 </table>
