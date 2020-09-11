@@ -16,14 +16,14 @@ infracost reports on resources of that type (see their list of
     </tr>
   </thead>
   <tbody>
-    <% list.each do |ns| %>
+    <% list.each do |nc| %>
       <tr>
         <td>
-          <a href="/namespace_cost/<%= ns.fetch(:namespace) %>">
-            <%= ns.fetch(:namespace) %>
+          <a href="/namespace_cost/<%= nc.namespace %>">
+            <%= nc.namespace %>
           </a>
         </td>
-        <td class="text-right"><%= commify ns.fetch(:total) %></td>
+        <td class="text-right"><%= commify nc.total %></td>
       </tr>
     <% end %>
   </tbody>

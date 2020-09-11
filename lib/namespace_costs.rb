@@ -40,22 +40,10 @@ class NamespaceCosts
   end
 
   def updated_at
-    @updated_at ||= list.map {|i| i.fetch(:updated_at)}.min
+    @updated_at ||= list.map(&:updated_at).min
   end
 
   def list
-    @list ||=
-      begin
-        Dir["#{dir}/*.json"]
-          .sort
-          .map do |file|
-            nc = NamespaceCost.new(file: file)
-            {
-              namespace: nc.namespace,
-              total: nc.total,
-              updated_at: nc.updated_at,
-            }
-          end
-      end
+    @list ||= Dir["#{dir}/*.json"].map { |file| NamespaceCost.new(file: file) }
   end
 end
