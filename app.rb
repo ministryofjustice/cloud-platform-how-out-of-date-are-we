@@ -14,7 +14,11 @@ end
 
 def update_json_datafile(docpath, request)
   require_api_key(request) do
-    File.open(datafile(docpath), "w") {|f| f.puts(request.body.read)}
+    file = datafile(docpath)
+    dir = File.dirname(file)
+
+    FileUtils.mkdir_p(dir) unless FileTest.directory?(dir)
+    File.write(file, request.body.read)
   end
 end
 
