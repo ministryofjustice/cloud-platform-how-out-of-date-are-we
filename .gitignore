@@ -1,2 +1,3 @@
 .built-image
 dashboard-reporter/report.rb
+data/
