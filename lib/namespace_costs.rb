@@ -1,3 +1,26 @@
+class NamespaceCost
+  def initialize(params)
+    @file = params.fetch(:file)
+  end
+
+  def data
+    @data ||= JSON.parse(File.read(@file))
+  end
+
+  def namespace
+    File.basename(@file).sub(".json", "")
+  end
+
+  def updated_at
+    File.stat(@file).mtime
+  end
+
+  # file contains the output of `infracost --tfdir .` for each namespace
+  def total
+    @total ||= data.map { |item| item["monthlyCost"].to_f }.sum
+  end
+end
+
 class NamespaceCosts
   attr_reader :dir
 
@@ -6,35 +29,22 @@ class NamespaceCosts
   end
 
   def updated_at
-    list # sets @updated_at as a side-effect
-    @updated_at
-  end
-
-  def set_updated_at(file)
-    @updated_at ||= Time.now
-    @updated_at = [
-      @updated_at,
-      File.stat("data/namespace/costs/cccd-dev.json").mtime
-    ].min
+    @updated_at ||= list.map {|i| i.fetch(:updated_at)}.min
   end
 
   def list
-    @list ||= Dir["#{dir}/*.json"]
-      .sort
-      .map { |file| process(file) }
-  end
-
-  private
-
-  # file contains the output of `infracost --tfdir .` for each namespace
-  def process(file)
-    items = JSON.parse(File.read(file))
-    set_updated_at(file)
-    total = items.map { |item| item["monthlyCost"].to_f }.sum
-    namespace = File.basename(file).sub(".json", "")
-    {
-      name: namespace,
-      total: total,
-    }
+    @list ||=
+      begin
+        Dir["#{dir}/*.json"]
+          .sort
+          .map do |file|
+            nc = NamespaceCost.new(file: file)
+            {
+              namespace: nc.namespace,
+              total: nc.total,
+              updated_at: nc.updated_at,
+            }
+          end
+      end
   end
 end

@@ -18,7 +18,7 @@ infracost reports on resources of that type (see their list of
   <tbody>
     <% list.each do |ns| %>
       <tr>
-        <td><%= ns.fetch(:name) %></td>
+        <td><%= ns.fetch(:namespace) %></td>
         <td class="text-right"><%= commify ns.fetch(:total) %></td>
       </tr>
     <% end %>
