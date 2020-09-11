@@ -44,6 +44,9 @@ class NamespaceCosts
   end
 
   def list
-    @list ||= Dir["#{dir}/*.json"].map { |file| NamespaceCost.new(file: file) }
+    @list ||= Dir["#{dir}/*.json"]
+      .map { |file| NamespaceCost.new(file: file) }
+      .sort {|a,b| a.total <=> b.total}
+      .reverse
   end
 end
