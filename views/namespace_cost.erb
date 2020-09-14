@@ -1,0 +1,32 @@
+<h2><%= namespace_cost.namespace %></h2>
+
+<p>
+These are costs as reported by <a href="https://infracost.io">infracost</a>.
+Only AWS resources belonging to the namespace are included (i.e. shared resources
+including cluster running and support costs are not included), and only where
+infracost reports on resources of that type (see their list of
+<a href="https://www.infracost.io/docs/supported_resources">supported resources</a>).
+</p>
+
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Resource</th>
+      <th>Monthly Cost ($)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% namespace_cost.resources.each do |resource| %>
+      <tr>
+        <td><%= resource.fetch(:name) %></td>
+        <td class="text-right"><%= commify resource.fetch(:monthly_cost) %></td>
+      </tr>
+    <% end %>
+  </tbody>
+  <tfoot>
+    <tr>
+      <th>Total</th>
+      <th class="text-right"><%= commify namespace_cost.total %></th>
+    </tr>
+  </tfoot>
+</table>
