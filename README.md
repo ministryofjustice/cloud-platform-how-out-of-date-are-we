@@ -1,5 +1,7 @@
 # How out of date are we?
 
+[![Releases](https://img.shields.io/github/release/ministryofjustice/cloud-platform-how-out-of-date-are-we/all.svg?style=flat-square)](https://github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/releases)
+
 Simple web app. to display various status information including:
 
 * a traffic light view of how far our installed helm charts are behind the latest versions
