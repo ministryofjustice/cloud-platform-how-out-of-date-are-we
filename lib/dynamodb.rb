@@ -1,7 +1,7 @@
 class Dynamodb
   attr_reader :db, :table
 
-  def initialize(params)
+  def initialize(params = {})
     @db = params.fetch(:db, Aws::DynamoDB::Client.new(
       region: ENV.fetch("DYNAMODB_REGION"),
       access_key_id: ENV.fetch("DYNAMODB_ACCESS_KEY_ID"),
