@@ -16,9 +16,10 @@ test:
 	rspec
 
 fetch-live-json-datafiles:
+	mkdir -p data/namespace/costs
 	pod=$$(kubectl -n how-out-of-date-are-we get pods -o name); \
-		for file in $$(kubectl -n how-out-of-date-are-we exec $${pod} ls data); do \
+		for file in $$(kubectl -n how-out-of-date-are-we exec $${pod} find data); do \
 		  echo $${file}; \
-			kubectl -n how-out-of-date-are-we exec $${pod} cat data/$${file} > data/$${file}; \
+			kubectl -n how-out-of-date-are-we exec $${pod} cat $${file} > $${file}; \
 		done
 
