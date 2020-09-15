@@ -36,7 +36,7 @@ def correct_api_key?(request)
 end
 
 def datafile(docpath)
-  "./data/#{docpath}.json"
+  "data/#{docpath}.json"
 end
 
 def dashboard_data
