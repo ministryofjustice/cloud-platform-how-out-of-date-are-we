@@ -49,4 +49,8 @@ class NamespaceCosts
       .sort {|a,b| a.total <=> b.total}
       .reverse
   end
+
+  def total
+    list.sum(&:total)
+  end
 end
