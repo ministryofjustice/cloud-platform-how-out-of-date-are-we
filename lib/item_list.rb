@@ -33,7 +33,8 @@ class ItemList
       logger.info "No such file #{@json_file}"
     else
       begin
-        data = JSON.parse(store.retrieve_file @json_file)
+        json = store.retrieve_file @json_file
+        data = json.nil? ? {} : JSON.parse(json)
       rescue JSON::ParserError
         logger.info "Malformed JSON file: #{@json_file}"
       end
