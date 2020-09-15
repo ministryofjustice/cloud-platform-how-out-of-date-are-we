@@ -12,7 +12,7 @@ if development?
   require "pry-byebug"
 end
 
-def update_json_datafile(docpath, request)
+def update_json_data(docpath, request)
   require_api_key(request) do
     file = datafile(docpath)
     dir = File.dirname(file)
@@ -189,10 +189,10 @@ get "/namespace_cost/:namespace" do
 end
 
 post "/:docpath" do
-  update_json_datafile(params.fetch("docpath"), request)
+  update_json_data(params.fetch("docpath"), request)
 end
 
 post "/namespace/costs/:namespace" do
   path = "namespace/costs/#{params.fetch("namespace")}"
-  update_json_datafile(path, request)
+  update_json_data(path, request)
 end
