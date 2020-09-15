@@ -168,6 +168,7 @@ get "/namespace_costs" do
       active_nav: "namespace_costs",
       updated_at: nc.updated_at,
       list: nc.list,
+      total: nc.total,
     }
     erb :namespace_costs, locals: locals
   end
