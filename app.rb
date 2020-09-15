@@ -12,13 +12,10 @@ if development?
   require "pry-byebug"
 end
 
-def update_json_data(docpath, request)
+def update_json_data(store, docpath, request)
   require_api_key(request) do
     file = datafile(docpath)
-    dir = File.dirname(file)
-
-    FileUtils.mkdir_p(dir) unless FileTest.directory?(dir)
-    File.write(file, request.body.read)
+    store.store_file(file, request.body.read)
   end
 end
 
@@ -78,7 +75,7 @@ def get_data_from_json_file(docpath, key, klass)
 end
 
 def serve_json_data(docpath)
-  File.read(datafile(docpath))
+  store.retrieve_file(datafile(docpath))
 end
 
 # key is the name of the key in our datafile which contains the list of
@@ -100,6 +97,10 @@ end
 def accept_json?(request)
   accept = request.env["HTTP_ACCEPT"]
   accept == CONTENT_TYPE_JSON
+end
+
+def store
+  Filestore.new
 end
 
 ############################################################
@@ -163,7 +164,7 @@ get "/namespace_costs" do
   if accept_json?(request)
      # TODO: figure out what to do here
   else
-    nc = NamespaceCosts.new(dir: "data/namespace/costs")
+    nc = NamespaceCosts.new(dir: "data/namespace/costs", store: store)
     locals = {
       active_nav: "namespace_costs",
       updated_at: nc.updated_at,
@@ -178,7 +179,10 @@ get "/namespace_cost/:namespace" do
   if accept_json?(request)
      # TODO: figure out what to do here
   else
-    namespace_cost = NamespaceCost.new(file: "data/namespace/costs/#{params.fetch("namespace")}.json")
+    namespace_cost = NamespaceCost.new(
+      store: store,
+      file: "data/namespace/costs/#{params.fetch("namespace")}.json"
+    )
     locals = {
       active_nav: "namespace_costs",
       namespace_cost: namespace_cost,
@@ -189,10 +193,10 @@ get "/namespace_cost/:namespace" do
 end
 
 post "/:docpath" do
-  update_json_data(params.fetch("docpath"), request)
+  update_json_data(store, params.fetch("docpath"), request)
 end
 
 post "/namespace/costs/:namespace" do
   path = "namespace/costs/#{params.fetch("namespace")}"
-  update_json_data(path, request)
+  update_json_data(store, path, request)
 end

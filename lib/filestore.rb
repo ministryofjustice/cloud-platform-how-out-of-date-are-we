@@ -12,4 +12,12 @@ class Filestore
   def retrieve_file(file)
     File.read(file)
   end
+
+  def stored_at(file)
+    File.stat(file).mtime
+  end
+
+  def exists?(file)
+    FileTest.exists?(file)
+  end
 end

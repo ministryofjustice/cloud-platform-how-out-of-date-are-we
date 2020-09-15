@@ -1,10 +1,11 @@
 class NamespaceCost
   def initialize(params)
+    @store = params.fetch(:store)
     @file = params.fetch(:file)
   end
 
   def data
-    @data ||= JSON.parse(File.read(@file))
+    @data ||= JSON.parse(@store.retrieve_file(@file))
   end
 
   def namespace
@@ -12,7 +13,7 @@ class NamespaceCost
   end
 
   def updated_at
-    File.stat(@file).mtime
+    @store.stored_at(@file)
   end
 
   def resources
@@ -33,9 +34,10 @@ class NamespaceCost
 end
 
 class NamespaceCosts
-  attr_reader :dir
+  attr_reader :dir, :store
 
   def initialize(params)
+    @store = params.fetch(:store)
     @dir = params.fetch(:dir)
   end
 
@@ -44,13 +46,20 @@ class NamespaceCosts
   end
 
   def list
-    @list ||= Dir["#{dir}/*.json"]
-      .map { |file| NamespaceCost.new(file: file) }
-      .sort {|a,b| a.total <=> b.total}
-      .reverse
+    @list ||= costs_list
   end
 
   def total
     list.sum(&:total)
+  end
+
+  private
+
+  def costs_list
+    store.list_files
+      .filter { |f| f =~ %r[^#{dir}/.*.json$] }
+      .map { |file| NamespaceCost.new(file: file, store: store) }
+      .sort {|a,b| a.total <=> b.total}
+      .reverse
   end
 end
