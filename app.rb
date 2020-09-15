@@ -101,7 +101,7 @@ def accept_json?(request)
 end
 
 def store
-  Filestore.new
+  ENV.has_key?("DYNAMODB_TABLE_NAME") ? Dynamodb.new : Filestore.new
 end
 
 ############################################################
