@@ -28,7 +28,7 @@ class Dynamodb
   end
 
   def stored_at(file)
-    Time.parse get_item(file)["stored_at"]
+    exists?(file) ? Time.parse(get_item(file)["stored_at"]) : nil
   end
 
   def exists?(file)
