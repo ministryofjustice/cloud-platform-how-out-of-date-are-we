@@ -19,7 +19,7 @@ class Dynamodb
   end
 
   def store_file(file, content)
-    db.put_item(table_name: table, item: { filename: file, content: content})
+    db.put_item(table_name: table, item: { filename: file, content: content, stored_at: Time.now.to_s})
   end
 
   def retrieve_file(file)

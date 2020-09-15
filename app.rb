@@ -168,7 +168,7 @@ get "/namespace_costs" do
     nc = NamespaceCosts.new(dir: "data/namespace/costs", store: store)
     locals = {
       active_nav: "namespace_costs",
-      updated_at: nc.updated_at,
+      updated_at: nc.updated_at.to_s,
       list: nc.list,
       total: nc.total,
     }
