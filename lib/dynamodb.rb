@@ -18,16 +18,29 @@ class Dynamodb
     ).items.map { |i| i["filename"] }.sort
   end
 
-  def store_file(file)
-    puts file
-    json = File.read(file)
-    db.put_item(table_name: table, item: { filename: file, content: json})
+  def store_file(file, content)
+    db.put_item(table_name: table, item: { filename: file, content: content})
   end
 
   def retrieve_file(file)
+    item = get_item(file)
+    item.nil? ? nil : item["content"]
+  end
+
+  def stored_at(file)
+    Time.parse get_item(file)["stored_at"]
+  end
+
+  def exists?(file)
+    !retrieve_file(file).nil?
+  end
+
+  private
+
+  def get_item(key)
     db.get_item(
-      key: { filename: file },
+      key: { filename: key },
       table_name: table,
-    ).item["content"]
+    ).item
   end
 end
