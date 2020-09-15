@@ -68,6 +68,7 @@ end
 
 def get_data_from_json_file(docpath, key, klass)
   klass.new(
+    store: store,
     file: datafile(docpath),
     key: key,
     logger: logger,
