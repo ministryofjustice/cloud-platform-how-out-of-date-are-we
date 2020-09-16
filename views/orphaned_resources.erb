@@ -1,14 +1,16 @@
 <% count = list.inject(0) {|sum, (resource_type, items)| sum += items.size} %>
 <h1>Orphaned AWS Resources (<%= count %>)</h1>
 
-<% list.keys.sort.each do |resource_type| %>
-  <h2><%= snake_case_to_capitalised(resource_type) %></h2>
-  <ul>
-    <% list[resource_type].each do |item| %>
-      <li>
-        <%= item["id"] %>
-        <%= item["cluster"] == "" ? "" : "(#{item["cluster"]})"%>
-      </li>
-    <% end %>
-  </ul>
+<% if list.is_a?(Hash) %>
+  <% list.keys.sort.each do |resource_type| %>
+    <h2><%= snake_case_to_capitalised(resource_type) %></h2>
+    <ul>
+      <% list[resource_type].each do |item| %>
+        <li>
+          <%= item["id"] %>
+          <%= item["cluster"] == "" ? "" : "(#{item["cluster"]})"%>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
 <% end %>

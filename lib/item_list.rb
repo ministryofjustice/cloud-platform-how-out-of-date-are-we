@@ -1,10 +1,11 @@
 class ItemList
-  attr_reader :logger
+  attr_reader :logger, :store
 
   def initialize(params)
     @json_file = params.fetch(:file)
     @key = params.fetch(:key) # top-level key containing list of items
     @logger = params.fetch(:logger)
+    @store = params.fetch(:store, Filestore.new)
   end
 
   def list
@@ -28,11 +29,12 @@ class ItemList
   def read_data
     data = nil
 
-    unless FileTest.exists?(@json_file)
+    unless store.exists?(@json_file)
       logger.info "No such file #{@json_file}"
     else
       begin
-        data = JSON.parse(File.read @json_file)
+        json = store.retrieve_file @json_file
+        data = json.nil? ? {} : JSON.parse(json)
       rescue JSON::ParserError
         logger.info "Malformed JSON file: #{@json_file}"
       end

@@ -1,3 +1,4 @@
+
 # How out of date are we?
 
 [![Releases](https://img.shields.io/github/release/ministryofjustice/cloud-platform-how-out-of-date-are-we/all.svg?style=flat-square)](https://github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/releases)
@@ -5,13 +6,33 @@
 Simple web app. to display various status information including:
 
 * a traffic light view of how far our installed helm charts are behind the latest versions
-* documentation pages which are overdue for review.
+* documentation pages which are overdue for review
 * namespaces in the environments repository which use versions of our terraform modules which are not the latest
 * ministryofjustice/cloud-platform-\* github repositories whose settings do not match our requirements
+* "orphaned" AWS resources (which exist, but are not listed in any terraform state files)
+* cost per namespace (alpha)
 
 ![Screenshot of the app](screenshot.png?raw=true "Example screenshot")
 
-The app. accepts posted JSON data from an updater image, defined in the [updater-image] directory.
+The app. accepts posted JSON data from an updater image, defined in the [updater-image] directory, or from any other source provided the correct API key is supplied in the HTTP POST.
+
+## Data Storage
+
+The web application currently has two options for backend data storage:
+
+* Filestore: POSTed JSON data is stored/retrieved as files in the local filesystem, below the local `data` directory.
+* AWS DynamoDB: POSTed JSON data is stored/retrieved as documents in a DynamoDB table, where the key is the same filename that would be used if `Filestore` were the storage backend.
+
+The application will use `Filestore` unless a `DYNAMODB_TABLE_NAME` environment variable is configured.
+
+### Using DyanamoDB storage
+
+To use DynamoDB as the storage backend, the following environment variables must be set:
+
+* `DYNAMODB_REGION`: e.g. "eu-west-2"
+* `DYNAMODB_ACCESS_KEY_ID`: An AWS access key with permission to access the DynamoDB table
+* `DYNAMODB_SECRET_ACCESS_KEY`: An AWS secret key corresponding to the access key
+* `DYNAMODB_TABLE_NAME`: The name of the DynamoDB table - this should have a `filename` key field
 
 ## Dashboard Reporter
 
@@ -26,6 +47,21 @@ ruby script to the default ruby alpine image without having to install gems
 etc.
 
 ## Updating the JSON data
+
+In all cases, POSTing JSON data to `/endpoint` will result in the post body being stored as `data/endpoint.json`, provided the correct API key is provided in the `X-API-KEY` header.
+
+JSON data should consist of a hash with at least two key/value pairs:
+* `updated_at` containing a time value in a human-readable string format
+* A named data structure (the name can be any string value), containing the bulk of the data comprising the report.
+
+e.g. The report on MoJ Github repositories might consist of:
+
+```
+{
+    "updated_at": "2020-09-16 15:23:42 UTC",
+    "repositories": [ ...list of data hashes, one for each repo...]
+}
+```
 
 ### Helm releases
 
@@ -70,6 +106,14 @@ This uses: https://github.com/ministryofjustice/cloud-platform-repository-checke
 
 It requires a github personal access token with `public_repo` scope.
 
+### Orphaned AWS Resources
+
+See https://github.com/ministryofjustice/cloud-platform-report-orphaned-resources
+
+### Namespace Costs
+
+See https://github.com/ministryofjustice/cloud-platform-cost-calculator
+
 ### Developing
 
 See the `docker-compose.yml` file for details of how to run this app. and the updater script locally.
@@ -95,3 +139,9 @@ This will trigger a github action to build both the web app. and updater docker
 images, and push them to docker hub tagged with the release name.
 
 [release]: https://github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/releases
+
+
+---
+last_reviewed_on: 2020-09-16
+review_in: 3 months
+---
