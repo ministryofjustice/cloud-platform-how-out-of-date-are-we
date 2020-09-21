@@ -46,7 +46,7 @@ def dashboard_data
     repositories: get_data_from_json_file("repositories", "repositories", GithubRepositories),
     terraform_modules: get_data_from_json_file("terraform_modules", "out_of_date_modules", ItemList),
     orphaned_resources: get_data_from_json_file("orphaned_resources", "orphaned_aws_resources", OrphanedResources),
-    hosted_services: get_data_from_json_file("hosted_services", "namespace_details_list", ItemList),
+    hosted_services: get_data_from_json_file("hosted_services", "namespace_details", ItemList),
   }
 
   updated_at = info.values.map(&:updated_at).sort.first
