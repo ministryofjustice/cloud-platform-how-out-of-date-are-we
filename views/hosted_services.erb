@@ -1,0 +1,37 @@
+<h1>Hosted Services (<%= list.size %>)</h1>
+
+<% if list.any? %>
+  <div class="table-responsive">
+    <table class="table">
+  <thead class="thead-dark">
+    <tr>
+      <th scope="col">Namespace</th>
+      <th scope="col">Application</th>
+      <th scope="col">Business unit</th>
+      <th scope="col">Team name</th>
+       <th scope="col">Slack channel</th>
+      <th scope="col">Source code</th>
+      <th scope="col">Domain names</th>
+    </tr>
+  </thead>
+  <tbody>
+  <% list.each do |service| %>
+    <tr>
+      <th scope="row"><%= service["namespace"] %></th>
+      <td><%= service["application"] %></td>
+      <td><%= service["business_unit"] %></td>
+      <td><%= service["team_name"] %></td>
+      <td><%= service["team_slack_channel"] %></td>
+      <td><%= service["github_url"] %></td>
+      <td><%= service["domain_names"].join(", ") %></td>
+    </tr>
+    <% end %>
+    </tbody>
+    </table>
+    </div>
+    <% else %>
+  <h1>
+    Awaiting data
+  </h1>
+
+<% end %>
