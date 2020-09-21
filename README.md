@@ -129,7 +129,7 @@ make dev-server
 This will launch a local instance of the web server, and populate the data
 directory with the latest JSON files from the live instance.
 
-NB: You will need a workin ruby environment.
+NB: You will need a working ruby environment.
 
 ## Updating the docker images
 

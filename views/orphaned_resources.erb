@@ -6,9 +6,18 @@
     <h2><%= snake_case_to_capitalised(resource_type) %></h2>
     <ul>
       <% list[resource_type].each do |item| %>
+        <%
+          text = item["id"]
+          text = item["cluster"] == "" ? text : text + " (#{item["cluster"]})"
+        %>
         <li>
-          <%= item["id"] %>
-          <%= item["cluster"] == "" ? "" : "(#{item["cluster"]})"%>
+          <% if item["aws_console_url"].to_s != "" %>
+            <a href="<%= item["aws_console_url"] %>">
+              <%= text %>
+            </a>
+          <% else %>
+            <%= text %>
+          <% end %>
         </li>
       <% end %>
     </ul>
