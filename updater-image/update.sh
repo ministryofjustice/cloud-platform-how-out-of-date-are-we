@@ -52,9 +52,4 @@ repositories() {
   curl -H "X-API-KEY: ${API_KEY}" -d "$(cloud-platform-repository-checker)" ${DATA_URL}/repositories
 }
 
-
-hosted_services() {
-  curl -H "X-API-KEY: ${API_KEY}" -d "$(cloud-platform-environments-checker)" ${DATA_URL}/hosted_services
-}
-
 main
