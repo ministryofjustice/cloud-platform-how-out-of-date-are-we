@@ -20,7 +20,7 @@
       <th scope="row"><%= service["namespace"] %></th>
       <td><%= service["application"] %></td>
       <td><%= service["business_unit"] %></td>
-      <td><%= service["team_name"] %></td>
+      <td><%= github_team_url service["team_name"] %></td>
       <td><%= service["team_slack_channel"] %></td>
       <td><%= link_to service["github_url"], service["github_url"] %></td>
       <td><%= link_each_to service["domain_names"] %></td>
