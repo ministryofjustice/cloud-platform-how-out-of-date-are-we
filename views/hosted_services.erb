@@ -22,8 +22,8 @@
       <td><%= service["business_unit"] %></td>
       <td><%= service["team_name"] %></td>
       <td><%= service["team_slack_channel"] %></td>
-      <td><%= service["github_url"] %></td>
-      <td><%= service["domain_names"].join(", ") %></td>
+      <td><%= link_to service["github_url"], service["github_url"] %></td>
+      <td><%= link_each_to service["domain_names"] %></td>
     </tr>
     <% end %>
     </tbody>

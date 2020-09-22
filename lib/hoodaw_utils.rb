@@ -13,6 +13,20 @@ module HoodawUtils
     with_commas = whole.gsub(/\B(?=(...)*\b)/, ",")
     [with_commas, decimal].join(".")
   end
+
+  def link_each_to(domain_names)
+    domain_names.map { |domain_name| link_to(domain_name,"https://"+domain_name) }
+                .join("<br> ")
+  end
+
+  def link_to(text, href)
+    "<a href='#{href}'>#{split(text)}</a>" 
+  end
+
+  def split(text)
+    text.to_s.split('/').last
+  end
+
 end
 
 helpers HoodawUtils
