@@ -15,11 +15,11 @@ docker-dev-server:
 test:
 	rspec
 
+# This requires that the following ENV vars are set:
+#   * DYNAMODB_TABLE_NAME
+#   * DYNAMODB_ACCESS_KEY_ID
+#   * DYNAMODB_SECRET_ACCESS_KEY
 fetch-live-json-datafiles:
 	mkdir -p data/namespace/costs
-	pod=$$(kubectl -n how-out-of-date-are-we get pods -o name); \
-		for file in $$(kubectl -n how-out-of-date-are-we exec $${pod} find data); do \
-		  echo $${file}; \
-			kubectl -n how-out-of-date-are-we exec $${pod} cat $${file} > $${file}; \
-		done
+	./fetch-data-from-dynamodb.rb
 
