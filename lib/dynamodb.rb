@@ -1,6 +1,12 @@
 class Dynamodb
   attr_reader :db, :table
 
+  # Max. number of items for the `batch_get_item` method of the DynamoDB client
+  # https://docs.aws.amazon.com/sdk-for-ruby/v3/api/Aws/DynamoDB/Client.html#batch_get_item-instance_method
+  # If we're using DynamoDB as our storage backend, we need to fetch items in chunks
+  # no larger than this.
+  MAX_ITEMS = 100
+
   def initialize(params = {})
     @db = params.fetch(:db, Aws::DynamoDB::Client.new(
       region: ENV.fetch("DYNAMODB_REGION"),
@@ -27,6 +33,15 @@ class Dynamodb
     item.nil? ? nil : item["content"]
   end
 
+  def retrieve_files(filenames)
+    rtn = {}
+    filenames.each_slice(MAX_ITEMS) do |chunk|
+      hash = batch_get_item(chunk)
+      rtn.merge!(hash)
+    end
+    rtn
+  end
+
   def stored_at(file)
     exists?(file) ? Time.parse(get_item(file)["stored_at"]) : nil
   end
@@ -36,6 +51,26 @@ class Dynamodb
   end
 
   private
+
+  def batch_get_item(keys)
+    result = db.batch_get_item(
+      request_items: {
+        table => {
+          keys: keys.map {|k| {"filename" => k}}
+        }
+      }
+    )
+
+    items = result.responses[table]
+
+    items.inject({}) do |hash, item|
+      filename = item.delete("filename")
+      hash[filename] = item
+      hash
+    end
+
+    # keys.inject({}) { |hash, key| hash[key] = retrieve_file(key); hash }
+  end
 
   def get_item(key)
     db.get_item(

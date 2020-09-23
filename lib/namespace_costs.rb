@@ -46,11 +46,6 @@ end
 class NamespaceCosts
   attr_reader :dir, :store
 
-  # Generating the list requires a lot of file lookups, which is slow if we're using
-  # dynamodb, so we cache the generated list in this file.
-  CACHE_FILENAME = "data/namespace_costs.json"
-  CACHE_SECONDS = 3600
-
   def initialize(params)
     @store = params.fetch(:store)
     @dir = params.fetch(:dir)
@@ -71,52 +66,18 @@ class NamespaceCosts
   private
 
   def costs_list
-    if cache_expired?
-      data = {
-        "list" => build_costs_list,
-        "updated_at" => Time.now,
-      }
-      cache(data)
-    else
-      data = cached_costs_list
-    end
-    data["list"]
-  end
+    cost_files = store.list_files.filter { |f| f =~ %r[^#{dir}/.*.json$] }
 
-  def cache_expired?
-    if store.exists?(CACHE_FILENAME)
-      (store.stored_at(CACHE_FILENAME) + CACHE_SECONDS) < Time.now
-    else
-      true
-    end
-  end
-
-  def cached_costs_list
-    data = JSON.parse(store.retrieve_file CACHE_FILENAME)
-
-    list = data["list"].map { |d|
+    list = store.retrieve_files(cost_files).map do |file, hash|
       NamespaceCost.new(
-        file: d["file"],
-        data: d["data"],
-        updated_at: d["updated_at"],
+        file: file,
+        data: JSON.parse(hash["content"]),
+        updated_at: hash["stored_at"],
         store: nil,
       )
-    }
+    end
 
-    {
-      "list" => list,
-      "updated_at" => data["updated_at"],
-    }
-  end
-
-  def cache(data)
-    store.store_file(CACHE_FILENAME, data.to_json)
-  end
-
-  def build_costs_list
-    store.list_files
-      .filter { |f| f =~ %r[^#{dir}/.*.json$] }
-      .map { |file| NamespaceCost.new(file: file, store: store) }
+    list
       .sort {|a,b| a.total <=> b.total}
       .reverse
   end

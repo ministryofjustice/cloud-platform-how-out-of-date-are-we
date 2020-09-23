@@ -13,6 +13,16 @@ class Filestore
     File.read(file)
   end
 
+  def retrieve_files(filenames)
+    filenames.inject({}) do |hash, filename|
+      hash[filename] = {
+        "content" => retrieve_file(filename),
+        "stored_at" => stored_at(filename),
+      }
+      hash
+    end
+  end
+
   def stored_at(file)
     File.stat(file).mtime
   end
