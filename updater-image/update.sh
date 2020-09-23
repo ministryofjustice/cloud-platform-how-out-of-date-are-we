@@ -9,6 +9,7 @@ main() {
   terraform_modules
   documentation
   repositories
+  hosted_services
 }
 
 set_kube_context() {

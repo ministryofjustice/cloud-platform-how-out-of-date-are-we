@@ -46,6 +46,7 @@ def dashboard_data
     repositories: get_data_from_json_file("repositories", "repositories", GithubRepositories),
     terraform_modules: get_data_from_json_file("terraform_modules", "out_of_date_modules", ItemList),
     orphaned_resources: get_data_from_json_file("orphaned_resources", "orphaned_aws_resources", OrphanedResources),
+    hosted_services: get_data_from_json_file("hosted_services", "namespace_details", ItemList),
   }
 
   updated_at = info.values.map(&:updated_at).sort.first
@@ -60,6 +61,7 @@ def dashboard_data
         repositories: info[:repositories].todo_count,
         terraform_modules: info[:terraform_modules].todo_count,
         orphaned_resources: info[:orphaned_resources].todo_count,
+        hosted_services: info[:hosted_services].todo_count,
       },
       action_required: (todo_count > 0),
     }
@@ -160,6 +162,16 @@ get "/orphaned_resources" do
     render_item_list("orphaned_resources", "orphaned_aws_resources", OrphanedResources)
   end
 end
+
+
+get "/hosted_services" do
+  if accept_json?(request)
+     serve_json_data(:hosted_services)
+  else
+    render_item_list("hosted_services", "namespace_details")
+  end
+end
+
 
 get "/namespace_costs" do
   if accept_json?(request)
