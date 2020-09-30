@@ -26,6 +26,7 @@ describe "local dev server" do
   let(:documentation_url) { [base_url, "documentation"].join("/") }
   let(:repositories_url) { [base_url, "repositories"].join("/") }
   let(:orphaned_resources_url) { [base_url, "orphaned_resources"].join("/") }
+  let(:hosted_services_url) { [base_url, "hosted_services"].join("/") }
 
   let(:urls) { [
     dashboard_url,
@@ -34,6 +35,7 @@ describe "local dev server" do
     documentation_url,
     repositories_url,
     orphaned_resources_url,
+    hosted_services_url,
   ] }
 
   it "redirects / to /dashboard" do
@@ -67,6 +69,10 @@ describe "local dev server" do
 
   it "serves orphaned_resources json" do
     expect_json_data(orphaned_resources_url, "orphaned_aws_resources")
+  end
+
+  it "serves hosted_services json" do
+    expect_json_data(hosted_services_url, "namespace_details")
   end
 
   it "serves dashboard json" do
