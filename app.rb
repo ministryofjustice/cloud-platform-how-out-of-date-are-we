@@ -15,7 +15,12 @@ end
 def update_json_data(store, docpath, request)
   require_api_key(request) do
     file = datafile(docpath)
-    store.store_file(file, request.body.read)
+    if(request.content_type.include? "multipart/form-data")
+      request_file = File.read request[:file][:tempfile]
+      store.store_file(file, request_file)
+    else
+      store.store_file(file, request.body.read) 
+    end
   end
 end
 
