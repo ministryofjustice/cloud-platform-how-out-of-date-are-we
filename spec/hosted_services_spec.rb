@@ -1,6 +1,6 @@
 require "spec_helper"
 
-describe HostedServices do
+describe "hosted_services" do
   let(:json) { data.to_json }
   let(:logger) { double(Sinatra::CommonLogger) }
 
@@ -42,7 +42,7 @@ describe HostedServices do
       ]
   }
 
-  subject(:hosted_services) { described_class.new(params) }
+  subject(:hosted_services) { ItemList.new(params) }
 
   before do
     allow(FileTest).to receive(:exists?).and_return(true)
