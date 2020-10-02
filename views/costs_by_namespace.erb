@@ -1,0 +1,43 @@
+<h2>Costs by Namespace</h2>
+
+<div class="card text-white bg-danger mb-6">
+  <div class="card-header">Incomplete data</div>
+  <div class="card-body">
+    <p class="card-text">This report depends on tags assigned to AWS resources. As of 2020-10-02 tagging was incomplete, so most of the AWS costs will be reported as shared. This data should improve over time, as more costs are recorded using the correct tags.</p>
+  </div>
+</div>
+
+<p>
+Data from the
+<a href="https://aws.amazon.com/aws-cost-management/aws-cost-explorer/">AWS Cost Explorer</a>,
+broken down by "namespace" tag.
+Shared costs, both AWS resources and the staff and ancillary costs of the Cloud Platform
+team, are distributed evenly across all namespaces.
+</p>
+
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Namespace</th>
+      <th>Monthly Cost ($)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% costs.list.each do |data| %>
+      <tr>
+        <td>
+          <a href="/namespace_cost/<%= data["name"] %>">
+            <%= data["name"] %>
+          </a>
+        </td>
+        <td class="text-right"><%= commify data["total"] %></td>
+      </tr>
+    <% end %>
+  </tbody>
+  <tfoot>
+    <tr>
+      <th>Total</th>
+      <th><%= commify costs.total %></th>
+    </tr>
+  </tfoot>
+</table>

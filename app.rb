@@ -167,7 +167,21 @@ get "/hosted_services" do
   end
 end
 
+get "/costs_by_namespace" do
+  json = store.retrieve_file datafile("costs_by_namespace")
+  costs = CostsByNamespace.new(json: json)
 
+  locals = {
+    updated_at: costs.updated_at,
+    costs: costs,
+  }
+
+  erb :costs_by_namespace, locals: locals
+end
+
+# Deprecated: we're moving away from infracost to using AWS cost reporter data,
+# but we don't have full months of data yet. TODO: remove this when the other
+# reports give us all the information we need.
 get "/namespace_costs" do
   if accept_json?(request)
      # TODO: figure out what to do here
