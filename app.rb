@@ -61,7 +61,6 @@ def dashboard_data
         repositories: info[:repositories].todo_count,
         terraform_modules: info[:terraform_modules].todo_count,
         orphaned_resources: info[:orphaned_resources].todo_count,
-        hosted_services: info[:hosted_services].todo_count,
       },
       action_required: (todo_count > 0),
     }
