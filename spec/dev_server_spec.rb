@@ -7,13 +7,10 @@ require "spec_helper"
 
 HELM_RELEASE_DATA_FILE = "data/helm_whatup.json"
 
-def expect_json_data(url, key)
+
+def expect_json_ok(url)
   response = fetch_url(url, "application/json")
   expect(response.code).to eq("200")
-  expect {
-    data = JSON.parse(response.body)
-    expect(data).to have_key(key)
-  }.to_not raise_error
 end
 
 describe "local dev server" do
@@ -26,6 +23,7 @@ describe "local dev server" do
   let(:documentation_url) { [base_url, "documentation"].join("/") }
   let(:repositories_url) { [base_url, "repositories"].join("/") }
   let(:orphaned_resources_url) { [base_url, "orphaned_resources"].join("/") }
+  let(:hosted_services_url) { [base_url, "hosted_services"].join("/") }
 
   let(:urls) { [
     dashboard_url,
@@ -34,7 +32,18 @@ describe "local dev server" do
     documentation_url,
     repositories_url,
     orphaned_resources_url,
+    hosted_services_url,
   ] }
+
+  let(:pages) { [
+      "helm_whatup",
+      "terraform_modules",
+      "documentation",
+      "repositories",
+      "orphaned_resources",
+      "hosted_services",
+      "dashboard",
+  ]}
 
   it "redirects / to /dashboard" do
     response = fetch_url(base_url)
@@ -48,29 +57,13 @@ describe "local dev server" do
       expect(response.code).to eq("200")
     end
   end
-
-  it "serves helm_whatup json" do
-    expect_json_data(helm_whatup_url, "clusters")
-  end
-
-  it "serves terraform_modules json" do
-    expect_json_data(terraform_modules_url, "out_of_date_modules")
-  end
-
-  it "serves documentation json" do
-    expect_json_data(documentation_url, "pages")
-  end
-
-  it "serves repositories json" do
-    expect_json_data(repositories_url, "repositories")
-  end
-
-  it "serves orphaned_resources json" do
-    expect_json_data(orphaned_resources_url, "orphaned_aws_resources")
-  end
-
-  it "serves dashboard json" do
-    expect_json_data(dashboard_url, "data")
+  
+  it "serves json" do
+    pages.each do |page|
+      url = [base_url, page].join("/")
+      system("touch data/#{page}.json")
+      expect_json_ok(url)
+    end
   end
 
   context "with malformed json data" do
