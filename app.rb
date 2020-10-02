@@ -88,7 +88,6 @@ def render_item_list(docpath, key, klass = ItemList)
   item_list = get_data_from_json_file(docpath, key, klass)
 
   locals = {
-    active_nav: docpath,
     updated_at: item_list.updated_at,
     list: item_list.list,
   }
@@ -115,10 +114,7 @@ get "/dashboard" do
   if accept_json?(request)
     dashboard_data.to_json
   else
-    locals = dashboard_data.merge(
-      active_nav: "dashboard",
-    )
-    erb :dashboard, locals: locals
+    erb :dashboard, locals: dashboard_data
   end
 end
 
@@ -178,7 +174,6 @@ get "/namespace_costs" do
   else
     nc = NamespaceCosts.new(dir: "data/namespace/costs", store: store)
     locals = {
-      active_nav: "namespace_costs",
       updated_at: nc.updated_at.to_s,
       list: nc.list,
       total: nc.total,
@@ -196,7 +191,6 @@ get "/namespace_cost/:namespace" do
       file: "data/namespace/costs/#{params.fetch("namespace")}.json"
     )
     locals = {
-      active_nav: "namespace_costs",
       namespace_cost: namespace_cost,
       updated_at: namespace_cost.updated_at,
     }
