@@ -1,16 +1,12 @@
-<h2><%= namespace_cost.namespace %></h2>
+<h2><%= namespace %></h2>
 
 <p>
-These are costs as reported by <a href="https://infracost.io">infracost</a>,
-for AWS resources dedicated to each namespace.
-Infracost only reports on a subset of AWS resources
-(see their list of <a href="https://www.infracost.io/docs/supported_resources">supported resources</a>),
-so some namespace resources may not be included in this report.
+  Data provided by the
+  <a href="https://github.com/ministryofjustice/cloud-platform-cost-calculator">Cloud Platform Cost Calculator</a>
 </p>
 
 <p>
-Shared costs, both AWS resources and the staff and ancillary costs of the Cloud Platform
-team, are distributed evenly across all namespaces.
+AWS resources which do not have the correct "namespace" tag will not be reported correctly.
 </p>
 
 <table class="table table-striped">
@@ -21,17 +17,21 @@ team, are distributed evenly across all namespaces.
     </tr>
   </thead>
   <tbody>
-    <% namespace_cost.resources.each do |resource| %>
+    <% resource_costs.each do |i| %>
       <tr>
-        <td><%= resource.fetch(:name) %></td>
-        <td class="text-right"><%= commify resource.fetch(:monthly_cost) %></td>
+        <td><%= i[0] %></td>
+        <td class="text-right"><%= commify i[1] %></td>
       </tr>
     <% end %>
   </tbody>
   <tfoot>
     <tr>
       <th>Total</th>
-      <th class="text-right"><%= commify namespace_cost.total %></th>
+      <th class="text-right"><%= commify total %></th>
     </tr>
   </tfoot>
 </table>
+
+<p>
+  <a href="/costs_by_namespace">Back</a>
+</p>
