@@ -18,32 +18,25 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
-          <li class="nav-item <%= active_nav == "dashboard" ? "active" : "" %>">
-            <a class="nav-link" href="/dashboard">Dashboard</a>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Todo</a>
+            <div class="dropdown-menu">
+              <a class="dropdown-item" href="/dashboard">Dashboard</a>
+              <a class="dropdown-item" href="/helm_whatup">Helm Releases</a>
+              <a class="dropdown-item" href="/terraform_modules">Terraform Modules</a>
+              <a class="dropdown-item" href="/documentation">Documentation</a>
+              <a class="dropdown-item" href="/repositories">GitHub Repositories</a>
+              <a class="dropdown-item" href="/orphaned_resources">Orphaned AWS Resources</a>
+            </div>
           </li>
-          <li class="nav-item <%= active_nav == "helm_whatup" ? "active" : "" %>">
-            <a class="nav-link" href="/helm_whatup">Helm Releases</a>
-          </li>
-          <li class="nav-item <%= active_nav == "terraform_modules" ? "active" : "" %>">
-            <a class="nav-link" href="/terraform_modules">Terraform Modules</a>
-          </li>
-          <li class="nav-item <%= active_nav == "documentation" ? "active" : "" %>">
-            <a class="nav-link" href="/documentation">Documentation</a>
-          </li>
-          <li class="nav-item <%= active_nav == "repositories" ? "active" : "" %>">
-            <a class="nav-link" href="/repositories">GitHub Repositories</a>
-          </li>
-          <li class="nav-item <%= active_nav == "orphaned_resources" ? "active" : "" %>">
-            <a class="nav-link" href="/orphaned_resources">Orphaned AWS Resources</a>
-          </li>
-          <li class="nav-item <%= active_nav == "namespace_costs" ? "active" : "" %>">
-            <a class="nav-link" href="/namespace_costs">Namespace Costs</a>
-          </li>
-             <li class="nav-item <%= active_nav == "hosted_services" ? "active" : "" %>">
-            <a class="nav-link" href="/hosted_services">Hosted Services</a>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Reports</a>
+            <div class="dropdown-menu">
+              <a class="dropdown-item" href="/costs_by_namespace">Costs by Namespace</a>
+              <a class="dropdown-item" href="/hosted_services">Hosted Services</a>
+            </div>
           </li>
         </ul>
-
         <ul class="navbar-nav justify-content-end">
           <li class="nav-item">
             <a class="nav-link" href="https://github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we">GitHub</a>
@@ -67,5 +60,8 @@
       </div>
 
     </main>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
   </body>
 </html>

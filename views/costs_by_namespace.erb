@@ -1,0 +1,36 @@
+<h2>Costs by Namespace</h2>
+
+<p>
+  Data provided by the
+  <a href="https://github.com/ministryofjustice/cloud-platform-cost-calculator">Cloud Platform Cost Calculator</a>
+</p>
+<p>
+  Shared costs, both AWS resources (i.e. Cloud Platform infrastructure), and the staff and ancillary costs of the Cloud Platform team, are distributed evenly across all namespaces.
+</p>
+
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Namespace</th>
+      <th>Monthly Cost ($)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% costs.list.each do |data| %>
+      <tr>
+        <td>
+          <a href="/namespace_cost/<%= data["name"] %>">
+            <%= data["name"] %>
+          </a>
+        </td>
+        <td class="text-right"><%= commify data["total"] %></td>
+      </tr>
+    <% end %>
+  </tbody>
+  <tfoot>
+    <tr>
+      <th>Total</th>
+      <th><%= commify costs.total %></th>
+    </tr>
+  </tfoot>
+</table>

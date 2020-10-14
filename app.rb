@@ -88,7 +88,6 @@ def render_item_list(docpath, key, klass = ItemList)
   item_list = get_data_from_json_file(docpath, key, klass)
 
   locals = {
-    active_nav: docpath,
     updated_at: item_list.updated_at,
     list: item_list.list,
   }
@@ -105,6 +104,11 @@ def store
   ENV.has_key?("DYNAMODB_TABLE_NAME") ? Dynamodb.new : Filestore.new
 end
 
+def namespace_costs
+  json = store.retrieve_file datafile("costs_by_namespace")
+  CostsByNamespace.new(json: json)
+end
+
 ############################################################
 
 get "/" do
@@ -115,10 +119,7 @@ get "/dashboard" do
   if accept_json?(request)
     dashboard_data.to_json
   else
-    locals = dashboard_data.merge(
-      active_nav: "dashboard",
-    )
-    erb :dashboard, locals: locals
+    erb :dashboard, locals: dashboard_data
   end
 end
 
@@ -171,34 +172,32 @@ get "/hosted_services" do
   end
 end
 
+get "/costs_by_namespace" do
+  costs = namespace_costs
 
-get "/namespace_costs" do
-  if accept_json?(request)
-     # TODO: figure out what to do here
-  else
-    nc = NamespaceCosts.new(dir: "data/namespace/costs", store: store)
-    locals = {
-      active_nav: "namespace_costs",
-      updated_at: nc.updated_at.to_s,
-      list: nc.list,
-      total: nc.total,
-    }
-    erb :namespace_costs, locals: locals
-  end
+  locals = {
+    updated_at: costs.updated_at,
+    costs: costs,
+  }
+
+  erb :costs_by_namespace, locals: locals
 end
 
 get "/namespace_cost/:namespace" do
+  costs = namespace_costs
+  namespace_cost = costs.list.find { |ns| ns["name"] == params["namespace"] }
+
   if accept_json?(request)
-     # TODO: figure out what to do here
+    namespace_cost.to_json
   else
-    namespace_cost = NamespaceCost.new(
-      store: store,
-      file: "data/namespace/costs/#{params.fetch("namespace")}.json"
-    )
+    # Sort costs in reverse value order
+    resource_costs = namespace_cost["breakdown"].to_a.sort { |a,b| a[1] <=> b[1] }.reverse
+
     locals = {
-      active_nav: "namespace_costs",
-      namespace_cost: namespace_cost,
-      updated_at: namespace_cost.updated_at,
+      namespace: namespace_cost["name"],
+      total: namespace_cost["total"],
+      resource_costs: resource_costs,
+      updated_at: costs.updated_at,
     }
     erb :namespace_cost, locals: locals
   end
