@@ -206,8 +206,3 @@ end
 post "/:docpath" do
   update_json_data(store, params.fetch("docpath"), request)
 end
-
-post "/namespace/costs/:namespace" do
-  path = "namespace/costs/#{params.fetch("namespace")}"
-  update_json_data(store, path, request)
-end
