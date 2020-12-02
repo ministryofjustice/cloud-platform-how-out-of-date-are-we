@@ -241,8 +241,6 @@ get "/namespace_usage_cpu" do
   )
 
   erb :namespaces_chart, locals: locals, layout: :namespace_usage_layout
-rescue Errno::ENOENT
-  erb :no_data
 end
 
 post "/:docpath" do
