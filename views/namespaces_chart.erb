@@ -112,7 +112,11 @@
   </head>
 
   <body>
-    <p class="updated_at">Last updated: <%= updated_at.strftime("%Y-%m-%d %H:%M:%S") %></p>
+    <p>
+      <%= link_to "CPU", "/namespace_usage_cpu" %>
+      |
+      <%= link_to "Memory", "/namespace_usage_memory" %>
+    </p>
     <p>
       Total requested: <%= total_requested %>
     </p>

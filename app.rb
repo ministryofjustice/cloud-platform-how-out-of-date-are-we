@@ -243,6 +243,17 @@ get "/namespace_usage_cpu" do
   erb :namespaces_chart, locals: locals, layout: :namespace_usage_layout
 end
 
+get "/namespace_usage_memory" do
+  column_titles = [ "Namespaces", "Total pods requests (mebibytes)", "Memory used (mebibytes)" ]
+
+  locals = namespaces_data("memory").merge(
+    column_titles: column_titles,
+    title: "Namespaces by Memory (requested vs. used)",
+  )
+
+  erb :namespaces_chart, locals: locals, layout: :namespace_usage_layout
+end
+
 post "/:docpath" do
   update_json_data(store, params.fetch("docpath"), request)
 end
