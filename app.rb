@@ -232,6 +232,10 @@ get "/namespace_cost/:namespace" do
   end
 end
 
+get "/namespace_usage" do
+  redirect "/namespace_usage_cpu"
+end
+
 get "/namespace_usage_cpu" do
   column_titles = [ "Namespaces", "Total pod requests (millicores)", "CPU used (millicores)" ]
 
