@@ -109,6 +109,36 @@ def namespace_costs
   CostsByNamespace.new(json: json)
 end
 
+def namespaces_data(order_by)
+  json = store.retrieve_file("data/namespace_usage.json")
+  namespaces = JSON.parse(json)
+
+  values = namespaces["data"]
+    .map { |n| namespace_values(n, order_by) }
+    .sort_by { |i| i[1] }
+    .reverse
+
+  {
+    values: values,
+    updated_at: DateTime.parse(namespaces["updated_at"]),
+    type: order_by,
+    total_requested: total_requested_by_all_namespaces(namespaces, order_by), # order_by is cpu|memory
+  }
+end
+
+def namespace_values(namespace, order_by)
+  [
+    namespace.fetch("name").to_s,
+    namespace.dig("max_requests", order_by).to_i,
+    namespace.dig("resources_requested", order_by).to_i,
+    namespace.dig("resources_used", order_by).to_i,
+  ]
+end
+
+def total_requested_by_all_namespaces(namespaces, property)
+  namespaces["data"].map { |ns| ns.dig("resources_requested", property) }.map(&:to_i).sum
+end
+
 ############################################################
 
 get "/" do
@@ -201,6 +231,19 @@ get "/namespace_cost/:namespace" do
     }
     erb :namespace_cost, locals: locals
   end
+end
+
+get "/namespace_usage_cpu" do
+  column_titles = [ "Namespaces", "Namespace CPU request (millicores)", "Total pod requests (millicores)", "CPU used (millicores)" ]
+
+  locals = namespaces_data("cpu").merge(
+    column_titles: column_titles,
+    title: "Namespaces by CPU (requested vs. used)",
+  )
+
+  erb :namespaces_chart, locals: locals, layout: :namespace_usage_layout
+rescue Errno::ENOENT
+  erb :no_data
 end
 
 post "/:docpath" do
