@@ -126,6 +126,33 @@ def namespaces_data(order_by)
   }
 end
 
+def namespaces_pods_data
+  json = store.retrieve_file("data/namespace_usage.json")
+  namespaces = JSON.parse(json)
+
+  values = namespaces["data"]
+    .map { |n| namespace_pods_values(n) }
+    .sort_by { |i| i[1] }
+    .reverse
+
+  total_pods = namespaces["data"].sum { |n| n.dig("resources_used", "pods") }
+
+  {
+    values: values,
+    updated_at: DateTime.parse(namespaces["updated_at"]),
+    type: "pods",
+    total_requested: total_pods,
+  }
+end
+
+def namespace_pods_values(namespace)
+  [
+    namespace.fetch("name").to_s,
+    namespace.dig("hard_limit", "pods").to_i,
+    namespace.dig("resources_used", "pods").to_i,
+  ]
+end
+
 def namespace_values(namespace, order_by)
   [
     namespace.fetch("name").to_s,
@@ -253,6 +280,17 @@ get "/namespace_usage_memory" do
   locals = namespaces_data("memory").merge(
     column_titles: column_titles,
     title: "Namespaces by Memory (requested vs. used)",
+  )
+
+  erb :namespaces_chart, locals: locals, layout: :namespace_usage_layout
+end
+
+get "/namespace_usage_pods" do
+  column_titles = [ "Namespaces", "Pods limit", "Pods running" ]
+
+  locals = namespaces_pods_data.merge(
+    column_titles: column_titles,
+    title: "Namespaces by pods (limit vs. running)",
   )
 
   erb :namespaces_chart, locals: locals, layout: :namespace_usage_layout
