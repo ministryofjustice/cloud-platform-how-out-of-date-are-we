@@ -1,28 +1,32 @@
 require "spec_helper"
 
 describe DashboardReporter do
-  let(:data) { {
-    "updated_at" =>"2020-07-20 09:27:44",
-    "data" => {
-      "action_items" => {
-        "documentation" => 1,
-        "helm_whatup" => 1,
-        "repositories" => 3,
-        "terraform_modules" => 0
+  let(:data) {
+    {
+      "updated_at" => "2020-07-20 09:27:44",
+      "data" => {
+        "action_items" => {
+          "documentation" => 1,
+          "helm_whatup" => 1,
+          "repositories" => 3,
+          "terraform_modules" => 0,
+        },
+        "action_required" => action_required,
       },
-      "action_required" => action_required
     }
-  } }
+  }
 
-  let(:formatted_message) { %(
-Action items:
+  let(:formatted_message) {
+    %(
+    Action items:
 ```
 documentation:     1
 helm_whatup:       1
 repositories:      3
 terraform_modules: 0
 ```
-                            ).strip }
+    ).strip
+  }
 
   let(:dashboard_url) { "" }
 
@@ -49,10 +53,10 @@ terraform_modules: 0
   end
 
   context "when data is incorrectly structured" do
-    let(:data) { { "foo" => "bar" } }
+    let(:data) { {"foo" => "bar"} }
 
     it "raises an error" do
-      expect{
+      expect {
         dr.slack_formatted_report
       }.to raise_error(KeyError)
     end

@@ -16,14 +16,14 @@ module HoodawUtils
   end
 
   def link_to_github_team(team_name)
-    if !team_name.nil? 
-      link_to(team_name.to_s,GITHUB_TEAM_URL+team_name.to_s)
+    unless team_name.nil?
+      link_to(team_name.to_s, GITHUB_TEAM_URL + team_name.to_s)
     end
   end
 
   def links_to_domain_names(domain_names)
-    domain_names.map { |domain_name| link_to(domain_name,"https://"+domain_name) }
-                .join("<br/> ")
+    domain_names.map { |domain_name| link_to(domain_name, "https://" + domain_name) }
+      .join("<br/> ")
   end
 
   def link_to_repo(repo, url)
@@ -32,9 +32,8 @@ module HoodawUtils
   end
 
   def link_to(text, href)
-    "<a href='#{href}'>#{text}</a>" 
+    "<a href='#{href}'>#{text}</a>"
   end
-
 end
 
 helpers HoodawUtils

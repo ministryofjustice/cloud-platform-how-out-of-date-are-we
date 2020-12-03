@@ -14,12 +14,11 @@ class Filestore
   end
 
   def retrieve_files(filenames)
-    filenames.inject({}) do |hash, filename|
+    filenames.each_with_object({}) do |filename, hash|
       hash[filename] = {
         "content" => retrieve_file(filename),
         "stored_at" => stored_at(filename),
       }
-      hash
     end
   end
 

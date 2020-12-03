@@ -4,11 +4,13 @@ describe GithubRepositories do
   let(:json) { data.to_json }
   let(:logger) { double(Sinatra::CommonLogger) }
 
-  let(:params) { {
-    file: "foo.json",
-    key: key,
-    logger: logger,
-  } }
+  let(:params) {
+    {
+      file: "foo.json",
+      key: key,
+      logger: logger,
+    }
+  }
 
   let(:key) { "repositories" }
   let(:data) {
@@ -18,12 +20,14 @@ describe GithubRepositories do
     }
   }
 
-  let(:pass_repos) { [
-    { "status" => "PASS", "foo" => "bar" },
-    { "status" => "PASS", "foo" => "baz" },
-  ] }
+  let(:pass_repos) {
+    [
+      {"status" => "PASS", "foo" => "bar"},
+      {"status" => "PASS", "foo" => "baz"},
+    ]
+  }
 
-  let(:fail_repos) { [ { "status" => "NOTPASS", "foo" => "xxx" } ] }
+  let(:fail_repos) { [{"status" => "NOTPASS", "foo" => "xxx"}] }
 
   let(:repositories) { pass_repos + fail_repos }
 

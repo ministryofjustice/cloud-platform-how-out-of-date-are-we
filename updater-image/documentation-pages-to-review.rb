@@ -14,7 +14,7 @@ end
 # Spider a URL looking for links to other pages.
 # Return a hash: { unique_page_url => needs_review? }
 def urls_and_review_statuses(url, root_url, seen = {})
-  return if seen.has_key?(url)
+  return if seen.key?(url)
 
   doc = get_nokogiri_doc(url)
   seen[url] = needs_review?(doc)
@@ -35,7 +35,7 @@ def needs_review?(doc)
 end
 
 def get_links(doc)
-  doc.css('a')
+  doc.css("a")
     .map { |link| link.attributes.dig("href").value }
     .map { |href| normalise_href(href) }.compact
     .uniq
@@ -61,13 +61,13 @@ end
 # Return a normalised href value, or nil if we don't like this href
 def normalise_href(href)
   # ignore links which are external, or to in-page anchors
-  return nil if href[0] == "#" || ["/", "http", "mail", "/ima"].include?(href[0,4])
+  return nil if href[0] == "#" || ["/", "http", "mail", "/ima"].include?(href[0, 4])
 
   # Remove any trailing anchors, or "/"
   target = href.sub(/\#.*/, "").sub(/\/$/, "")
 
   # Ignore links which don't point to html files
-  target =~ /html$/ ? target : nil
+  /html$/.match?(target) ? target : nil
 end
 
 ############################################################
@@ -82,5 +82,5 @@ pages = sites.map { |url| page_urls_overdue_for_review(url) }.flatten
 
 puts({
   pages: pages,
-  updated_at: Time.now
+  updated_at: Time.now,
 }.to_json)

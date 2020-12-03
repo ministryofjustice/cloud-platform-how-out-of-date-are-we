@@ -4,11 +4,13 @@ describe OrphanedResources do
   let(:json) { data.to_json }
   let(:logger) { double(Sinatra::CommonLogger) }
 
-  let(:params) { {
-    file: "foo.json",
-    key: key,
-    logger: logger,
-  } }
+  let(:params) {
+    {
+      file: "foo.json",
+      key: key,
+      logger: logger,
+    }
+  }
 
   let(:key) { "orphaned_aws_resources" }
 
@@ -16,15 +18,15 @@ describe OrphanedResources do
     {
       "orphaned_aws_resources" => {
         "hosted_zones" => [
-          {"id" => "z1", "cluster" => "" },
-          {"id" => "z2", "cluster" => "" },
-          {"id" => "z3", "cluster" => "" },
+          {"id" => "z1", "cluster" => ""},
+          {"id" => "z2", "cluster" => ""},
+          {"id" => "z3", "cluster" => ""},
         ],
         "vpcs" => [
-          {"id" => "v1", "cluster" => "test-1" },
-          {"id" => "v2", "cluster" => "test-2" },
-        ]
-      }
+          {"id" => "v1", "cluster" => "test-1"},
+          {"id" => "v2", "cluster" => "test-2"},
+        ],
+      },
     }
   }
 

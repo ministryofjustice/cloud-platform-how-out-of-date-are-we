@@ -7,7 +7,6 @@ require "spec_helper"
 
 HELM_RELEASE_DATA_FILE = "data/helm_whatup.json"
 
-
 def expect_json_ok(url)
   response = fetch_url(url, "application/json")
   expect(response.code).to eq("200")
@@ -27,17 +26,20 @@ describe "local dev server" do
   let(:namespace_usage_url) { [base_url, "namespace_usage"].join("/") }
   let(:namespace_usage_cpu_url) { [base_url, "namespace_usage_cpu"].join("/") }
 
-  let(:urls) { [
-    dashboard_url,
-    helm_whatup_url,
-    terraform_modules_url,
-    documentation_url,
-    repositories_url,
-    orphaned_resources_url,
-    hosted_services_url,
-  ] }
+  let(:urls) {
+    [
+      dashboard_url,
+      helm_whatup_url,
+      terraform_modules_url,
+      documentation_url,
+      repositories_url,
+      orphaned_resources_url,
+      hosted_services_url,
+    ]
+  }
 
-  let(:pages) { [
+  let(:pages) {
+    [
       "helm_whatup",
       "terraform_modules",
       "documentation",
@@ -48,7 +50,8 @@ describe "local dev server" do
       "namespace_usage_cpu",
       "namespace_usage_memory",
       "namespace_usage_pods",
-  ]}
+    ]
+  }
 
   it "redirects / to /dashboard" do
     response = fetch_url(base_url)
@@ -103,9 +106,9 @@ describe "local dev server" do
         json = {
           clusters: [
             name: "live-1",
-            apps: []
+            apps: [],
           ],
-          updated_at: Time.now
+          updated_at: Time.now,
         }.to_json
         response = post_to_url(helm_whatup_url, json, api_key)
         expect(response.code).to eq("200")
