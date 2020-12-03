@@ -110,62 +110,19 @@ def namespace_costs
 end
 
 def namespaces_data(order_by)
-  namespaces = all_namespaces_usage_data
-
-  values = namespaces["data"]
-    .map { |n| namespace_values(n, order_by) }
-    .sort_by { |i| i[1] }
-    .reverse
+  nu = namespace_usage_from_json
 
   {
-    values: values,
-    updated_at: DateTime.parse(namespaces["updated_at"]),
+    values: nu.values(order_by),
+    updated_at: nu.updated_at,
     type: order_by,
-    total_requested: total_requested_by_all_namespaces(namespaces, order_by), # order_by is cpu|memory
+    total_requested: nu.total_requested(order_by), # order_by is cpu|memory
   }
 end
 
-def namespaces_pods_data
-  namespaces = all_namespaces_usage_data
-
-  values = namespaces["data"]
-    .map { |n| namespace_pods_values(n) }
-    .sort_by { |i| i[1] }
-    .reverse
-
-  total_pods = namespaces["data"].sum { |n| n.dig("resources_used", "pods") }
-
-  {
-    values: values,
-    updated_at: DateTime.parse(namespaces["updated_at"]),
-    type: "pods",
-    total_requested: total_pods,
-  }
-end
-
-def all_namespaces_usage_data
+def namespace_usage_from_json
   json = store.retrieve_file("data/namespace_usage.json")
-  JSON.parse(json)
-end
-
-def namespace_pods_values(namespace)
-  [
-    namespace.fetch("name").to_s,
-    namespace.dig("hard_limit", "pods").to_i,
-    namespace.dig("resources_used", "pods").to_i,
-  ]
-end
-
-def namespace_values(namespace, order_by)
-  [
-    namespace.fetch("name").to_s,
-    namespace.dig("resources_requested", order_by).to_i,
-    namespace.dig("resources_used", order_by).to_i,
-  ]
-end
-
-def total_requested_by_all_namespaces(namespaces, property)
-  namespaces["data"].map { |ns| ns.dig("resources_requested", property) }.map(&:to_i).sum
+  NamespaceUsage.new(json: json)
 end
 
 ############################################################
@@ -267,44 +224,41 @@ get "/namespace_usage" do
 end
 
 get "/namespace_usage_cpu" do
-  column_titles = [ "Namespaces", "Total pod requests (millicores)", "CPU used (millicores)" ]
-
   locals = namespaces_data("cpu").merge(
-    column_titles: column_titles,
+    column_titles: [ "Namespaces", "Total pod requests (millicores)", "CPU used (millicores)" ],
     title: "Namespaces by CPU (requested vs. used)",
   )
-
   erb :namespaces_chart, locals: locals, layout: :namespace_usage_layout
 end
 
 get "/namespace_usage_memory" do
-  column_titles = [ "Namespaces", "Total pods requests (mebibytes)", "Memory used (mebibytes)" ]
-
   locals = namespaces_data("memory").merge(
-    column_titles: column_titles,
+    column_titles: [ "Namespaces", "Total pods requests (mebibytes)", "Memory used (mebibytes)" ],
     title: "Namespaces by Memory (requested vs. used)",
   )
-
   erb :namespaces_chart, locals: locals, layout: :namespace_usage_layout
 end
 
 get "/namespace_usage_pods" do
-  column_titles = [ "Namespaces", "Pods limit", "Pods running" ]
+  nu = namespace_usage_from_json
 
-  locals = namespaces_pods_data.merge(
-    column_titles: column_titles,
+  locals = {
+    column_titles: [ "Namespaces", "Pods limit", "Pods running" ],
     title: "Namespaces by pods (limit vs. running)",
-  )
-
+    values: nu.pods_values,
+    updated_at: nu.updated_at,
+    type: "pods",
+    total_requested: nu.total_pods,
+  }
   erb :namespaces_chart, locals: locals, layout: :namespace_usage_layout
 end
 
 get "/namespace_usage/:namespace" do
-  namespaces = all_namespaces_usage_data
-  namespace = namespaces["data"].find { |n| n["name"] == params[:namespace] }
+  nu = namespace_usage_from_json
+
   erb :namespace_usage, locals: {
-    data: namespace,
-    updated_at: DateTime.parse(namespaces["updated_at"])
+    data: nu.namespace(params[:namespace]),
+    updated_at: nu.updated_at
   }
 end
 
