@@ -110,8 +110,7 @@ def namespace_costs
 end
 
 def namespaces_data(order_by)
-  json = store.retrieve_file("data/namespace_usage.json")
-  namespaces = JSON.parse(json)
+  namespaces = all_namespaces_usage_data
 
   values = namespaces["data"]
     .map { |n| namespace_values(n, order_by) }
@@ -127,8 +126,7 @@ def namespaces_data(order_by)
 end
 
 def namespaces_pods_data
-  json = store.retrieve_file("data/namespace_usage.json")
-  namespaces = JSON.parse(json)
+  namespaces = all_namespaces_usage_data
 
   values = namespaces["data"]
     .map { |n| namespace_pods_values(n) }
@@ -143,6 +141,11 @@ def namespaces_pods_data
     type: "pods",
     total_requested: total_pods,
   }
+end
+
+def all_namespaces_usage_data
+  json = store.retrieve_file("data/namespace_usage.json")
+  JSON.parse(json)
 end
 
 def namespace_pods_values(namespace)
