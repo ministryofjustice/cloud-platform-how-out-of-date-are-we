@@ -24,6 +24,8 @@ describe "local dev server" do
   let(:repositories_url) { [base_url, "repositories"].join("/") }
   let(:orphaned_resources_url) { [base_url, "orphaned_resources"].join("/") }
   let(:hosted_services_url) { [base_url, "hosted_services"].join("/") }
+  let(:namespace_usage_url) { [base_url, "namespace_usage"].join("/") }
+  let(:namespace_usage_cpu_url) { [base_url, "namespace_usage_cpu"].join("/") }
 
   let(:urls) { [
     dashboard_url,
@@ -43,6 +45,9 @@ describe "local dev server" do
       "orphaned_resources",
       "hosted_services",
       "dashboard",
+      "namespace_usage_cpu",
+      "namespace_usage_memory",
+      "namespace_usage_pods",
   ]}
 
   it "redirects / to /dashboard" do
@@ -51,13 +56,19 @@ describe "local dev server" do
     expect(response["location"]).to eq(dashboard_url)
   end
 
+  it "redirects /namespace_usage to /namespace_usage_cpu" do
+    response = fetch_url(namespace_usage_url)
+    expect(response.code).to eq("302")
+    expect(response["location"]).to eq(namespace_usage_cpu_url)
+  end
+
   it "serves pages" do
     urls.each do |url|
       response = fetch_url(url)
       expect(response.code).to eq("200")
     end
   end
-  
+
   it "serves json" do
     pages.each do |page|
       url = [base_url, page].join("/")
