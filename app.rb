@@ -299,6 +299,15 @@ get "/namespace_usage_pods" do
   erb :namespaces_chart, locals: locals, layout: :namespace_usage_layout
 end
 
+get "/namespace_usage/:namespace" do
+  namespaces = all_namespaces_usage_data
+  namespace = namespaces["data"].find { |n| n["name"] == params[:namespace] }
+  erb :namespace_usage, locals: {
+    data: namespace,
+    updated_at: DateTime.parse(namespaces["updated_at"])
+  }
+end
+
 post "/:docpath" do
   update_json_data(store, params.fetch("docpath"), request)
 end
