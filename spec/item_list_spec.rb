@@ -4,11 +4,13 @@ describe ItemList do
   let(:json) { data.to_json }
   let(:logger) { double(Sinatra::CommonLogger) }
 
-  let(:params) { {
-    file: "foo.json",
-    key: key,
-    logger: logger,
-  } }
+  let(:params) {
+    {
+      file: "foo.json",
+      key: key,
+      logger: logger,
+    }
+  }
 
   let(:key) { "mylist" }
   let(:mylist) { ["foo", "bar", "baz"] }

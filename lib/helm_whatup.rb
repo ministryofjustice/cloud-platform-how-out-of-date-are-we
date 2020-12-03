@@ -1,5 +1,4 @@
 class HelmWhatup < ItemList
-
   DANGER = "danger"
   WARNING = "warning"
   SUCCESS = "success"
@@ -21,10 +20,8 @@ class HelmWhatup < ItemList
   def read_data
     data = super
 
-    unless data.nil?
-      data.fetch("clusters").each do |cluster|
-        cluster.fetch("apps").map { |app| app["traffic_light"] = version_lag_traffic_light(app) }
-      end
+    data&.fetch("clusters")&.each do |cluster|
+      cluster.fetch("apps").map { |app| app["traffic_light"] = version_lag_traffic_light(app) }
     end
 
     data

@@ -1,5 +1,4 @@
 class GithubRepositories < ItemList
-
   private
 
   def read_data

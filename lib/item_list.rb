@@ -29,15 +29,15 @@ class ItemList
   def read_data
     data = nil
 
-    unless store.exists?(@json_file)
-      logger.info "No such file #{@json_file}"
-    else
+    if store.exists?(@json_file)
       begin
         json = store.retrieve_file @json_file
         data = json.nil? ? {} : JSON.parse(json)
       rescue JSON::ParserError
         logger.info "Malformed JSON file: #{@json_file}"
       end
+    else
+      logger.info "No such file #{@json_file}"
     end
 
     data

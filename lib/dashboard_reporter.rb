@@ -15,11 +15,11 @@ class DashboardReporter
     item_keys = items.keys.sort
     max_key_length = item_keys.map(&:length).max
 
-    action_items = item_keys.map do |key|
+    action_items = item_keys.map { |key|
       value = items[key]
       label = "#{key}:".ljust(max_key_length + 1)
       [label, value].join(" ")
-    end
+    }
 
     %(
 Action items:

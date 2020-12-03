@@ -4,42 +4,50 @@ describe HelmWhatup do
   let(:json) { data.to_json }
   let(:logger) { double(Sinatra::CommonLogger) }
 
-  let(:params) { {
-    file: "foo.json",
-    key: key,
-    logger: logger,
-  } }
+  let(:params) {
+    {
+      file: "foo.json",
+      key: key,
+      logger: logger,
+    }
+  }
 
   let(:key) { "clusters" }
 
-  let(:red) { {
-    "name" => "red",
-    "installed_version" => "1.2.3",
-    "latest_version" => "5.0.0",
-  } }
+  let(:red) {
+    {
+      "name" => "red",
+      "installed_version" => "1.2.3",
+      "latest_version" => "5.0.0",
+    }
+  }
 
-  let(:yellow) { {
-    "name" => "yellow",
-    "installed_version" => "1.2.3",
-    "latest_version" => "1.3.0",
-  } }
+  let(:yellow) {
+    {
+      "name" => "yellow",
+      "installed_version" => "1.2.3",
+      "latest_version" => "1.3.0",
+    }
+  }
 
-  let(:green) { {
-    "name" => "green",
-    "installed_version" => "1.2.3",
-    "latest_version" => "1.2.4",
-  } }
+  let(:green) {
+    {
+      "name" => "green",
+      "installed_version" => "1.2.3",
+      "latest_version" => "1.2.4",
+    }
+  }
 
   let(:data) {
     {
       clusters: [
         {
           name: "manager",
-          apps: [ red, yellow ],
+          apps: [red, yellow],
         },
         {
           name: "live-1",
-          apps: [ green ],
+          apps: [green],
         },
       ],
       updated_at: "2020-07-14 12:34:56",
@@ -59,7 +67,7 @@ describe HelmWhatup do
   end
 
   it "returns red apps" do
-    expected = [ red.merge("traffic_light" => "danger") ]
+    expected = [red.merge("traffic_light" => "danger")]
     expect(helm_whatup.out_of_date_apps).to eq(expected)
   end
 end

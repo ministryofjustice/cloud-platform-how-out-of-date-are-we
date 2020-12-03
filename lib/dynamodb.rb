@@ -19,13 +19,13 @@ class Dynamodb
   def list_files
     db.scan(
       table_name: table,
-      expression_attribute_names: { "#F" => "filename" },
+      expression_attribute_names: {"#F" => "filename"},
       projection_expression: "#F",
     ).items.map { |i| i["filename"] }.sort
   end
 
   def store_file(file, content)
-    db.put_item(table_name: table, item: { filename: file, content: content, stored_at: Time.now.to_s})
+    db.put_item(table_name: table, item: {filename: file, content: content, stored_at: Time.now.to_s})
   end
 
   def retrieve_file(file)
@@ -56,17 +56,16 @@ class Dynamodb
     result = db.batch_get_item(
       request_items: {
         table => {
-          keys: keys.map {|k| {"filename" => k}}
-        }
+          keys: keys.map { |k| {"filename" => k} },
+        },
       }
     )
 
     items = result.responses[table]
 
-    items.inject({}) do |hash, item|
+    items.each_with_object({}) do |item, hash|
       filename = item.delete("filename")
       hash[filename] = item
-      hash
     end
 
     # keys.inject({}) { |hash, key| hash[key] = retrieve_file(key); hash }
@@ -74,7 +73,7 @@ class Dynamodb
 
   def get_item(key)
     db.get_item(
-      key: { filename: key },
+      key: {filename: key},
       table_name: table,
     ).item
   end

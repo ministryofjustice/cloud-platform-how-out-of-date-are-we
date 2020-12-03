@@ -4,11 +4,13 @@ describe "hosted_services" do
   let(:json) { data.to_json }
   let(:logger) { double(Sinatra::CommonLogger) }
 
-  let(:params) { {
-    file: "foo.json",
-    key: key,
-    logger: logger,
-  } }
+  let(:params) {
+    {
+      file: "foo.json",
+      key: key,
+      logger: logger,
+    }
+  }
 
   let(:key) { "namespace_details" }
   let(:data) {
@@ -18,28 +20,29 @@ describe "hosted_services" do
     }
   }
 
-  let(:namespace_details) { [
-        {
-          "namespace" => "mynamespace1", 
-          "application" => "MyApplication1",
-          "business_unit" => "BusinessUnit1",
-          "team_name" => "team1",
-          "team_slack_channel" => "slack-channel-team1",
-          "github_url" => "https://www.example1.com",
-          "deployment_type" => "prod1",
-          "domain_names" => ["www.domain1.com"],
-        },
-        {
-          "namespace" => "mynamespace2", 
-          "application" => "MyApplication2",
-          "business_unit" => "BusinessUnit2",
-          "team_name" => "team2",
-          "team_slack_channel" => "slack-channel-team2",
-          "github_url" => "https://www.example2.com",
-          "deployment_type" => "prod2",
-          "domain_names" => ["www.domain2.com"],
-        }
-      ]
+  let(:namespace_details) {
+    [
+      {
+        "namespace" => "mynamespace1",
+        "application" => "MyApplication1",
+        "business_unit" => "BusinessUnit1",
+        "team_name" => "team1",
+        "team_slack_channel" => "slack-channel-team1",
+        "github_url" => "https://www.example1.com",
+        "deployment_type" => "prod1",
+        "domain_names" => ["www.domain1.com"],
+      },
+      {
+        "namespace" => "mynamespace2",
+        "application" => "MyApplication2",
+        "business_unit" => "BusinessUnit2",
+        "team_name" => "team2",
+        "team_slack_channel" => "slack-channel-team2",
+        "github_url" => "https://www.example2.com",
+        "deployment_type" => "prod2",
+        "domain_names" => ["www.domain2.com"],
+      },
+    ]
   }
 
   subject(:hosted_services) { ItemList.new(params) }

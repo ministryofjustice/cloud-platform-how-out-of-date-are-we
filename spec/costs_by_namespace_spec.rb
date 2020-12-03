@@ -3,23 +3,25 @@ require "spec_helper"
 describe CostsByNamespace do
   let(:updated_at) { "2020-10-02 16:24:25" }
 
-  let(:data) { {
-    "namespace" => {
-      "SHARED" => {
-        "breakdown" => {},
-        "total" => 33.33
+  let(:data) {
+    {
+      "namespace" => {
+        "SHARED" => {
+          "breakdown" => {},
+          "total" => 33.33,
+        },
+        "aaa" => {
+          "breakdown" => {},
+          "total" => 11.11,
+        },
+        "bbb" => {
+          "breakdown" => {},
+          "total" => 22.22,
+        },
       },
-      "aaa" => {
-        "breakdown" => {},
-        "total" => 11.11
-      },
-      "bbb" => {
-        "breakdown" => {},
-        "total" => 22.22
-      },
-    },
-    "updated_at" => updated_at
-  } }
+      "updated_at" => updated_at,
+    }
+  }
 
   let(:json) { data.to_json }
 

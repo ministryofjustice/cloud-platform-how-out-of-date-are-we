@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+    <title>How out of date are we?</title>
+    <style>
+      svg a.namespace-name > text {
+        fill: #0073aa;
+        text-decoration: underline;
+      }
+
+      svg a.namespace-name:hover > text {
+        fill: #0096dd;
+      }
+
+      .last_updated {
+        margin-top: 20px;
+      }
+
+    </style>
+    <!--Load the AJAX API-->
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+
+    <script type="text/javascript">
+
+      // Load the Visualization API and the corechart package.
+      google.charts.load('current', {'packages':['corechart', 'bar']});
+
+      // Set a callback to run when the Google Visualization API is loaded.
+      google.charts.setOnLoadCallback(drawChart);
+
+      // Callback that creates and populates a data table,
+      // instantiates the pie chart, passes in the data and
+      // draws it.
+      function drawChart() {
+
+        // Create the data table.
+        var data = new google.visualization.DataTable();
+        data.addColumn('string', '<%= column_titles[0] %>');
+        <% column_titles[1..].each do |title| %>
+          data.addColumn('number', '<%= title %>');
+        <% end %>
+        data.addRows(<%= values %>);
+
+        // Set chart options
+        var options = {
+          'title':'<%= title %>',
+          'width':1500,
+          'height':<%= values.count * 50 %>,
+          'chartArea': { 'top': 50 },
+          'colors': ['blue', 'orange', 'red']
+        };
+
+        // Instantiate and draw our chart, passing in some options.
+        var chart = new google.visualization.BarChart(document.getElementById('chart_div'));
+        chart.draw(data, options);
+        addLink(data, 'chart_div');
+      }
+
+      /*
+        Link adding code taken from
+        https://stackoverflow.com/questions/12701772/insert-links-into-google-charts-api-data#14728567
+      */
+
+      /* find the value in array */
+      function inArray(val, arr) {
+        var i, n = arr.length;
+        val = val.replace('…', ''); // remove ellipsis
+
+        for (i = 0; i < n; ++i) {
+          if (i in arr && 0 === arr[i].label.indexOf(val)) {
+            return i;
+          }
+        }
+
+        return -1;
+      }
+
+      /* add a link to each label */
+      function addLink(data, id) {
+        var n, p, info = [],
+          ns = 'http://www.w3.org/1999/xlink';
+
+        // make an array for label and link.
+        info = [];
+        n = data.getNumberOfRows();
+        for (i = 0; i < n; ++i) {
+          namespace = data.getValue(i, 0);
+          info.push({
+            label: namespace,
+            link: 'namespace/' + namespace,
+          });
+        }
+
+        $('#' + id).find('text').each(function(i, elm) {
+          p = elm.parentNode;
+          if ('g' === p.tagName.toLowerCase()) {
+            i = inArray(elm.textContent, info);
+            if (-1 !== i) {
+              /* wrap text tag with anchor tag */
+              n = document.createElementNS('http://www.w3.org/2000/svg', 'a');
+              n.setAttributeNS(ns, 'xlink:href', info[i].link);
+              n.setAttributeNS(ns, 'title', info[i].label);
+              n.setAttribute('class', 'namespace-name');
+              n.appendChild(p.removeChild(elm));
+              p.appendChild(n);
+              info.splice(i, 1); // for speeding up
+            }
+          }
+        });
+      }
+
+    </script>
+  </head>
+  <body>
+    <%= erb :_nav %>
+    <main role="main">
+      <section class="jumbotron text-center">
+        <div class="container">
+          <h1>How out of date are we?</h1>
+          <p class="lead text-muted">Updated: <%= updated_at %> UTC</p>
+        </div>
+      </section>
+
+      <div class="album py-5 bg-light">
+        <div class="container">
+          <%= yield %>
+        </div>
+      </div>
+
+    </main>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+  </body>
+</html>
