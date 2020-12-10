@@ -3,6 +3,10 @@
 <p>
 Data from the <a href="https://github.com/ministryofjustice/cloud-platform-report-orphaned-resources">Orphaned AWS Reporter</a>
 </p>
+<p>
+  This report is susceptible to changes in the structure of our terraform code, which can cause false-posititives.
+  Please be cautious about deleting resources listed here.
+</p>
 
 <% if list.is_a?(Hash) %>
   <% list.keys.sort.each do |resource_type| %>
