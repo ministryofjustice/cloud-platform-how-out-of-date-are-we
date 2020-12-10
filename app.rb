@@ -46,6 +46,7 @@ def dashboard_data
     repositories: get_data_from_json_file("repositories", "repositories", GithubRepositories),
     terraform_modules: get_data_from_json_file("terraform_modules", "out_of_date_modules", ItemList),
     orphaned_resources: get_data_from_json_file("orphaned_resources", "orphaned_aws_resources", OrphanedResources),
+    orphaned_statefiles: get_data_from_json_file("orphaned_statefiles", "data", ItemList),
     hosted_services: get_data_from_json_file("hosted_services", "namespace_details", ItemList),
   }
 
@@ -61,6 +62,7 @@ def dashboard_data
         repositories: info[:repositories].todo_count,
         terraform_modules: info[:terraform_modules].todo_count,
         orphaned_resources: info[:orphaned_resources].todo_count,
+        orphaned_statefiles: info[:orphaned_statefiles].todo_count,
       },
       action_required: (todo_count > 0),
     },
@@ -176,6 +178,14 @@ get "/orphaned_resources" do
     serve_json_data(:orphaned_resources)
   else
     render_item_list("orphaned_resources", "orphaned_aws_resources", OrphanedResources)
+  end
+end
+
+get "/orphaned_statefiles" do
+  if accept_json?(request)
+    serve_json_data(:orphaned_statefiles)
+  else
+    render_item_list("orphaned_statefiles", "data", ItemList)
   end
 end
 
