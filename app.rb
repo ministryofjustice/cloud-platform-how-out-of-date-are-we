@@ -179,6 +179,14 @@ get "/orphaned_resources" do
   end
 end
 
+get "/orphaned_statefiles" do
+  if accept_json?(request)
+    serve_json_data(:orphaned_statefiles)
+  else
+    render_item_list("orphaned_statefiles", "data", ItemList)
+  end
+end
+
 get "/hosted_services" do
   if accept_json?(request)
     serve_json_data(:hosted_services)
