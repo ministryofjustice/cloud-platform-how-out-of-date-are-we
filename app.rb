@@ -106,6 +106,15 @@ def store
   ENV.key?("DYNAMODB_TABLE_NAME") ? Dynamodb.new : Filestore.new
 end
 
+def costs_for_namespace(namespace)
+  costs = namespace_costs
+  data = costs.list.find { |ns| ns["name"] == namespace } || {}
+  data.merge(
+    "updated_at" => costs.updated_at,
+    "resource_costs" => data["breakdown"].to_a.sort_by { |a| a[1] }.reverse
+  )
+end
+
 def namespace_costs
   json = store.retrieve_file datafile("costs_by_namespace")
   CostsByNamespace.new(json: json)
@@ -122,9 +131,20 @@ def namespaces_data(order_by)
   }
 end
 
+def usage_for_namespace(namespace)
+  nu = namespace_usage_from_json
+  nu.namespace(namespace).merge(updated_at: nu.updated_at)
+end
+
 def namespace_usage_from_json
   json = store.retrieve_file("data/namespace_usage.json")
   NamespaceUsage.new(json: json)
+end
+
+def hosted_services_for_namespace(namespace)
+  data = JSON.parse File.read(datafile("hosted_services"))
+  ns = data["namespace_details"].find {|h| h["namespace"] == namespace}
+  ns.merge("updated_at" => DateTime.parse(data["updated_at"]))
 end
 
 ############################################################
@@ -208,26 +228,6 @@ get "/costs_by_namespace" do
   erb :costs_by_namespace, locals: locals
 end
 
-get "/namespace_cost/:namespace" do
-  costs = namespace_costs
-  namespace_cost = costs.list.find { |ns| ns["name"] == params["namespace"] }
-
-  if accept_json?(request)
-    namespace_cost.to_json
-  else
-    # Sort costs in reverse value order
-    resource_costs = namespace_cost["breakdown"].to_a.sort_by { |a| a[1] }.reverse
-
-    locals = {
-      namespace: namespace_cost["name"],
-      total: namespace_cost["total"],
-      resource_costs: resource_costs,
-      updated_at: costs.updated_at,
-    }
-    erb :namespace_cost, locals: locals
-  end
-end
-
 get "/namespace_usage" do
   redirect "/namespace_usage_cpu"
 end
@@ -262,12 +262,16 @@ get "/namespace_usage_pods" do
   erb :namespaces_chart, locals: locals, layout: :namespace_usage_layout
 end
 
-get "/namespace_usage/:namespace" do
-  nu = namespace_usage_from_json
+get "/namespace/:namespace" do
+  namespace = params["namespace"]
+  details = hosted_services_for_namespace(namespace)
 
-  erb :namespace_usage, locals: {
-    data: nu.namespace(params[:namespace]),
-    updated_at: nu.updated_at,
+  erb :namespace, layout: :namespace_layout, locals: {
+    namespace: namespace,
+    details: details,
+    namespace_costs: costs_for_namespace(namespace),
+    usage: usage_for_namespace(namespace),
+    updated_at: details["updated_at"],
   }
 end
 

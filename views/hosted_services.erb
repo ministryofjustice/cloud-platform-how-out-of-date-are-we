@@ -16,13 +16,16 @@
   </thead>
   <tbody>
   <% list.each do |service| %>
+    <% namespace = service["namespace"] %>
     <tr>
-      <th scope="row"><%= service["namespace"] %></th>
+      <th scope="row">
+        <%= link_to namespace, "/namespace/#{namespace}" %>
+      </th>
       <td><%= service["application"] %></td>
       <td><%= service["business_unit"] %></td>
       <td><%= link_to_github_team service["team_name"] %></td>
       <td><%= service["team_slack_channel"] %></td>
-      <td><%= link_to_repo service["github_url"], service["github_url"] %></td>
+      <td><%= link_to_repo service["github_url"] %></td>
       <td><%= links_to_domain_names service["domain_names"] %></td>
     </tr>
     <% end %>

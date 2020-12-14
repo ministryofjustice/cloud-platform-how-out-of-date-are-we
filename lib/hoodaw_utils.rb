@@ -10,6 +10,8 @@ module HoodawUtils
   end
 
   def commify(value)
+    return "" if value.nil?
+
     whole, decimal = decimals(value).split(".")
     with_commas = whole.gsub(/\B(?=(...)*\b)/, ",")
     [with_commas, decimal].join(".")
@@ -26,8 +28,8 @@ module HoodawUtils
       .join("<br/> ")
   end
 
-  def link_to_repo(repo, url)
-    name = repo.to_s.split("/").last
+  def link_to_repo(url)
+    name = url.to_s.split("/").last
     link_to(name, url)
   end
 
