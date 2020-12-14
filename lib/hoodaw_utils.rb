@@ -10,6 +10,8 @@ module HoodawUtils
   end
 
   def commify(value)
+    return "" if value.nil?
+
     whole, decimal = decimals(value).split(".")
     with_commas = whole.gsub(/\B(?=(...)*\b)/, ",")
     [with_commas, decimal].join(".")
