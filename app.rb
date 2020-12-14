@@ -277,15 +277,9 @@ get "/namespace_usage/:namespace" do
 end
 
 get "/namespace/:namespace" do
-  resource_costs = {
-    "Amazon Relational Database Service" => "6776.98",
-    "Shared CP Team Costs" => "723.40",
-    "Shared AWS Costs" => "197.79",
-    "AWS Key Management Service" => "0.97",
-    "Amazon Simple Queue Service" => "0.31",
-    "Amazon Route 53" => "0.01",
-    "Amazon Simple Storage Service" => "0.00",
-  }
+  namespace_cost = costs_for_namespace(params["namespace"])
+  # Sort costs in reverse value order
+  resource_costs = namespace_cost["breakdown"].to_a.sort_by { |a| a[1] }.reverse
 
   details = {
     application: "Backend API for the Civil Legal Aid applications",
@@ -314,7 +308,7 @@ get "/namespace/:namespace" do
     details: details,
     resource_costs: resource_costs,
     usage: usage,
-    total: 7699.47,
+    total: namespace_cost["total"],
   }
 end
 
