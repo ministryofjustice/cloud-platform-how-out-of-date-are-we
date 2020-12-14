@@ -17,11 +17,10 @@
   </thead>
   <tbody>
     <% costs.list.each do |data| %>
+      <% namespace = data["name"] %>
       <tr>
         <td>
-          <a href="/namespace_cost/<%= data["name"] %>">
-            <%= data["name"] %>
-          </a>
+          <%= link_to namespace, "/namespace/#{namespace}" %>
         </td>
         <td class="text-right"><%= commify data["total"] %></td>
       </tr>
