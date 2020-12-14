@@ -287,12 +287,13 @@ get "/namespace_usage/:namespace" do
 end
 
 get "/namespace/:namespace" do
+  namespace = params["namespace"]
 
   erb :namespace, layout: :namespace_layout, locals: {
-    namespace: params[:namespace],
-    details: hosted_services_for_namespace(params["namespace"]),
-    namespace_costs: costs_for_namespace(params["namespace"]),
-    usage: usage_for_namespace(params[:namespace]),
+    namespace: namespace,
+    details: hosted_services_for_namespace(namespace),
+    namespace_costs: costs_for_namespace(namespace),
+    usage: usage_for_namespace(namespace),
     updated_at: Time.now, # TODO fix this
   }
 end
