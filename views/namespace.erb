@@ -51,7 +51,7 @@
             </tr>
           </thead>
           <tbody>
-            <% resource_costs.each do |i| %>
+            <% namespace_costs["resource_costs"].each do |i| %>
               <tr>
                 <td><%= i[0] %></td>
                 <td class="text-right"><%= commify i[1] %></td>
@@ -61,7 +61,7 @@
           <tfoot>
             <tr>
               <th>Total</th>
-              <th class="text-right"><%= commify total %></th>
+              <th class="text-right"><%= commify namespace_costs["total"] %></th>
             </tr>
           </tfoot>
         </table>

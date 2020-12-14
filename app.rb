@@ -109,7 +109,10 @@ end
 def costs_for_namespace(namespace)
   costs = namespace_costs
   data = costs.list.find { |ns| ns["name"] == namespace }
-  data.merge("updated_at" => costs.updated_at)
+  data.merge(
+    "updated_at" => costs.updated_at,
+    "resource_costs" => data["breakdown"].to_a.sort_by { |a| a[1] }.reverse
+  )
 end
 
 def namespace_costs
@@ -230,13 +233,10 @@ get "/namespace_cost/:namespace" do
   if accept_json?(request)
     namespace_cost.to_json
   else
-    # Sort costs in reverse value order
-    resource_costs = namespace_cost["breakdown"].to_a.sort_by { |a| a[1] }.reverse
-
     locals = {
       namespace: namespace_cost["name"],
       total: namespace_cost["total"],
-      resource_costs: resource_costs,
+      resource_costs: namespace_cost["resource_costs"],
       updated_at: namespace_cost["updated_at"],
     }
     erb :namespace_cost, locals: locals
@@ -287,18 +287,13 @@ get "/namespace_usage/:namespace" do
 end
 
 get "/namespace/:namespace" do
-  namespace_cost = costs_for_namespace(params["namespace"])
-  # Sort costs in reverse value order
-  resource_costs = namespace_cost["breakdown"].to_a.sort_by { |a| a[1] }.reverse
-  # TODO DRY up
 
   erb :namespace, layout: :namespace_layout, locals: {
     namespace: params[:namespace],
-    updated_at: Time.now, # TODO fix this
     details: hosted_services_for_namespace(params["namespace"]),
-    resource_costs: resource_costs,
+    namespace_costs: costs_for_namespace(params["namespace"]),
     usage: usage_for_namespace(params[:namespace]),
-    total: namespace_cost["total"], # TODO tidy up
+    updated_at: Time.now, # TODO fix this
   }
 end
 
