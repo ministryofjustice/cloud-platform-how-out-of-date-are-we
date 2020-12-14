@@ -9,7 +9,6 @@ CONTENT_TYPE_JSON = "application/json"
 
 if development?
   require "sinatra/reloader"
-  require "pry-byebug"
 end
 
 def update_json_data(store, docpath, request)
