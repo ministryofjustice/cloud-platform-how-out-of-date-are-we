@@ -26,8 +26,8 @@ module HoodawUtils
       .join("<br/> ")
   end
 
-  def link_to_repo(repo, url)
-    name = repo.to_s.split("/").last
+  def link_to_repo(url)
+    name = url.to_s.split("/").last
     link_to(name, url)
   end
 
