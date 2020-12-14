@@ -138,6 +138,11 @@ def namespace_usage_from_json
   NamespaceUsage.new(json: json)
 end
 
+def hosted_services_for_namespace(namespace)
+  data = JSON.parse File.read(datafile("hosted_services"))
+  data["namespace_details"].find {|h| h["namespace"] == namespace}
+end
+
 ############################################################
 
 get "/" do
@@ -285,23 +290,15 @@ get "/namespace/:namespace" do
   namespace_cost = costs_for_namespace(params["namespace"])
   # Sort costs in reverse value order
   resource_costs = namespace_cost["breakdown"].to_a.sort_by { |a| a[1] }.reverse
-
-  details = {
-    application: "Backend API for the Civil Legal Aid applications",
-    business_unit: "LAA",
-    team: "",
-    slack_channel: "cla-alerts",
-    repositories: ["https://github.com/ministryofjustice/cla_backend"],
-    domains: ["fox.civillegaladvice.service.gov.uk"],
-  }
+  # TODO DRY up
 
   erb :namespace, layout: :namespace_layout, locals: {
     namespace: params[:namespace],
-    updated_at: Time.now,
-    details: details,
+    updated_at: Time.now, # TODO fix this
+    details: hosted_services_for_namespace(params["namespace"]),
     resource_costs: resource_costs,
     usage: usage_for_namespace(params[:namespace]),
-    total: namespace_cost["total"],
+    total: namespace_cost["total"], # TODO tidy up
   }
 end
 

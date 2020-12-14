@@ -9,27 +9,27 @@
           <tbody>
             <tr>
               <th>Application</th>
-              <td><%= details[:application] %></td>
+              <td><%= details["application"] %></td>
             </tr>
             <tr>
               <th>Business Unit</th>
-              <td><%= details[:business_unit] %></td>
+              <td><%= details["business_unit"] %></td>
             </tr>
             <tr>
               <th>Team</th>
-              <td><%= details[:team] %></td>
+              <td><%= details["team"] %></td>
             </tr>
             <tr>
               <th>Slack channel</th>
-              <td><%= details[:slack_channel] %></td>
+              <td><%= details["slack_channel"] %></td>
             </tr>
             <tr>
               <th>Source code</th>
-              <td><%= details[:repositories].join("<br />") %></td>
+              <td><%= details["github_url"].gsub(",", "<br />") %></td>
             </tr>
             <tr>
               <th>Domain names</th>
-              <td><%= details[:domains].join("<br />") %></td>
+              <td><%= details["domain_names"].join("<br />") %></td>
             </tr>
           </tbody>
         </table>
