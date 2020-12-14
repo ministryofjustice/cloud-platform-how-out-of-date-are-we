@@ -262,15 +262,6 @@ get "/namespace_usage_pods" do
   erb :namespaces_chart, locals: locals, layout: :namespace_usage_layout
 end
 
-get "/namespace_usage/:namespace" do
-  nu = usage_for_namespace(params[:namespace])
-
-  erb :namespace_usage, locals: {
-    data: nu,
-    updated_at: nu[:updated_at],
-  }
-end
-
 get "/namespace/:namespace" do
   namespace = params["namespace"]
   details = hosted_services_for_namespace(namespace)
