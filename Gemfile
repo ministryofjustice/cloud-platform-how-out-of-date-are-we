@@ -10,5 +10,4 @@ gem "aws-sdk-dynamodb"
 
 group :development do
   gem "rspec"
-  gem "pry-byebug"
 end
