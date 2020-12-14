@@ -228,22 +228,6 @@ get "/costs_by_namespace" do
   erb :costs_by_namespace, locals: locals
 end
 
-get "/namespace_cost/:namespace" do
-  namespace_cost = costs_for_namespace(params["namespace"])
-
-  if accept_json?(request)
-    namespace_cost.to_json
-  else
-    locals = {
-      namespace: namespace_cost["name"],
-      total: namespace_cost["total"],
-      resource_costs: namespace_cost["resource_costs"],
-      updated_at: namespace_cost["updated_at"],
-    }
-    erb :namespace_cost, locals: locals
-  end
-end
-
 get "/namespace_usage" do
   redirect "/namespace_usage_cpu"
 end
