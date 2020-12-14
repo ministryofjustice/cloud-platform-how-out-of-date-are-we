@@ -143,7 +143,8 @@ end
 
 def hosted_services_for_namespace(namespace)
   data = JSON.parse File.read(datafile("hosted_services"))
-  data["namespace_details"].find {|h| h["namespace"] == namespace}
+  ns = data["namespace_details"].find {|h| h["namespace"] == namespace}
+  ns.merge("updated_at" => DateTime.parse(data["updated_at"]))
 end
 
 ############################################################
@@ -288,13 +289,14 @@ end
 
 get "/namespace/:namespace" do
   namespace = params["namespace"]
+  details = hosted_services_for_namespace(namespace)
 
   erb :namespace, layout: :namespace_layout, locals: {
     namespace: namespace,
-    details: hosted_services_for_namespace(namespace),
+    details: details,
     namespace_costs: costs_for_namespace(namespace),
     usage: usage_for_namespace(namespace),
-    updated_at: Time.now, # TODO fix this
+    updated_at: details["updated_at"],
   }
 end
 
