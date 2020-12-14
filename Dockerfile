@@ -1,10 +1,9 @@
-FROM ruby:2.6-alpine
+FROM ruby:2.7-alpine
 
 RUN addgroup -g 1000 -S appgroup \
   && adduser -u 1000 -S appuser -G appgroup \
   && apk update \
-  && gem install bundler \
-  && bundle config set without 'development'
+  && gem install bundler
 
 WORKDIR /app
 
