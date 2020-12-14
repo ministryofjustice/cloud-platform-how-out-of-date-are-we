@@ -1,0 +1,111 @@
+<h1>
+  Namespace: <%= namespace %>
+</h1>
+
+<h2>Details</h2>
+<table class="table table-striped">
+  <tbody>
+  <tr>
+    <th>Application</th>
+    <td><%= details[:application] %></td>
+  </tr>
+  <tr>
+    <th>Business Unit</th>
+    <td><%= details[:business_unit] %></td>
+  </tr>
+  <tr>
+    <th>Team</th>
+    <td><%= details[:team] %></td>
+  </tr>
+  <tr>
+    <th>Slack channel</th>
+    <td><%= details[:slack_channel] %></td>
+  </tr>
+  <tr>
+    <th>Source code</th>
+    <td><%= details[:repositories].join("<br />") %></td>
+  </tr>
+  <tr>
+    <th>Domain names</th>
+    <td><%= details[:domains].join("<br />") %></td>
+  </tr>
+  </tbody>
+</table>
+
+<h2>Namespace Usage</h2>
+<h3>CPU (millicores)</h3>
+<table>
+  <thead>
+    <tr>
+      <th>&nbsp;</th>
+      <th>Requested</th>
+      <th>Used</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Pods</td>
+      <td><%= usage.dig(:resources_requested, :cpu).to_i %></td>
+      <td><%= usage.dig(:resources_used, :cpu).to_i %></td>
+    </tr>
+    <tr>
+      <td>Per container (avg)</td>
+      <td>&nbsp;</td>
+      <td><%= (usage.dig(:resources_used, :cpu).to_f / usage.fetch(:container_count).to_i).round(2) %></td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h3>Memory (mebibytes)</h3>
+<table>
+  <thead>
+    <tr>
+      <th>&nbsp;</th>
+      <th>Requested</th>
+      <th>Used</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Pods</td>
+      <td><%= usage.dig(:resources_requested, :memory).to_i %></td>
+      <td><%= usage.dig(:resources_used, :memory).to_i %></td>
+    </tr>
+    <tr>
+      <td>Per container (avg)</td>
+      <td>&nbsp;</td>
+      <td><%= (usage.dig(:resources_used, :memory).to_f / usage.fetch(:container_count).to_i).round(2) %></td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h4>Containers: <%= usage.fetch(:container_count).to_i %></h4>
+
+
+<h2>Costs</h2>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Resource</th>
+      <th>Monthly Cost ($)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% resource_costs.each do |i| %>
+      <tr>
+        <td><%= i[0] %></td>
+        <td class="text-right"><%= commify i[1] %></td>
+      </tr>
+    <% end %>
+  </tbody>
+  <tfoot>
+    <tr>
+      <th>Total</th>
+      <th class="text-right"><%= commify total %></th>
+    </tr>
+  </tfoot>
+</table>

@@ -271,6 +271,48 @@ get "/namespace_usage/:namespace" do
   }
 end
 
+get "/namespace/:namespace" do
+  resource_costs = {
+    "Amazon Relational Database Service" => "6776.98",
+    "Shared CP Team Costs" => "723.40",
+    "Shared AWS Costs" => "197.79",
+    "AWS Key Management Service" => "0.97",
+    "Amazon Simple Queue Service" => "0.31",
+    "Amazon Route 53" => "0.01",
+    "Amazon Simple Storage Service" => "0.00",
+  }
+
+  details = {
+    application: "Backend API for the Civil Legal Aid applications",
+    business_unit: "LAA",
+    team: "",
+    slack_channel: "cla-alerts",
+    repositories: ["https://github.com/ministryofjustice/cla_backend"],
+    domains: ["fox.civillegaladvice.service.gov.uk"],
+  }
+
+  usage = {
+    container_count: 6,
+    resources_requested: {
+      cpu: 60,
+      memory: 1200,
+    },
+    resources_used: {
+      cpu: 295,
+      memory: 1197,
+    }
+  }
+
+  erb :namespace, locals: {
+    namespace: params[:namespace],
+    updated_at: Time.now,
+    details: details,
+    resource_costs: resource_costs,
+    usage: usage,
+    total: 7699.47,
+  }
+end
+
 post "/:docpath" do
   update_json_data(store, params.fetch("docpath"), request)
 end
