@@ -108,7 +108,7 @@ end
 
 def costs_for_namespace(namespace)
   costs = namespace_costs
-  data = costs.list.find { |ns| ns["name"] == namespace }
+  data = costs.list.find { |ns| ns["name"] == namespace } || {}
   data.merge(
     "updated_at" => costs.updated_at,
     "resource_costs" => data["breakdown"].to_a.sort_by { |a| a[1] }.reverse
