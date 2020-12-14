@@ -16,8 +16,11 @@
   </thead>
   <tbody>
   <% list.each do |service| %>
+    <% namespace = service["namespace"] %>
     <tr>
-      <th scope="row"><%= service["namespace"] %></th>
+      <th scope="row">
+        <%= link_to namespace, "/namespace/#{namespace}" %>
+      </th>
       <td><%= service["application"] %></td>
       <td><%= service["business_unit"] %></td>
       <td><%= link_to_github_team service["team_name"] %></td>
