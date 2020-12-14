@@ -128,6 +128,11 @@ def namespaces_data(order_by)
   }
 end
 
+def usage_for_namespace(namespace)
+  nu = namespace_usage_from_json
+  nu.namespace(namespace).merge(updated_at: nu.updated_at)
+end
+
 def namespace_usage_from_json
   json = store.retrieve_file("data/namespace_usage.json")
   NamespaceUsage.new(json: json)
@@ -268,11 +273,11 @@ get "/namespace_usage_pods" do
 end
 
 get "/namespace_usage/:namespace" do
-  nu = namespace_usage_from_json
+  nu = usage_for_namespace(params[:namespace])
 
   erb :namespace_usage, locals: {
-    data: nu.namespace(params[:namespace]),
-    updated_at: nu.updated_at,
+    data: nu,
+    updated_at: nu[:updated_at],
   }
 end
 
@@ -290,24 +295,12 @@ get "/namespace/:namespace" do
     domains: ["fox.civillegaladvice.service.gov.uk"],
   }
 
-  usage = {
-    container_count: 6,
-    resources_requested: {
-      cpu: 60,
-      memory: 1200,
-    },
-    resources_used: {
-      cpu: 295,
-      memory: 1197,
-    }
-  }
-
   erb :namespace, layout: :namespace_layout, locals: {
     namespace: params[:namespace],
     updated_at: Time.now,
     details: details,
     resource_costs: resource_costs,
-    usage: usage,
+    usage: usage_for_namespace(params[:namespace]),
     total: namespace_cost["total"],
   }
 end
