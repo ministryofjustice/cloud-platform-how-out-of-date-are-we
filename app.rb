@@ -106,6 +106,12 @@ def store
   ENV.key?("DYNAMODB_TABLE_NAME") ? Dynamodb.new : Filestore.new
 end
 
+def costs_for_namespace(namespace)
+  costs = namespace_costs
+  data = costs.list.find { |ns| ns["name"] == namespace }
+  data.merge("updated_at" => costs.updated_at)
+end
+
 def namespace_costs
   json = store.retrieve_file datafile("costs_by_namespace")
   CostsByNamespace.new(json: json)
@@ -209,8 +215,7 @@ get "/costs_by_namespace" do
 end
 
 get "/namespace_cost/:namespace" do
-  costs = namespace_costs
-  namespace_cost = costs.list.find { |ns| ns["name"] == params["namespace"] }
+  namespace_cost = costs_for_namespace(params["namespace"])
 
   if accept_json?(request)
     namespace_cost.to_json
@@ -222,7 +227,7 @@ get "/namespace_cost/:namespace" do
       namespace: namespace_cost["name"],
       total: namespace_cost["total"],
       resource_costs: resource_costs,
-      updated_at: costs.updated_at,
+      updated_at: namespace_cost["updated_at"],
     }
     erb :namespace_cost, locals: locals
   end
