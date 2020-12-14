@@ -303,7 +303,7 @@ get "/namespace/:namespace" do
     }
   }
 
-  erb :namespace, locals: {
+  erb :namespace, layout: :namespace_layout, locals: {
     namespace: params[:namespace],
     updated_at: Time.now,
     details: details,
