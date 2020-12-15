@@ -1,26 +1,16 @@
-
 # How out of date are we?
 
 [![Releases](https://img.shields.io/github/release/ministryofjustice/cloud-platform-how-out-of-date-are-we/all.svg?style=flat-square)](https://github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/releases)
 
-Simple web app. to display various status information including:
+Web app. to display various reports about the Cloud Platform.
 
-* a traffic light view of how far our installed helm charts are behind the latest versions
-* documentation pages which are overdue for review
-* namespaces in the environments repository which use versions of our terraform modules which are not the latest
-* ministryofjustice/cloud-platform-\* github repositories whose settings do not match our requirements
-* "orphaned" AWS resources (which exist, but are not listed in any terraform state files)
-* cost per namespace (alpha)
-
-![Screenshot of the app](screenshot.png?raw=true "Example screenshot")
-
-The app. accepts posted JSON data from an updater image, defined in the [updater-image] directory, or from any other source provided the correct API key is supplied in the HTTP POST.
+See the [about page](views/about.erb) for more details.
 
 ## Data Storage
 
 The web application currently has two options for backend data storage:
 
-* Filestore: POSTed JSON data is stored/retrieved as files in the local filesystem, below the local `data` directory.
+* Filestore: POSTed JSON data is stored/retrieved as files in the local filesystem, below the `data` directory.
 * AWS DynamoDB: POSTed JSON data is stored/retrieved as documents in a DynamoDB table, where the key is the same filename that would be used if `Filestore` were the storage backend.
 
 The application will use `Filestore` unless a `DYNAMODB_TABLE_NAME` environment variable is configured.
@@ -63,29 +53,6 @@ e.g. The report on MoJ Github repositories might consist of:
 }
 ```
 
-### Helm releases
-
-To provision data to the app, make an HTTP post, like this:
-
-    curl -H "X-API-KEY: soopersekrit" -d "$(helm whatup -o json)" http://localhost:4567/helm_whatup
-
-JSON data should be the output of [Helm Whatup](https://github.com/bacongobbler/helm-whatup)
-
-### Terraform Modules
-
-To provision data to the app, make an HTTP post, like this:
-
-    curl -H "X-API-KEY: soopersekrit" -d "[JSON data]" http://localhost:4567/terraform_modules
-
-JSON data should be the output of the [terraform modules version checker script](updater-image/module-versions.rb)
-
-To run the script, you need a `GITHUB_TOKEN` environment variable, containing a
-GitHub personal access token which has had single sign-on (SSO) enabled for the
-ministryofjustice GitHub organisation. The token does not need any scopes
-enabled, since all our repos are public.
-
-Once data has been posted, visit the app at `http://localhost:4567`
-
 The app. will only accept posted JSON data when the HTTP POST supplies the correct API key.
 
 'correct' means the value of the 'X-API-KEY' header in the HTTP POST must match the value of the 'API_KEY' environment variable that was in scope when the app. was started.
@@ -94,42 +61,16 @@ If the supplied API key matches the expected value, the locally stored JSON data
 
 If the API key doesn't match, the app. will return a 403 error.
 
-### Documentation pages
-
-This uses the `updater-image/documentation-pages-to-review.rb` script in a similar way to the terraform_modules script.
-
-In addition to the API key, this script uses the value of the `DOCUMENTATION_SITES` environment variable to decide what sites to crawl, looking for documentation pages which are past their "review by" dates.
-
-### Repositories
-
-This uses: https://github.com/ministryofjustice/cloud-platform-repository-checker
-
-It requires a github personal access token with `public_repo` scope.
-
-### Orphaned AWS Resources
-
-See https://github.com/ministryofjustice/cloud-platform-report-orphaned-resources
-
-### Namespace Costs
-
-See https://github.com/ministryofjustice/cloud-platform-cost-calculator
-
 ### Developing
 
 See the `docker-compose.yml` file for details of how to run this app. and the updater script locally.
 
-If you're just working on the web application, another option is to run:
+If you have a working ruby 2.7 environment, you can run the application locally as follows:
 
 ```
 bundle install
-make fetch-live-json-datafiles
-make dev-server
+./app.rb
 ```
-
-This will launch a local instance of the web server, and populate the data
-directory with the latest JSON files from the live instance.
-
-NB: You will need a working ruby environment.
 
 ## Updating the docker images
 
@@ -140,8 +81,7 @@ images, and push them to docker hub tagged with the release name.
 
 [release]: https://github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/releases
 
-
 ---
-last_reviewed_on: 2020-09-16
+last_reviewed_on: 2020-12-15
 review_in: 3 months
 ---
