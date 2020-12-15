@@ -1,0 +1,116 @@
+<p>
+  This web application publishes a variety of reports about the
+  <a href="https://user-guide.cloud-platform.service.justice.gov.uk/documentation/concepts/about-the-cloud-platform.html#about-the-cloud-platform">Cloud Platform</a>
+  and the services running on it.
+</p>
+
+<p>
+  The data for the reports is provided by scheduled jobs which post JSON to this application.
+  These JSON documents are stored in DynamoDB and read when each page is requested.
+</p>
+
+<p>
+  The reports provided are:
+</p>
+
+<h4>
+  <a href="/helm_whatup">Helm Releases</a>
+</h4>
+<h6 class="text-muted">
+  <a href="https://github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/tree/main/updater-image">Data provider</a>
+</h6>
+<p>
+  Uses
+  <a href="https://github.com/bacongobbler/helm-whatup">Helm Whatup</a>
+  to scan the helm charts installed on the "live-1" and "manager" kubernetes clusters,
+  and report any whose versions are too far behind the latest.
+</p>
+
+<h4>
+  <a href="/terraform_modules">Terraform Modules</a>
+</h4>
+<h6 class="text-muted">
+  <a href="https://github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/tree/main/updater-image">Data provider</a>
+</h6>
+<p>
+  Scans the
+  <a href="https://github.com/ministryofjustice/cloud-platform-environments/tree/main/namespaces/live-1.cloud-platform.service.justice.gov.uk">environments repository</a>
+  and checks that all namespaces are specifying the latest versions of any
+  <a href="https://github.com/ministryofjustice/cloud-platform#terraform-modules">cloud platform terraform modules</a>
+  they use.
+</p>
+
+<h4>
+  <a href="/documentation">Documentation</a>
+</h4>
+<h6 class="text-muted">
+  <a href="https://github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/tree/main/updater-image">Data provider</a>
+</h6>
+<p>
+  Scans the
+  <a href="https://user-guide.cloud-platform.service.justice.gov.uk">Cloud Platform User Guide</a>
+  and
+  <a href="https://runbooks.cloud-platform.service.justice.gov.uk">Cloud Platform Runbooks</a>
+  websites, and reports any pages which are overdue for review.
+</p>
+
+<h4>
+  <a href="/repositories">GitHub Repositories</a>
+</h4>
+<h6 class="text-muted">
+  <a href="https://github.com/ministryofjustice/cloud-platform-repository-checker">Data provider</a>
+</h6>
+<p>
+  Checks all "ministryofjustice/cloud-platform-*" GitHub repositories and reports any which deviate from MoJ Digital &amp; Technology standards (e.g. default branch name, branch protection).
+</p>
+
+<h4>
+  <a href="/orphaned_resources">Orphaned AWS Resources</a>
+</h4>
+<h6 class="text-muted">
+  <a href="https://github.com/ministryofjustice/cloud-platform-report-orphaned-resources">Data provider</a>
+</h6>
+<p>
+  Checks the "moj-cp" AWS account, and reports resources which exist but are not listed in any of our Terraform state files.
+</p>
+
+<h4>
+  <a href="/orphaned_statefiles">Orphaned Terraform Statefiles</a>
+</h4>
+<h6 class="text-muted">
+  <a href="https://github.com/ministryofjustice/cloud-platform-orphaned-terraform-statefiles">Data provider</a>
+</h6>
+<p>
+  Looks for terraform statefiles in our S3 bucket which belong to kubernetes clusters that no longer exist.
+</p>
+
+<h4>
+  <a href="/costs_by_namespace">Costs by Namespace</a>
+</h4>
+<h6 class="text-muted">
+  <a href="https://github.com/ministryofjustice/cloud-platform-cost-calculator">Data provider</a>
+</h6>
+<p>
+  Uses
+  <a href="https://aws.amazon.com/aws-cost-management/aws-cost-explorer/">AWS CostExplorer</a>
+  data and the
+  <a href="https://ministryofjustice.github.io/technical-guidance/documentation/standards/documenting-infrastructure-owners.html#mandatory">mandatory "namespace" tag</a>
+  we apply to all AWS resources to allocate AWS resource costs to namespaces. The cost of shared resources (e.g. kubernetes cluster nodes), and the staff cost of the Cloud Platform Team are spread evenly across all namespaces.
+</p>
+
+<h4>
+  <a href="/hosted_services">Hosted Services</a>
+</h4>
+<h6 class="text-muted">
+  <a href="https://github.com/ministryofjustice/cloud-platform-environments-checker">Data provider</a>
+</h6>
+<p>
+  Introspects cluster namespaces and displays information about the services running in them, including the application, team, github repositories and domain names in use.
+</p>
+
+<h4>
+  <a href="/namespace_usage">Namespace Resource Usage</a>
+</h4>
+<p>
+  Introspects cluster namespaces and displays information about the cluster resources (CPU and memory) that each namespace is requesting and using.
+</p>

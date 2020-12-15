@@ -275,6 +275,10 @@ get "/namespace/:namespace" do
   }
 end
 
+get "/about" do
+  erb :about, locals: { title: "About", updated_at: Date.parse("2020-12-15") }
+end
+
 post "/:docpath" do
   update_json_data(store, params.fetch("docpath"), request)
 end
