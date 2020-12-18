@@ -36,9 +36,16 @@ securityContext: {}
   # runAsNonRoot: true
   # runAsUser: 1000
 
+ingress:
+  name: cloud-platform-reports-app-ingress
+
 service:
-  type: ClusterIP
-  port: 80
+  name: cloud-platform-reports-service
+  port: 4567
+
+deployment:
+  labels:
+    app: cloud-platform-reports-app
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious

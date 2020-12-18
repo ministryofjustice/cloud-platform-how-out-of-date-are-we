@@ -6,11 +6,11 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: cloud-platform-reports-app
+      app: {{ .Values.deployment.labels.app }
   template:
     metadata:
       labels:
-        app: cloud-platform-reports-app
+        app: {{ .Values.deployment.labels.app }
     spec:
       containers:
         - name: cloud-platform-reports

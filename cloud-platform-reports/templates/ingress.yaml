@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
-  name: cloud-platform-reports-app-ingress
+  name: {{ .Values.ingress.name }}
 spec:
   tls:
   - hosts:
@@ -12,5 +12,5 @@ spec:
         paths:
         - path: /
           backend:
-            serviceName: cloud-platform-reports-service
-            servicePort: 4567
+            serviceName: {{ .Values.service.name }}
+            servicePort: {{ .Values.service.port }}
