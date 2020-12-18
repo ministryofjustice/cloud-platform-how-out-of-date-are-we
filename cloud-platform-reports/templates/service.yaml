@@ -1,15 +1,13 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "cloud-platform-reports.fullname" . }}
+  name: cloud-platform-reports-service
   labels:
-    {{- include "cloud-platform-reports.labels" . | nindent 4 }}
+    app: cloud-platform-reports-service
 spec:
-  type: {{ .Values.service.type }}
   ports:
-    - port: {{ .Values.service.port }}
-      targetPort: http
-      protocol: TCP
-      name: http
+  - port: 4567
+    name: https
+    targetPort: 4567
   selector:
-    {{- include "cloud-platform-reports.selectorLabels" . | nindent 4 }}
+    app: cloud-platform-reports-app
