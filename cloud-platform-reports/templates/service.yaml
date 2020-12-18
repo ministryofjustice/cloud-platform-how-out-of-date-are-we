@@ -10,4 +10,4 @@ spec:
     name: https
     targetPort: {{ .Values.service.port }}
   selector:
-    app: {{ .Values.deployment.labels.app }
+    app: {{ .Values.deployment.labels.app }}

@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: cloud-platform-reports
+  name: {{ .Values.deployment.name }}
 spec:
-  replicas: 1
+  replicas: {{ .Values.deployment.replicas }}
   selector:
     matchLabels:
-      app: {{ .Values.deployment.labels.app }
+      app: {{ .Values.deployment.labels.app }}
   template:
     metadata:
       labels:
-        app: {{ .Values.deployment.labels.app }
+        app: {{ .Values.deployment.labels.app }}
     spec:
       containers:
-        - name: cloud-platform-reports
-          image: ministryofjustice/cloud-platform-how-out-of-date-are-we:2.36
+        - name: {{ .Values.deployment.containers.webapp.name }}
+          image: {{ .Values.deployment.containers.webapp.image }}
           env:
             - name: RACK_ENV
               value: "production"
@@ -28,17 +28,17 @@ spec:
             - name: DYNAMODB_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
-                  name: hoodaw-dynamodb-output
+                  name: {{ .Values.dynamodb.secretName }}
                   key: access_key_id
             - name: DYNAMODB_SECRET_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
-                  name: hoodaw-dynamodb-output
+                  name: {{ .Values.dynamodb.secretName }}
                   key: secret_access_key
             - name: DYNAMODB_TABLE_NAME
               valueFrom:
                 secretKeyRef:
-                  name: hoodaw-dynamodb-output
+                  name: {{ .Values.dynamodb.secretName }}
                   key: table_name
           ports:
-          - containerPort: 4567
+          - containerPort: {{ .Values.service.port }}

@@ -6,5 +6,10 @@ service:
   port: 4567
 
 deployment:
+  name: cloud-platform-reports
   labels:
     app: cloud-platform-reports-app
+  containers:
+    webapp:
+      name: cloud-platform-reports
+      image: ministryofjustice/cloud-platform-how-out-of-date-are-we:2.36
