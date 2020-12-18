@@ -25,5 +25,11 @@ fetch-live-json-datafiles:
 	./fetch-data-from-dynamodb.rb
 
 dev-deploy:
-	helm install --generate-name --namespace $(DEV_NAMESPACE) ./cloud-platform-reports --values cloud-platform-reports/secrets.yaml
+	helm install \
+		--generate-name \
+		--namespace $(DEV_NAMESPACE) \
+		./cloud-platform-reports \
+		--values cloud-platform-reports/secrets.yaml \
+		--values cloud-platform-reports/values-dev.yaml
+
 

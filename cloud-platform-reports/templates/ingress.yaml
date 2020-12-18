@@ -5,9 +5,9 @@ metadata:
 spec:
   tls:
   - hosts:
-    - cloud-platform-reports.apps.live-1.cloud-platform.service.justice.gov.uk
+    - {{ .Values.ingress.hostname }}
   rules:
-    - host: cloud-platform-reports.apps.live-1.cloud-platform.service.justice.gov.uk
+    - host: {{ .Values.ingress.hostname }}
       http:
         paths:
         - path: /
