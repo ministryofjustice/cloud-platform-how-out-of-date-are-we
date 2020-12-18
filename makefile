@@ -1,4 +1,5 @@
 IMAGE := ministryofjustice/cloud-platform-how-out-of-date-are-we:2.11
+DEV_NAMESPACE := cloud-platform-reports-dev
 
 dev-server:
 	API_KEY=soopersekrit ./app.rb -o 0.0.0.0
@@ -22,4 +23,7 @@ test:
 fetch-live-json-datafiles:
 	mkdir -p data/namespace/costs
 	./fetch-data-from-dynamodb.rb
+
+dev-deploy:
+	helm install --generate-name --namespace $(DEV_NAMESPACE) ./cloud-platform-reports --values cloud-platform-reports/secrets.yaml
 

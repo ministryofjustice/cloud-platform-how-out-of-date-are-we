@@ -1,3 +1,4 @@
 .built-image
 dashboard-reporter/report.rb
 data/
+cloud-platform-reports/secrets.yaml
