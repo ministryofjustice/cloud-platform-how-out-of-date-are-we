@@ -25,9 +25,17 @@ fetch-live-json-datafiles:
 	./fetch-data-from-dynamodb.rb
 
 dev-deploy:
-	helm install \
-		--generate-name \
-		--namespace $(DEV_NAMESPACE) \
+	kubectl config use-context live-1 \
+	  && helm install \
+			--generate-name \
+			--namespace $(DEV_NAMESPACE) \
+			./cloud-platform-reports \
+			--values cloud-platform-reports/secrets.yaml \
+			--values cloud-platform-reports/values-dev.yaml
+
+dev-uninstall:
+	kubectl config use-context live-1 \
+	  && helm uninstall --namespace $(DEV_NAMESPACE) $$(helm ls --short --namespace $(DEV_NAMESPACE))
 		./cloud-platform-reports \
 		--values cloud-platform-reports/secrets.yaml \
 		--values cloud-platform-reports/values-dev.yaml
