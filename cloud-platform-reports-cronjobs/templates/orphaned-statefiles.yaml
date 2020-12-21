@@ -1,0 +1,59 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: {{ .Values.cronjobs.orphanedTerraformStatefiles.name }}
+spec:
+  schedule: "{{ .Values.cronjobs.orphanedTerraformStatefiles.schedule }}"
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 100
+      template:
+        spec:
+          containers:
+          - name: orphaned-terraform-statefiles
+            image: ministryofjustice/cloud-platform-orphaned-terraform-statefiles:1.3
+            securityContext:
+              runAsUser: 1000
+            env:
+            - name: AWS_REGION
+              value: eu-west-2
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: aws-creds
+                  key: access-key-id
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: aws-creds
+                  key: secret-access-key
+            - name: TF_STATE_BUCKET_REGION
+              value: "eu-west-1"
+            - name: TF_STATE_BUCKET_AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: aws-creds
+                  key: access-key-id
+            - name: TF_STATE_BUCKET_AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: aws-creds
+                  key: secret-access-key
+            - name: KOPS_STATE_STORE
+              value: s3://cloud-platform-kops-state
+            - name: HOODAW_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: hoodaw-creds
+                  key: api_key
+            - name: HOODAW_HOST
+              value: "https://{{ .Values.ingress.hostname }}"
+            args:
+              - /bin/sh
+              - -c
+              - |-
+                cd /app
+                ./bin/post-data.sh
+          restartPolicy: OnFailure

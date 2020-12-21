@@ -1,0 +1,4 @@
+cronjobs:
+  orphanedTerraformStatefiles:
+    name: dev-orphaned-terraform-statefiles
+    schedule: "17 5 * * *"

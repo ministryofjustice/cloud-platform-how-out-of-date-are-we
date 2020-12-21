@@ -1,5 +1,6 @@
 IMAGE := ministryofjustice/cloud-platform-how-out-of-date-are-we:2.11
 DEV_NAMESPACE := cloud-platform-reports-dev
+CRONJOB_NAMESPACE := concourse-main
 
 dev-server:
 	API_KEY=soopersekrit ./app.rb -o 0.0.0.0
@@ -36,6 +37,20 @@ dev-deploy:
 dev-uninstall:
 	kubectl config use-context live-1 \
 	  && helm uninstall --namespace $(DEV_NAMESPACE) $$(helm ls --short --namespace $(DEV_NAMESPACE))
+
+dev-deploy-cronjobs:
+	kubectl config use-context manager \
+		&& helm install \
+			--generate-name \
+			--namespace $(CRONJOB_NAMESPACE) \
+			./cloud-platform-reports-cronjobs \
+			--values cloud-platform-reports/values-dev.yaml \
+			--values cloud-platform-reports-cronjobs/values-dev.yaml
+
+dev-uninstall-cronjobs:
+	kubectl config use-context manager \
+		&& helm uninstall --namespace $(CRONJOB_NAMESPACE) $$(helm ls --short --namespace $(CRONJOB_NAMESPACE))
+
 		./cloud-platform-reports \
 		--values cloud-platform-reports/secrets.yaml \
 		--values cloud-platform-reports/values-dev.yaml
