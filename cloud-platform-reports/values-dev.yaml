@@ -3,3 +3,6 @@ ingress:
 
 deployment:
   replicas: 1
+
+dynamodb:
+  secretName: cloud-platform-reports-dynamodb-output
