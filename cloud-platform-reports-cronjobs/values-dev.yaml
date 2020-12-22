@@ -3,3 +3,5 @@ cronjobs:
     name: dev-orphaned-terraform-statefiles
   orphanedAwsResources:
     name: dev-orphaned-aws-resources
+  namespaceCostsReport:
+    name: dev-namespace-costs

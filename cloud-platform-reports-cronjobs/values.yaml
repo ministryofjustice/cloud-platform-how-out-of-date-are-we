@@ -5,3 +5,6 @@ cronjobs:
   orphanedAwsResources:
     name: orphaned-aws-resources
     schedule: "57 */6 * * *"
+  namespaceCostsReport:
+    name: namespace-costs
+    schedule: "41 5 * * *"
