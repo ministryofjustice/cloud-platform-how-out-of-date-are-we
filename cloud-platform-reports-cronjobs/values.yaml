@@ -4,4 +4,4 @@ cronjobs:
     schedule: "23 5 * * *"
   orphanedAwsResources:
     name: orphaned-aws-resources
-    schedule: "57 */6 * * *" # TODO
+    schedule: "57 */6 * * *"
