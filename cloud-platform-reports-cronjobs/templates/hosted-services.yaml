@@ -1,0 +1,47 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: {{ .Values.cronjobs.hostedServices.name }}
+spec:
+  schedule: "{{ .Values.cronjobs.hostedServices.schedule }}"
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 100
+      template:
+        spec:
+          containers:
+          - name: orphaned-namespace-checker-image
+            image: "registry.hub.docker.com/ministryofjustice/orphaned-namespace-checker:non-root" # TODO: use official release, when non-root, tf12 version is available
+            env:
+            - name: KUBECONFIG_AWS_REGION
+              value: eu-west-2
+            - name: KUBECONFIG_AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: aws-creds
+                  key: access-key-id
+            - name: KUBECONFIG_AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: aws-creds
+                  key: secret-access-key
+            - name: KUBE_CTX
+              value: live-1.cloud-platform.service.justice.gov.uk
+            - name: KUBECONFIG_S3_BUCKET
+              value: cloud-platform-concourse-kubeconfig
+            - name: KUBECONFIG_S3_KEY
+              value: kubeconfig
+            - name: KUBECONFIG
+              value: /tmp/kubeconfig
+            - name: HOODAW_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: hoodaw-creds
+                  key: api_key
+            - name: HOODAW_HOST
+              value: "https://{{ .Values.ingress.hostname }}"
+            args:
+              - /app/bin/post-data-to-hoodaw.sh
+          restartPolicy: OnFailure

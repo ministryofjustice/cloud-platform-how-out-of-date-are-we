@@ -5,3 +5,5 @@ cronjobs:
     name: dev-orphaned-aws-resources
   namespaceCostsReport:
     name: dev-namespace-costs
+  hostedServices:
+    name: dev-hosted-services

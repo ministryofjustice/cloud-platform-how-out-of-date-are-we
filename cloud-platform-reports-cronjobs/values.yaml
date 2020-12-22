@@ -8,3 +8,6 @@ cronjobs:
   namespaceCostsReport:
     name: namespace-costs
     schedule: "41 5 * * *"
+  hostedServices:
+    name: hosted-services
+    schedule: "37 4 * * *"
