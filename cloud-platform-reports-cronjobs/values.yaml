@@ -11,3 +11,6 @@ cronjobs:
   hostedServices:
     name: hosted-services
     schedule: "37 4 * * *"
+  namespaceUsageReport:
+    name: namespace-usage-report
+    schedule: "11 */6 * * *"

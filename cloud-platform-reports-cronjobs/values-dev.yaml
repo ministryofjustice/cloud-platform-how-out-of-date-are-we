@@ -7,3 +7,5 @@ cronjobs:
     name: dev-namespace-costs
   hostedServices:
     name: dev-hosted-services
+  namespaceUsageReport:
+    name: dev-namespace-usage-report
