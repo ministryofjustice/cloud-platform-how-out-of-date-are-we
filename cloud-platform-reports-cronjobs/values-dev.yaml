@@ -1,7 +1,5 @@
 cronjobs:
   orphanedTerraformStatefiles:
     name: dev-orphaned-terraform-statefiles
-    schedule: "17 5 * * *"
   orphanedAwsResources:
     name: dev-orphaned-aws-resources
-    schedule: "59 * * * *" # TODO
