@@ -11,14 +11,14 @@ spec:
       ttlSecondsAfterFinished: 100
       template:
         spec:
-          {{- template "cloud-platform-reports-cronjobs.imagePullSecrets" . }}
+          {{- include "cloud-platform-reports-cronjobs.imagePullSecrets" . | indent 10 }}
           containers:
           - name: orphaned-terraform-statefiles
             image: ministryofjustice/cloud-platform-orphaned-terraform-statefiles:1.3
             securityContext:
               runAsUser: 1000
             env:
-            {{- template "cloud-platform-reports-cronjobs.awsCredentials" . }}
+            {{- include "cloud-platform-reports-cronjobs.awsCredentials" . | indent 12 }}
             - name: TF_STATE_BUCKET_REGION
               value: "eu-west-1"
             - name: TF_STATE_BUCKET_AWS_ACCESS_KEY_ID
@@ -33,7 +33,7 @@ spec:
                   key: secret-access-key
             - name: KOPS_STATE_STORE
               value: s3://cloud-platform-kops-state
-            {{- template "cloud-platform-reports-cronjobs.hoodaw-credentials" . }}
+            {{- include "cloud-platform-reports-cronjobs.hoodaw-credentials" . | indent 12 }}
             args:
               - /bin/sh
               - -c
