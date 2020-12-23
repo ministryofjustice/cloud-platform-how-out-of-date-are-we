@@ -46,3 +46,20 @@
                   name: aws-creds
                   key: secret-access-key
 {{- end }}
+
+
+{{/*
+
+  Kubeconfig
+
+  The S3 bucket and location of the cluster kubeconfig file
+
+*/}}
+{{- define "cloud-platform-reports-cronjobs.kubeconfigLocation" }}
+            - name: KUBECONFIG
+              value: /tmp/kubeconfig
+            - name: KUBECONFIG_S3_BUCKET
+              value: cloud-platform-concourse-kubeconfig
+            - name: KUBECONFIG_S3_KEY
+              value: kubeconfig
+{{- end }}

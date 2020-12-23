@@ -20,12 +20,7 @@ spec:
             env:
             {{- template "cloud-platform-reports-cronjobs.awsCredentials" . }}
             {{- template "cloud-platform-reports-cronjobs.hoodaw-credentials" . }}
-            - name: KUBECONFIG
-              value: /tmp/kubeconfig
-            - name: KUBECONFIG_S3_BUCKET
-              value: cloud-platform-concourse-kubeconfig
-            - name: KUBECONFIG_S3_KEY
-              value: kubeconfig
+            {{- template "cloud-platform-reports-cronjobs.kubeconfigLocation" . }}
             - name: KUBE_CLUSTER
               value: live-1.cloud-platform.service.justice.gov.uk
             args:
