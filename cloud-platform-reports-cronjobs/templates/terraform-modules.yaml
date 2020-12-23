@@ -1,0 +1,42 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: {{ .Values.cronjobs.terraformModules.name }}
+spec:
+  schedule: "{{ .Values.cronjobs.terraformModules.schedule }}"
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 100
+      template:
+        spec:
+          imagePullSecrets: # TODO: add to all cronjobs
+            - name: {{ .Values.dockerhubCredentials.secretName }}
+          containers:
+          - name: terraform-modules-checker
+            image: "ministryofjustice/cloud-platform-terraform-modules-checker:test2" # TODO: use official release
+            env: # TODO: There's a lot of duplication in these yaml files. It should be possible to use `include` to DRY them up
+            - name: HOODAW_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: hoodaw-creds
+                  key: api_key
+            - name: HOODAW_HOST
+              value: "https://{{ .Values.ingress.hostname }}"
+            - name: ORG
+              value: "ministryofjustice"
+            - name: NAMESPACE_DIR
+              value: "cloud-platform-environments/namespaces/live-1.cloud-platform.service.justice.gov.uk"
+            - name: TF_MODULE_REGEX
+              value: "source.*github.com\\/${ORG}\\/cloud-platform-terraform-.*"
+            - name: GITHUB_API_URL
+              value: "https://api.github.com/graphql"
+            - name: GITHUB_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: how-out-of-date-are-we-github-token
+                  key: token
+            args:
+              - /app/bin/post-data.sh
+          restartPolicy: OnFailure

@@ -9,3 +9,5 @@ cronjobs:
     name: dev-hosted-services
   namespaceUsageReport:
     name: dev-namespace-usage-report
+  terraformModules:
+    name: dev-terraform-modules

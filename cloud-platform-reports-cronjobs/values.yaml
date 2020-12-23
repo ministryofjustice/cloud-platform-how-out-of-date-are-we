@@ -14,3 +14,6 @@ cronjobs:
   namespaceUsageReport:
     name: namespace-usage-report
     schedule: "11 */6 * * *"
+  terraformModules:
+    name: terraform-modules
+    schedule: "7 */12 * * *"
