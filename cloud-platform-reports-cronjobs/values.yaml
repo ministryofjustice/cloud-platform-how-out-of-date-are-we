@@ -1,3 +1,5 @@
+cluster:
+  fullName: live-1.cloud-platform.service.justice.gov.uk
 cronjobs:
   orphanedTerraformStatefiles:
     name: orphaned-terraform-statefiles

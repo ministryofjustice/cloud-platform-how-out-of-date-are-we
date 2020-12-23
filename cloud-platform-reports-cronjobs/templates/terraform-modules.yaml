@@ -20,7 +20,7 @@ spec:
             - name: ORG
               value: "ministryofjustice"
             - name: NAMESPACE_DIR
-              value: "cloud-platform-environments/namespaces/live-1.cloud-platform.service.justice.gov.uk"
+              value: "cloud-platform-environments/namespaces/{{ .Values.cluster.fullName }}"
             - name: TF_MODULE_REGEX
               value: "source.*github.com\\/${ORG}\\/cloud-platform-terraform-.*"
             - name: GITHUB_API_URL
