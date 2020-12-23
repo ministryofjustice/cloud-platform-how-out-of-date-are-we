@@ -1,3 +1,7 @@
+webApplication:
+  apiSecretName: hoodaw-creds
+  apiSecretKey: api_key
+  hostname: "https://{{ .Values.ingress.hostname }}"
 cronjobs:
   orphanedTerraformStatefiles:
     name: dev-orphaned-terraform-statefiles

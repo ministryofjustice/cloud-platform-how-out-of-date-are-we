@@ -8,10 +8,10 @@
 - name: HOODAW_API_KEY
   valueFrom:
     secretKeyRef:
-      name: hoodaw-creds
-      key: api_key
+      name: {{ .Values.webApplication.apiSecretName }}
+      key: {{ .Values.webApplication.apiSecretKey }}
 - name: HOODAW_HOST
-  value: "https://{{ .Values.ingress.hostname }}"
+  value: {{ .Values.webApplication.hostname }}
 {{- end }}
 
 {{/*
