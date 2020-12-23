@@ -14,7 +14,7 @@ spec:
           {{- include "cloud-platform-reports-cronjobs.imagePullSecrets" . | indent 10 }}
           containers:
           - name: terraform-modules-checker
-            image: "ministryofjustice/cloud-platform-terraform-modules-checker:test2" # TODO: use official release
+            image: "{{ .Values.cronjobs.terraformModules.image }}"
             env: # TODO: There's a lot of duplication in these yaml files. It should be possible to use `include` to DRY them up
             {{- include "cloud-platform-reports-cronjobs.hoodaw-credentials" . | indent 12 }}
             - name: ORG

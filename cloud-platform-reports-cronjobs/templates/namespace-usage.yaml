@@ -14,7 +14,7 @@ spec:
           {{- include "cloud-platform-reports-cronjobs.imagePullSecrets" . | indent 10 }}
           containers:
           - name: namespace-usage-reporter
-            image: "registry.hub.docker.com/ministryofjustice/cloud-platform-namespace-usage-reporter:non-root" # TODO: switch to the 'official' release tag
+            image: {{ .Values.cronjobs.namespaceUsageReport.image }}
             securityContext:
               runAsUser: 1000
             env:

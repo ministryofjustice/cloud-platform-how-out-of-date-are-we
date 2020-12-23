@@ -14,7 +14,7 @@ spec:
           {{- include "cloud-platform-reports-cronjobs.imagePullSecrets" . | indent 10 }}
           containers:
           - name: orphaned-namespace-checker-image
-            image: "registry.hub.docker.com/ministryofjustice/orphaned-namespace-checker:non-root" # TODO: use official release, when non-root, tf12 version is available
+            image: "{{ .Values.cronjobs.hostedServices.image }}"
             env:
             - name: KUBECONFIG_AWS_REGION
               value: eu-west-2

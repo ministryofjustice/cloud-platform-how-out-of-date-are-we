@@ -14,7 +14,7 @@ spec:
           {{- include "cloud-platform-reports-cronjobs.imagePullSecrets" . | indent 10 }}
           containers:
           - name: orphaned-terraform-statefiles
-            image: "ministryofjustice/cloud-platform-report-orphaned-resources:1.10"
+            image: "{{ .Values.cronjobs.orphanedAwsResources.image }}"
             securityContext:
               runAsUser: 1000
             env:

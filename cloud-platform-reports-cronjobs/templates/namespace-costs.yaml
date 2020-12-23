@@ -14,7 +14,7 @@ spec:
           {{- include "cloud-platform-reports-cronjobs.imagePullSecrets" . | indent 10 }}
           containers:
           - name: namespace-cost-calculator
-            image: "registry.hub.docker.com/ministryofjustice/cloud-platform-cost-calculator:2.1"
+            image: "{{ .Values.cronjobs.namespaceCostsReport.image }}"
             securityContext:
               runAsUser: 1000
             env:
