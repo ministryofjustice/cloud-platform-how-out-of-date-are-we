@@ -44,3 +44,11 @@ jobs:
           path: reports/namespace-usage
           repository: ministryofjustice/cloud-platform-namespace-usage-reporter
           tag_with_ref: true
+      - name: Push terraform-module-checker to docker hub
+        uses: docker/build-push-action@v2.2.1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          path: reports/terraform-modules
+          repository: ministryofjustice/cloud-platform-terraform-modules-checker
+          tag_with_ref: true
