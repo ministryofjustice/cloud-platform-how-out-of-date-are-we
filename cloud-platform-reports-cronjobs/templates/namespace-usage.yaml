@@ -11,6 +11,7 @@ spec:
       ttlSecondsAfterFinished: 100
       template:
         spec:
+          {{- template "cloud-platform-reports-cronjobs.imagePullSecrets" . }}
           containers:
           - name: namespace-usage-reporter
             image: "registry.hub.docker.com/ministryofjustice/cloud-platform-namespace-usage-reporter:non-root" # TODO: switch to the 'official' release tag

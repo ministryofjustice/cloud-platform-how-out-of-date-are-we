@@ -11,8 +11,7 @@ spec:
       ttlSecondsAfterFinished: 100
       template:
         spec:
-          imagePullSecrets: # TODO: add to all cronjobs
-            - name: {{ .Values.dockerhubCredentials.secretName }}
+          {{- template "cloud-platform-reports-cronjobs.imagePullSecrets" . }}
           containers:
           - name: terraform-modules-checker
             image: "ministryofjustice/cloud-platform-terraform-modules-checker:test2" # TODO: use official release

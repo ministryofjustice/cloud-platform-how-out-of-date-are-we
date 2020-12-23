@@ -13,3 +13,14 @@
             - name: HOODAW_HOST
               value: "https://{{ .Values.ingress.hostname }}"
 {{- end }}
+
+{{/*
+
+  Add imagePullSecrets so that the cronjob uses credentials from the named
+  docker-registry secret, rather than pulling images anonymously.
+
+*/}}
+{{- define "cloud-platform-reports-cronjobs.imagePullSecrets" }}
+          imagePullSecrets:
+            - name: {{ .Values.dockerhubCredentials.secretName }}
+{{- end }}

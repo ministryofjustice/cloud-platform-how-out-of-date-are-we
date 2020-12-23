@@ -11,6 +11,7 @@ spec:
       ttlSecondsAfterFinished: 100
       template:
         spec:
+          {{- template "cloud-platform-reports-cronjobs.imagePullSecrets" . }}
           containers:
           - name: orphaned-terraform-statefiles
             image: ministryofjustice/cloud-platform-orphaned-terraform-statefiles:1.3

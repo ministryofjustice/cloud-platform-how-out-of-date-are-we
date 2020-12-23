@@ -11,6 +11,7 @@ spec:
       ttlSecondsAfterFinished: 100
       template:
         spec:
+          {{- template "cloud-platform-reports-cronjobs.imagePullSecrets" . }}
           containers:
           - name: orphaned-namespace-checker-image
             image: "registry.hub.docker.com/ministryofjustice/orphaned-namespace-checker:non-root" # TODO: use official release, when non-root, tf12 version is available
