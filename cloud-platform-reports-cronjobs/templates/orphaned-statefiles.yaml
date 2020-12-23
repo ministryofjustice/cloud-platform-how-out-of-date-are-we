@@ -18,18 +18,7 @@ spec:
             securityContext:
               runAsUser: 1000
             env:
-            - name: AWS_REGION
-              value: eu-west-2
-            - name: AWS_ACCESS_KEY_ID
-              valueFrom:
-                secretKeyRef:
-                  name: aws-creds
-                  key: access-key-id
-            - name: AWS_SECRET_ACCESS_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: aws-creds
-                  key: secret-access-key
+            {{- template "cloud-platform-reports-cronjobs.awsCredentials" . }}
             - name: TF_STATE_BUCKET_REGION
               value: "eu-west-1"
             - name: TF_STATE_BUCKET_AWS_ACCESS_KEY_ID
