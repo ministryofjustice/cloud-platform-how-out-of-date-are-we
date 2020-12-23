@@ -43,13 +43,7 @@ spec:
                   key: secret-access-key
             - name: KOPS_STATE_STORE
               value: s3://cloud-platform-kops-state
-            - name: HOODAW_API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: hoodaw-creds
-                  key: api_key
-            - name: HOODAW_HOST
-              value: "https://{{ .Values.ingress.hostname }}"
+            {{- template "cloud-platform-reports-cronjobs.hoodaw-credentials" . }}
             args:
               - /bin/sh
               - -c

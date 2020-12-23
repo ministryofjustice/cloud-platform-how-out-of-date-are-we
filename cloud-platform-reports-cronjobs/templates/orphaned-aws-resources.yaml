@@ -29,13 +29,7 @@ spec:
                 secretKeyRef:
                   name: aws-creds
                   key: secret-access-key
-            - name: HOODAW_API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: hoodaw-creds
-                  key: api_key
-            - name: HOODAW_HOST
-              value: "https://{{ .Values.ingress.hostname }}"
+            {{- template "cloud-platform-reports-cronjobs.hoodaw-credentials" . }}
             args:
               - /bin/sh
               - -c
