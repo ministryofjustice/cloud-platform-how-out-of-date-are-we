@@ -25,3 +25,7 @@ cronjobs:
     name: terraform-modules
     image: "ministryofjustice/cloud-platform-terraform-modules-checker:test2" # TODO: use official release
     schedule: "7 */12 * * *"
+  overdueDocumentation:
+    name: overdue-documentation
+    image: ministryofjustice/cloud-platform-overdue-documentation-checker:test2 # TODO: use official release
+    schedule: "37 */6 * * *"

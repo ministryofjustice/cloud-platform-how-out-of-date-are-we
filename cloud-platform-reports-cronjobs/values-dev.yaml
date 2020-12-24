@@ -15,3 +15,5 @@ cronjobs:
     name: dev-namespace-usage-report
   terraformModules:
     name: dev-terraform-modules
+  overdueDocumentation:
+    name: dev-overdue-documentation
