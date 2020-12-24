@@ -19,7 +19,7 @@ cronjobs:
     schedule: "37 4 * * *"
   namespaceUsageReport:
     name: namespace-usage-report
-    image: "registry.hub.docker.com/ministryofjustice/cloud-platform-namespace-usage-reporter:non-root" # TODO: switch to the 'official' release tag
+    image: "registry.hub.docker.com/ministryofjustice/cloud-platform-namespace-usage-reporter:test" # TODO: switch to the 'official' release tag
     schedule: "11 */6 * * *"
   terraformModules:
     name: terraform-modules

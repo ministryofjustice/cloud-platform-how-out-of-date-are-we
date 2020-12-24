@@ -1,7 +1,7 @@
 FROM python:alpine3.12
 
 ENV \
-  KUBECTL_VERSION=1.15.0
+  KUBECTL_VERSION=1.17.12
 
 RUN pip install awscli \
   && apk add curl ruby
