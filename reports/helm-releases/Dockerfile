@@ -1,0 +1,37 @@
+FROM python:alpine3.12
+
+RUN pip install awscli \
+  && apk add bash git curl ruby
+RUN gem install json_pure
+
+ENV \
+  HELM_VERSION=3.4.0 \
+  KUBECTL_VERSION=1.17.12
+
+# kubectl
+RUN curl -sLo /usr/local/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v${KUBECTL_VERSION}/bin/linux/amd64/kubectl \
+  && chmod 755 /usr/local/bin/kubectl
+
+# Install helm
+RUN curl -sL https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz \
+    | tar -xzC /usr/local/bin --strip-components 1 linux-amd64/helm \
+    && chmod 755 /usr/local/bin/helm
+
+RUN addgroup -g 1000 -S appgroup && \
+    adduser -u 1000 -S appuser -G appgroup
+
+WORKDIR /app
+
+COPY bin ./bin
+
+RUN chown 1000:1000 /app
+USER 1000
+
+# Install helm-whatup
+RUN helm plugin install https://github.com/fabmation-gmbh/helm-whatup
+
+# Add helm repos
+RUN helm repo add stable https://charts.helm.sh/stable; \
+  helm repo add jetstack https://charts.jetstack.io/; \
+  helm repo add concourse https://concourse-charts.storage.googleapis.com/; \
+  helm repo add cloud-platform https://ministryofjustice.github.io/cloud-platform-helm-charts

@@ -17,3 +17,5 @@ cronjobs:
     name: dev-terraform-modules
   overdueDocumentation:
     name: dev-overdue-documentation
+  helmWhatup:
+    name: dev-helm-whatup

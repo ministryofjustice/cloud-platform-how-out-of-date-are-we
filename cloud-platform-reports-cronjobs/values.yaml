@@ -29,3 +29,7 @@ cronjobs:
     name: overdue-documentation
     image: ministryofjustice/cloud-platform-overdue-documentation-checker:test2 # TODO: use official release
     schedule: "37 */6 * * *"
+  helmWhatup:
+    name: helm-whatup
+    image: ministryofjustice/cloud-platform-helm-release-checker:test3 # TODO: use official release
+    schedule: "23 4 * * *"
