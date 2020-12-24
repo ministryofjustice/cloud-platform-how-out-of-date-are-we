@@ -19,3 +19,5 @@ cronjobs:
     name: dev-overdue-documentation
   helmWhatup:
     name: dev-helm-whatup
+  githubRepositories:
+    name: dev-github-repositories

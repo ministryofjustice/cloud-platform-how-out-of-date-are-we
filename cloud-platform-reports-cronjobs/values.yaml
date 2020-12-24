@@ -33,3 +33,7 @@ cronjobs:
     name: helm-whatup
     image: ministryofjustice/cloud-platform-helm-release-checker:test3 # TODO: use official release
     schedule: "23 4 * * *"
+  githubRepositories:
+    name: github-repositories
+    image: ministryofjustice/cloud-platform-github-repositories-checker:test # TODO: use official release
+    schedule: "12 5 * * *"
