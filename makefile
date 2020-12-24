@@ -44,7 +44,6 @@ dev-deploy-cronjobs:
 			--generate-name \
 			--namespace $(CRONJOB_NAMESPACE) \
 			./cloud-platform-reports-cronjobs \
-			--values cloud-platform-reports/values-dev.yaml \
 			--values cloud-platform-reports-cronjobs/values-dev.yaml \
 			--values cloud-platform-reports-cronjobs/secrets.yaml
 
