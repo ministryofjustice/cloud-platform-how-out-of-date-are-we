@@ -2,6 +2,50 @@ IMAGE := ministryofjustice/cloud-platform-how-out-of-date-are-we:2.11
 DEV_NAMESPACE := cloud-platform-reports-dev
 CRONJOB_NAMESPACE := concourse-main
 
+dev-deploy:
+	make dev-deploy-webapp
+	make dev-deploy-cronjobs
+
+dev-upgrade:
+	make dev-upgrade-webapp
+	make dev-upgrade-cronjobs
+
+dev-deploy-webapp:
+	kubectl config use-context live-1 \
+	  && helm install \
+			--generate-name \
+			--namespace $(DEV_NAMESPACE) \
+			./cloud-platform-reports \
+			--values cloud-platform-reports/secrets.yaml \
+			--values cloud-platform-reports/values-dev.yaml
+
+dev-deploy-cronjobs:
+	kubectl config use-context manager \
+		&& helm install \
+			--generate-name \
+			--namespace $(CRONJOB_NAMESPACE) \
+			./cloud-platform-reports-cronjobs \
+			--values cloud-platform-reports-cronjobs/values-dev.yaml \
+			--values cloud-platform-reports-cronjobs/secrets.yaml
+
+dev-upgrade-webapp:
+	kubectl config use-context live-1 \
+		&& helm upgrade \
+			$$(helm ls --short --namespace $(DEV_NAMESPACE) | grep cloud-platform-reports) \
+			--namespace $(DEV_NAMESPACE) \
+			./cloud-platform-reports \
+			--values cloud-platform-reports/secrets.yaml \
+			--values cloud-platform-reports/values-dev.yaml
+
+dev-upgrade-cronjobs:
+	kubectl config use-context manager \
+		&& helm upgrade \
+			$$(helm ls --short --namespace $(CRONJOB_NAMESPACE) | grep cloud-platform-reports-cronjobs) \
+			--namespace $(CRONJOB_NAMESPACE) \
+			./cloud-platform-reports-cronjobs \
+			--values cloud-platform-reports-cronjobs/values-dev.yaml \
+			--values cloud-platform-reports-cronjobs/secrets.yaml
+
 dev-server:
 	API_KEY=soopersekrit ./app.rb -o 0.0.0.0
 
@@ -25,27 +69,11 @@ fetch-live-json-datafiles:
 	mkdir -p data/namespace/costs
 	./fetch-data-from-dynamodb.rb
 
-dev-deploy:
-	kubectl config use-context live-1 \
-	  && helm install \
-			--generate-name \
-			--namespace $(DEV_NAMESPACE) \
-			./cloud-platform-reports \
-			--values cloud-platform-reports/secrets.yaml \
-			--values cloud-platform-reports/values-dev.yaml
 
 dev-uninstall:
 	kubectl config use-context live-1 \
 	  && helm uninstall --namespace $(DEV_NAMESPACE) $$(helm ls --short --namespace $(DEV_NAMESPACE))
 
-dev-deploy-cronjobs:
-	kubectl config use-context manager \
-		&& helm install \
-			--generate-name \
-			--namespace $(CRONJOB_NAMESPACE) \
-			./cloud-platform-reports-cronjobs \
-			--values cloud-platform-reports-cronjobs/values-dev.yaml \
-			--values cloud-platform-reports-cronjobs/secrets.yaml
 
 dev-uninstall-cronjobs:
 	kubectl config use-context manager \
