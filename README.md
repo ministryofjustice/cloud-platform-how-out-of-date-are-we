@@ -2,9 +2,42 @@
 
 [![Releases](https://img.shields.io/github/release/ministryofjustice/cloud-platform-how-out-of-date-are-we/all.svg?style=flat-square)](https://github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/releases)
 
-Web app. to display various reports about the Cloud Platform.
+Various reports about the Cloud Platform, displayed via a web application.
 
 See the [about page](views/about.erb) for more details.
+
+## Installation
+
+The application consists of 2 Helm charts - one for the [web application](cloud-platform-reports), and one for the [cronjobs](cloud-platform-reports-cronjobs) which provide the data.
+
+The web application is deployed to the `live-1` cluster. The cronjobs are deployed to the `concourse-main` namespace of the `manager` cluster.
+
+## Pre-requisites
+
+* `live-1` kube context
+* `manager` kube context
+* `cloud-platform-reports-cronjobs/secrets.yaml` file containing Docker Hub credentials
+* `cloud-platform-reports/secrets.yaml` file defining the web application API key
+
+The web application API key is shared by both the web application and the
+cronjobs which post the report data. So the
+`cloud-platform-reports/secrets.yaml` file is used when deploying the
+`cloud-platform-reports-cronjobs` helm chart.
+
+## Deploying
+
+```
+make dev-deploy
+```
+
+## Updating
+
+```
+make dev-upgrade
+```
+
+* Add git-crypt to this repo for the dockerhub-credentials secret
+* Use the chart version as the docker image version for all the docker images
 
 ## Data Storage
 
@@ -63,8 +96,6 @@ If the API key doesn't match, the app. will return a 403 error.
 
 ### Developing
 
-See the `docker-compose.yml` file for details of how to run this app. and the updater script locally.
-
 If you have a working ruby 2.7 environment, you can run the application locally as follows:
 
 ```
@@ -76,12 +107,11 @@ bundle install
 
 After code changes, create a new [release] via the github web interface.
 
-This will trigger a github action to build both the web app. and updater docker
-images, and push them to docker hub tagged with the release name.
+This will trigger a github action to build all the docker images (web application and scheduled jobs), and push them to docker hub tagged with the release name.
 
 [release]: https://github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/releases
 
 ---
-last_reviewed_on: 2020-12-15
+last_reviewed_on: 2020-12-29
 review_in: 3 months
 ---
