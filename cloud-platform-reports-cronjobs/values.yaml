@@ -15,7 +15,7 @@ cronjobs:
     schedule: "41 5 * * *"
   hostedServices:
     name: hosted-services
-    image: "registry.hub.docker.com/ministryofjustice/orphaned-namespace-checker:non-root" # TODO: use official release, when non-root, tf12 version is available
+    image: "ministryofjustice/cloud-platform-hosted-services:test4" # TODO: use official release
     schedule: "37 4 * * *"
   namespaceUsageReport:
     name: namespace-usage-report

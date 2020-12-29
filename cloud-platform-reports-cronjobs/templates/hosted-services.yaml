@@ -33,5 +33,5 @@ spec:
             {{- include "cloud-platform-reports-cronjobs.kubeconfigLocation" . | indent 12 }}
             {{- include "cloud-platform-reports-cronjobs.hoodaw-credentials" . | indent 12 }}
             args:
-              - /app/bin/post-data-to-hoodaw.sh
+              - /app/bin/post-data.sh
           restartPolicy: OnFailure
