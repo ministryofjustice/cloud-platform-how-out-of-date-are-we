@@ -31,7 +31,6 @@ USER 1000
 RUN helm plugin install https://github.com/fabmation-gmbh/helm-whatup
 
 # Add helm repos
-RUN helm repo add stable https://charts.helm.sh/stable; \
-  helm repo add jetstack https://charts.jetstack.io/; \
+RUN helm repo add jetstack https://charts.jetstack.io/; \
   helm repo add concourse https://concourse-charts.storage.googleapis.com/; \
   helm repo add cloud-platform https://ministryofjustice.github.io/cloud-platform-helm-charts
