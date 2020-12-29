@@ -21,5 +21,5 @@ spec:
             {{- include "cloud-platform-reports-cronjobs.awsCredentials" . | indent 12 }}
             {{- include "cloud-platform-reports-cronjobs.hoodaw-credentials" . | indent 12 }}
             args:
-              - /root/post-namespace-costs.rb
+              - /app/post-namespace-costs.rb
           restartPolicy: OnFailure
