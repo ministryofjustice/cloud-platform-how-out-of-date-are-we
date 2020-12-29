@@ -7,7 +7,7 @@ cronjobs:
     schedule: "23 5 * * *"
   orphanedAwsResources:
     name: orphaned-aws-resources
-    image: "ministryofjustice/cloud-platform-report-orphaned-resources:1.10"
+    image: "ministryofjustice/cloud-platform-report-orphaned-resources:test"
     schedule: "57 */6 * * *"
   namespaceCostsReport:
     name: namespace-costs
