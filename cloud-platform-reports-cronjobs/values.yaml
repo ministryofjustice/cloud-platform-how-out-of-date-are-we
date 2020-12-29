@@ -3,7 +3,7 @@ cluster:
 cronjobs:
   orphanedTerraformStatefiles:
     name: orphaned-terraform-statefiles
-    image: ministryofjustice/cloud-platform-orphaned-terraform-statefiles:1.3
+    image: ministryofjustice/cloud-platform-orphaned-terraform-statefiles:test
     schedule: "23 5 * * *"
   orphanedAwsResources:
     name: orphaned-aws-resources
