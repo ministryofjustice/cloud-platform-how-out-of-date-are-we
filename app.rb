@@ -283,7 +283,7 @@ get "/namespace/:namespace" do
 end
 
 get "/about" do
-  erb :about, locals: { title: "About", updated_at: Date.parse("2020-12-15") }
+  erb :about, locals: { title: "About", updated_at: Date.parse("2020-12-30") }
 end
 
 post "/:docpath" do
