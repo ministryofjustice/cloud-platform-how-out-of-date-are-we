@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: {{ .Values.deployment.containers.webapp.name }}
-          image: {{ .Values.deployment.containers.webapp.image }}
+          image: {{ .Values.deployment.containers.webapp.image }}:{{ .Chart.AppVersion }}
           env:
             - name: RACK_ENV
               value: "production"
