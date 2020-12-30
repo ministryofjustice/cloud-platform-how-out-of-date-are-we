@@ -11,23 +11,23 @@ cronjobs:
     schedule: "23 5 * * *"
   orphanedAwsResources:
     name: orphaned-aws-resources
-    image: "ministryofjustice/cloud-platform-report-orphaned-resources:test"
+    image: ministryofjustice/cloud-platform-report-orphaned-resources:test
     schedule: "57 */6 * * *"
   namespaceCostsReport:
     name: namespace-costs
-    image: "registry.hub.docker.com/ministryofjustice/cloud-platform-cost-calculator:test"
+    image: ministryofjustice/cloud-platform-cost-calculator:test
     schedule: "41 5 * * *"
   hostedServices:
     name: hosted-services
-    image: "ministryofjustice/cloud-platform-hosted-services:test4" # TODO: use official release
+    image: ministryofjustice/cloud-platform-hosted-services:test4 # TODO: use official release
     schedule: "37 4 * * *"
   namespaceUsageReport:
     name: namespace-usage-report
-    image: "registry.hub.docker.com/ministryofjustice/cloud-platform-namespace-usage-reporter:test" # TODO: switch to the 'official' release tag
+    image: ministryofjustice/cloud-platform-namespace-usage-reporter:test # TODO: switch to the 'official' release tag
     schedule: "11 */6 * * *"
   terraformModules:
     name: terraform-modules
-    image: "ministryofjustice/cloud-platform-terraform-modules-checker:test2" # TODO: use official release
+    image: ministryofjustice/cloud-platform-terraform-modules-checker:test2 # TODO: use official release
     schedule: "7 */12 * * *"
   overdueDocumentation:
     name: overdue-documentation
