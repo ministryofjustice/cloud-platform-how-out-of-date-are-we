@@ -1,8 +1,2 @@
 ingress:
   hostname: cloud-platform-reports.apps.live-1.cloud-platform.service.justice.gov.uk
-
-deployment:
-  replicas: 1
-
-dynamodb:
-  secretName: cloud-platform-reports-dynamodb-output
