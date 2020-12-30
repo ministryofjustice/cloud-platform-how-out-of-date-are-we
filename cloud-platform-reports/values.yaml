@@ -1,4 +1,5 @@
 ingress:
+  hostname: reports.cloud-platform.service.justice.gov.uk
   name: cloud-platform-reports-app-ingress
 
 service:
