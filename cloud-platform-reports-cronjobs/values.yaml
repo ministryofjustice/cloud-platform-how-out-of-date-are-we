@@ -1,3 +1,7 @@
+webApplication:
+  apiSecretName: cloud-platform-reports-api-key
+  apiSecretKey: token
+  hostname: https://reports.cloud-platform.service.justice.gov.uk
 cluster:
   fullName: live-1.cloud-platform.service.justice.gov.uk
 cronjobs:
