@@ -1,4 +1,4 @@
-# How out of date are we?
+# Cloud Platform Reports
 
 [![Releases](https://img.shields.io/github/release/ministryofjustice/cloud-platform-how-out-of-date-are-we/all.svg?style=flat-square)](https://github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/releases)
 
