@@ -19,25 +19,23 @@ The web application is deployed to the `live-1` cluster. The cronjobs are deploy
 * `cloud-platform-reports-cronjobs/secrets.yaml` file containing Docker Hub credentials
 * `cloud-platform-reports/secrets.yaml` file defining the web application API key
 
-The web application API key is shared by both the web application and the
+The web application API key is required by both the web application and the
 cronjobs which post the report data. So the
-`cloud-platform-reports/secrets.yaml` file is used when deploying the
-`cloud-platform-reports-cronjobs` helm chart.
+`cloud-platform-reports/secrets.yaml` file is also used when deploying the
+`cloud-platform-reports-cronjobs` helm chart. Equivalent secrets are created in
+both the `live-1/<web app>` and `manager/concourse-main` namespaces.
 
 ## Deploying
 
 ```
-make dev-deploy
+make deploy
 ```
 
 ## Updating
 
 ```
-make dev-upgrade
+make upgrade
 ```
-
-* Add git-crypt to this repo for the dockerhub-credentials secret
-* Use the chart version as the docker image version for all the docker images
 
 ## Data Storage
 
@@ -96,12 +94,14 @@ If the API key doesn't match, the app. will return a 403 error.
 
 ### Developing
 
-If you have a working ruby 2.7 environment, you can run the application locally as follows:
+If you have a working ruby 2.7 environment, you can run the web application locally as follows:
 
 ```
 bundle install
 ./app.rb
 ```
+
+> The cronjobs for both dev and prod are deployed into the same namespace (`manager/concourse-main`). So you need to change the chart name if you want to deploy development cronjobs alongside the existing production cronjobs.
 
 ## Updating the docker images
 
