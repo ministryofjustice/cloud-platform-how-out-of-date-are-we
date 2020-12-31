@@ -14,7 +14,7 @@ spec:
           {{- include "cloud-platform-reports-cronjobs.imagePullSecrets" . | indent 10 }}
           containers:
           - name: repository-checker
-            image: {{ .Values.cronjobs.githubRepositories.image }}
+            image: ministryofjustice/cloud-platform-github-repositories-checker:{{ .Chart.AppVersion }}
             securityContext:
               runAsUser: 1000
             env:

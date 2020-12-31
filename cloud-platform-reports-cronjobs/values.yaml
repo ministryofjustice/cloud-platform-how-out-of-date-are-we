@@ -7,37 +7,28 @@ cluster:
 cronjobs:
   orphanedTerraformStatefiles:
     name: orphaned-terraform-statefiles
-    image: ministryofjustice/cloud-platform-orphaned-terraform-statefiles:{{ .Chart.AppVersion }}
     schedule: "23 5 * * *"
   orphanedAwsResources:
     name: orphaned-aws-resources
-    image: ministryofjustice/cloud-platform-report-orphaned-resources:{{ .Chart.AppVersion }}
     schedule: "57 */6 * * *"
   namespaceCostsReport:
     name: namespace-costs
-    image: ministryofjustice/cloud-platform-cost-calculator:{{ .Chart.AppVersion }}
     schedule: "41 5 * * *"
   hostedServices:
     name: hosted-services
-    image: ministryofjustice/cloud-platform-hosted-services:{{ .Chart.AppVersion }}
     schedule: "37 4 * * *"
   namespaceUsageReport:
     name: namespace-usage-report
-    image: ministryofjustice/cloud-platform-namespace-usage-reporter:{{ .Chart.AppVersion }}
     schedule: "11 */6 * * *"
   terraformModules:
     name: terraform-modules
-    image: ministryofjustice/cloud-platform-terraform-modules-checker:{{ .Chart.AppVersion }}
     schedule: "7 */12 * * *"
   overdueDocumentation:
     name: overdue-documentation
-    image: ministryofjustice/cloud-platform-overdue-documentation-checker:{{ .Chart.AppVersion }}
     schedule: "37 */6 * * *"
   helmWhatup:
     name: helm-whatup
-    image: ministryofjustice/cloud-platform-helm-release-checker:{{ .Chart.AppVersion }}
     schedule: "23 4 * * *"
   githubRepositories:
     name: github-repositories
-    image: ministryofjustice/cloud-platform-github-repositories-checker:{{ .Chart.AppVersion }}
     schedule: "12 5 * * *"

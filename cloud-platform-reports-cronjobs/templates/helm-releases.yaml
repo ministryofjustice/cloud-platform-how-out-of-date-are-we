@@ -14,7 +14,7 @@ spec:
           {{- include "cloud-platform-reports-cronjobs.imagePullSecrets" . | indent 10 }}
           containers:
           - name: helm-whatup
-            image: {{ .Values.cronjobs.helmWhatup.image }}
+            image: ministryofjustice/cloud-platform-helm-release-checker:{{ .Chart.AppVersion }}
             securityContext:
               runAsUser: 1000
             env:

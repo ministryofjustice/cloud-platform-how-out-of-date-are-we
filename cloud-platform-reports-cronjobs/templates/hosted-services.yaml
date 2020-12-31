@@ -13,8 +13,8 @@ spec:
         spec:
           {{- include "cloud-platform-reports-cronjobs.imagePullSecrets" . | indent 10 }}
           containers:
-          - name: orphaned-namespace-checker-image
-            image: "{{ .Values.cronjobs.hostedServices.image }}"
+          - name: hosted-services-image
+            image: ministryofjustice/cloud-platform-hosted-services:{{ .Chart.AppVersion }}
             env:
             - name: KUBECONFIG_AWS_REGION
               value: eu-west-2

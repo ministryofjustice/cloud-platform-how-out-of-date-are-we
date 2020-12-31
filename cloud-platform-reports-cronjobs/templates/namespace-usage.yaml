@@ -14,7 +14,7 @@ spec:
           {{- include "cloud-platform-reports-cronjobs.imagePullSecrets" . | indent 10 }}
           containers:
           - name: namespace-usage-reporter
-            image: {{ .Values.cronjobs.namespaceUsageReport.image }}
+            image: ministryofjustice/cloud-platform-namespace-usage-reporter:{{ .Chart.AppVersion }}
             securityContext:
               runAsUser: 1000
             env:
