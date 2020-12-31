@@ -87,7 +87,7 @@ def render_item_list(params)
   docpath = params.fetch(:docpath)
   key = params.fetch(:key)
   klass = params.fetch(:klass, ItemList)
-  title = params.fetch(:title, "How out of date are we?")
+  title = params.fetch(:title, "Cloud Platform Reports")
 
   template = docpath.to_sym
 
@@ -283,7 +283,7 @@ get "/namespace/:namespace" do
 end
 
 get "/about" do
-  erb :about, locals: { title: "About", updated_at: Date.parse("2020-12-15") }
+  erb :about, locals: { title: "About", updated_at: Date.parse("2020-12-30") }
 end
 
 post "/:docpath" do

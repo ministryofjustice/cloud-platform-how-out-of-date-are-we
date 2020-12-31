@@ -1,0 +1,20 @@
+ingress:
+  hostname: reports.cloud-platform.service.justice.gov.uk
+  name: cloud-platform-reports-app-ingress
+
+service:
+  name: cloud-platform-reports-service
+  port: 4567
+
+deployment:
+  replicas: 1
+  name: cloud-platform-reports
+  labels:
+    app: cloud-platform-reports-app
+  containers:
+    webapp:
+      name: cloud-platform-reports
+      image: ministryofjustice/cloud-platform-how-out-of-date-are-we
+
+dynamodb:
+  secretName: cloud-platform-reports-dynamodb-output

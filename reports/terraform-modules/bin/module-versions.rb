@@ -8,11 +8,11 @@ require "net/http"
 require "open3"
 require "uri"
 
-ORG = "ministryofjustice"
-NAMESPACE_DIR = "namespaces/live-1.cloud-platform.service.justice.gov.uk"
-TF_MODULE_REGEX = "source.*github.com\\/#{ORG}\\/cloud-platform-terraform-.*"
-
-GITHUB_API_URL = "https://api.github.com/graphql"
+ORG = ENV.fetch("ORG")
+NAMESPACE_DIR = ENV.fetch("NAMESPACE_DIR")
+TF_MODULE_REGEX = ENV.fetch("TF_MODULE_REGEX")
+GITHUB_API_URL = ENV.fetch("GITHUB_API_URL")
+GITHUB_TOKEN = ENV.fetch("GITHUB_TOKEN")
 
 ModuleUsage = Struct.new(:namespace, :module, :version, :latest)
 
@@ -70,7 +70,7 @@ def module_usage(line)
     .sub(/"$/, "")
     .split("/")
 
-  namespace = parts[2]
+  namespace = parts[3]
   mod, version = parts.last.split("?ref=")
 
   ModuleUsage.new(namespace, mod, version)
@@ -85,7 +85,7 @@ end
 def latest_version(module_name)
   json = run_query(
     repo_name: File.join(ORG, module_name),
-    token: ENV.fetch("GITHUB_TOKEN")
+    token: GITHUB_TOKEN,
   )
 
   JSON.parse(json)

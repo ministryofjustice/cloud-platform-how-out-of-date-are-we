@@ -1,0 +1,43 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: {{ .Values.cronjobs.orphanedTerraformStatefiles.name }}
+spec:
+  schedule: "{{ .Values.cronjobs.orphanedTerraformStatefiles.schedule }}"
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 100
+      template:
+        spec:
+          {{- include "cloud-platform-reports-cronjobs.imagePullSecrets" . | indent 10 }}
+          containers:
+          - name: orphaned-terraform-statefiles
+            image: "{{ .Values.cronjobs.orphanedTerraformStatefiles.image }}"
+            securityContext:
+              runAsUser: 1000
+            env:
+            {{- include "cloud-platform-reports-cronjobs.awsCredentials" . | indent 12 }}
+            - name: TF_STATE_BUCKET_REGION
+              value: "eu-west-1"
+            - name: TF_STATE_BUCKET_AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: aws-creds
+                  key: access-key-id
+            - name: TF_STATE_BUCKET_AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: aws-creds
+                  key: secret-access-key
+            - name: KOPS_STATE_STORE
+              value: s3://cloud-platform-kops-state
+            {{- include "cloud-platform-reports-cronjobs.hoodaw-credentials" . | indent 12 }}
+            args:
+              - /bin/sh
+              - -c
+              - |-
+                cd /app
+                ./bin/post-data.sh
+          restartPolicy: OnFailure

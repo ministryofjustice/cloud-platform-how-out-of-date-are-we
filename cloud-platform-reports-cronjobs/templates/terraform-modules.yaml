@@ -1,0 +1,35 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: {{ .Values.cronjobs.terraformModules.name }}
+spec:
+  schedule: "{{ .Values.cronjobs.terraformModules.schedule }}"
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 100
+      template:
+        spec:
+          {{- include "cloud-platform-reports-cronjobs.imagePullSecrets" . | indent 10 }}
+          containers:
+          - name: terraform-modules-checker
+            image: "{{ .Values.cronjobs.terraformModules.image }}"
+            env:
+            {{- include "cloud-platform-reports-cronjobs.hoodaw-credentials" . | indent 12 }}
+            - name: ORG
+              value: "ministryofjustice"
+            - name: NAMESPACE_DIR
+              value: "cloud-platform-environments/namespaces/{{ .Values.cluster.fullName }}"
+            - name: TF_MODULE_REGEX
+              value: "source.*github.com\\/${ORG}\\/cloud-platform-terraform-.*"
+            - name: GITHUB_API_URL
+              value: "https://api.github.com/graphql"
+            - name: GITHUB_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: how-out-of-date-are-we-github-token
+                  key: token
+            args:
+              - /app/bin/post-data.sh
+          restartPolicy: OnFailure

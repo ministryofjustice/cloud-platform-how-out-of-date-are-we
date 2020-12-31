@@ -1,0 +1,6 @@
+apiVersion: v2
+name: cloud-platform-reports
+description: Cloud Platform Reports web application and data providers
+type: application
+version: 0.1.0
+appVersion: "test"

@@ -1,0 +1,25 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: {{ .Values.cronjobs.namespaceCostsReport.name }}
+spec:
+  schedule: "{{ .Values.cronjobs.namespaceCostsReport.schedule }}"
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 100
+      template:
+        spec:
+          {{- include "cloud-platform-reports-cronjobs.imagePullSecrets" . | indent 10 }}
+          containers:
+          - name: namespace-cost-calculator
+            image: "{{ .Values.cronjobs.namespaceCostsReport.image }}"
+            securityContext:
+              runAsUser: 1000
+            env:
+            {{- include "cloud-platform-reports-cronjobs.awsCredentials" . | indent 12 }}
+            {{- include "cloud-platform-reports-cronjobs.hoodaw-credentials" . | indent 12 }}
+            args:
+              - /app/post-namespace-costs.rb
+          restartPolicy: OnFailure

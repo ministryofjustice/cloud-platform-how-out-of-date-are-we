@@ -38,7 +38,8 @@ def namespaces_with_helm_releases
 end
 
 def helm_releases_in_namespace(namespace)
-  JSON.parse(execute("helm whatup -n #{namespace} -o json", true))
+  hash = JSON.parse(execute("helm whatup -n #{namespace} -o json", true))
+  hash.fetch("releases", [])
 rescue JSON::ParserError
   []
 end

@@ -1,4 +1,4 @@
-name: Publish docker image
+name: Publish docker images
 
 on:
   release:
@@ -6,33 +6,89 @@ on:
 
 jobs:
   push_to_registry:
-    name: Push image to docker hub
+    name: Push images to docker hub
     runs-on: ubuntu-latest
     steps:
       - name: checkout
         uses: actions/checkout@v2
       - name: Push webapp to docker hub
-        uses: docker/build-push-action@v1
+        uses: docker/build-push-action@v2.2.1
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
           repository: ministryofjustice/cloud-platform-how-out-of-date-are-we
           tag_with_ref: true
-      - name: Push updater to docker hub
-        uses: docker/build-push-action@v1
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-          path: updater-image
-          repository: ministryofjustice/cloud-platform-how-out-of-date-are-we-updater
-          tag_with_ref: true
       - name: Compile the dashboard-reporter script
         run: cd dashboard-reporter/; make
       - name: Push dashboard-reporter to docker hub
-        uses: docker/build-push-action@v1
+        uses: docker/build-push-action@v2.2.1
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
           path: dashboard-reporter
           repository: ministryofjustice/cloud-platform-how-out-of-date-are-we-reporter
+          tag_with_ref: true
+      - name: Push namespace-usage-reporter to docker hub
+        uses: docker/build-push-action@v2.2.1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          path: reports/namespace-usage
+          repository: ministryofjustice/cloud-platform-namespace-usage-reporter
+          tag_with_ref: true
+      - name: Push terraform-module-checker to docker hub
+        uses: docker/build-push-action@v2.2.1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          path: reports/terraform-modules
+          repository: ministryofjustice/cloud-platform-terraform-modules-checker
+          tag_with_ref: true
+      - name: Push overdue-documentation-checker to docker hub
+        uses: docker/build-push-action@v2.2.1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          path: reports/documentation
+          repository: ministryofjustice/cloud-platform-overdue-documentation-checker
+          tag_with_ref: true
+      - name: Push helm-release-checker to docker hub
+        uses: docker/build-push-action@v2.2.1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          path: reports/documentation
+          repository: ministryofjustice/cloud-platform-helm-release-checker
+          tag_with_ref: true
+      - name: Push orphaned-aws-resources checker to docker hub
+        uses: docker/build-push-action@v2.2.1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          path: reports/orphaned-aws-resources
+          repository: ministryofjustice/cloud-platform-report-orphaned-resources
+          tag_with_ref: true
+      - name: Push orphaned-terraform-statefiles checker to docker hub
+        uses: docker/build-push-action@v2.2.1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          path: reports/orphaned-terraform-statefiles
+          repository: ministryofjustice/cloud-platform-orphaned-terraform-statefiles
+          tag_with_ref: true
+      - name: Push namespace cost calculator to docker hub
+        uses: docker/build-push-action@v2.2.1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          path: reports/namespace-costs
+          repository: ministryofjustice/cloud-platform-cost-calculator
+          tag_with_ref: true
+      - name: Push hosted-services image to docker hub
+        uses: docker/build-push-action@v2.2.1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          path: reports/hosted-services
+          repository: ministryofjustice/cloud-platform-hosted-services
           tag_with_ref: true

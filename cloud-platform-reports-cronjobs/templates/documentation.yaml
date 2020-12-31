@@ -1,0 +1,25 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: {{ .Values.cronjobs.overdueDocumentation.name }}
+spec:
+  schedule: "{{ .Values.cronjobs.overdueDocumentation.schedule }}"
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 100
+      template:
+        spec:
+          {{- include "cloud-platform-reports-cronjobs.imagePullSecrets" . | indent 10 }}
+          containers:
+          - name: overdue-documentation-checker
+            image: "{{ .Values.cronjobs.overdueDocumentation.image }}"
+            env:
+            {{- include "cloud-platform-reports-cronjobs.hoodaw-credentials" . | indent 12 }}
+            - name: DOCUMENTATION_SITES
+              value: "https://runbooks.cloud-platform.service.justice.gov.uk https://user-guide.cloud-platform.service.justice.gov.uk"
+            args:
+              - /app/bin/post-data.sh
+          restartPolicy: OnFailure
+

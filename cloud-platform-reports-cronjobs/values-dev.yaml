@@ -1,0 +1,23 @@
+webApplication:
+  apiSecretName: hoodaw-creds
+  apiSecretKey: api_key
+  hostname: https://cloud-platform-reports.apps.live-1.cloud-platform.service.justice.gov.uk
+cronjobs:
+  orphanedTerraformStatefiles:
+    name: dev-orphaned-terraform-statefiles
+  orphanedAwsResources:
+    name: dev-orphaned-aws-resources
+  namespaceCostsReport:
+    name: dev-namespace-costs
+  hostedServices:
+    name: dev-hosted-services
+  namespaceUsageReport:
+    name: dev-namespace-usage-report
+  terraformModules:
+    name: dev-terraform-modules
+  overdueDocumentation:
+    name: dev-overdue-documentation
+  helmWhatup:
+    name: dev-helm-whatup
+  githubRepositories:
+    name: dev-github-repositories
