@@ -2,7 +2,7 @@
 
 [![Releases](https://img.shields.io/github/release/ministryofjustice/cloud-platform-how-out-of-date-are-we/all.svg?style=flat-square)](https://github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/releases)
 
-Various reports about the Cloud Platform, displayed via a web application.
+Various reports about the Cloud Platform, [displayed via a web application.](https://reports.cloud-platform.service.justice.gov.uk)
 
 See the [about page](views/about.erb) for more details.
 
@@ -124,6 +124,6 @@ This will trigger a github action to build all the docker images (web applicatio
 [release]: https://github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/releases
 
 ---
-last_reviewed_on: 2020-12-29
+last_reviewed_on: 2020-12-31
 review_in: 3 months
 ---
