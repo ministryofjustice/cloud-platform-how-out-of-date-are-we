@@ -33,9 +33,21 @@ make deploy
 
 ## Updating
 
+To update this application:
+
+1. Make your code changes, PR them and merge the PR once approved
+1. Create a new release [via the github UI](https://github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/releases)
+1. Edit `cloud-platform-reports/Chart.yaml` and `cloud-platform-reports-cronjobs/Chart.yaml` - change `appVersion` to the new release number
+1. Update the application by running:
+
 ```
 make upgrade
 ```
+
+> When a new release is created, a github action rebuilds all the project's
+> docker images, and tags them with the release number. The `appVersion` is
+> used in the template files so that the same version of the relevant docker
+> image is used for each sub-component of the application.
 
 ## Data Storage
 
