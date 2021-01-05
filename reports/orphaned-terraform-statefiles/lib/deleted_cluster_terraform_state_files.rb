@@ -14,6 +14,8 @@ class DeletedClusterTerraformStateFiles
     "terraform.tfstate", # AWS account baseline?
   ]
 
+  S3_URL = "https://s3.console.aws.amazon.com/s3/object"
+
   def initialize(params)
     @s3client = params.fetch(:s3)
     @bucket = params.fetch(:bucket)
@@ -31,7 +33,8 @@ class DeletedClusterTerraformStateFiles
   private
 
   def exclude_current_clusters(list)
-    list.reject do |file|
+    list.reject do |hash|
+      file = hash.fetch(:file)
       cluster = file.split("/")[1]
       current_clusters.include?(cluster)
     end
@@ -42,10 +45,15 @@ class DeletedClusterTerraformStateFiles
   end
 
   def exclude_non_cluster_files(list)
-    list.reject do |file|
+    list.reject do |hash|
+      file = hash.fetch(:file)
       prefix = file.split("/").first
       IGNORE_PREFIXES.include?(prefix)
     end
+  end
+
+  def url(file)
+    "#{S3_URL}/#{bucket}?region=#{cluster_region}&prefix=#{file}"
   end
 
   def all_statefiles_in_bucket
@@ -53,5 +61,6 @@ class DeletedClusterTerraformStateFiles
       .objects
       .collect(&:key)
       .find_all { |key| key =~ /terraform.tfstate$/ }
+      .map { |file| {file: file, url: url(file)} }
   end
 end
