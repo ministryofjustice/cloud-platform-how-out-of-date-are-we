@@ -6,6 +6,8 @@ module OrphanedResources
     EC2_HOME = "https://eu-west-2.console.aws.amazon.com/ec2/v2/home?region=eu-west-2"
     RDS_HOME = "https://eu-west-2.console.aws.amazon.com/rds/home?region=eu-west-2"
 
+    KOPS_CLUSTER_INSTANCES_URL = "https://eu-west-2.console.aws.amazon.com/ec2/v2/home?region=eu-west-2#Instances:tag:KubernetesCluster"
+
     NAT_GATEWAY_URL = VPC_HOME + "#NatGatewayDetails:natGatewayId="
     INTERNET_GATEWAY_URL = VPC_HOME + "#InternetGateway:internetGatewayId="
     ROUTE_TABLE_URL = VPC_HOME + "#RouteTables:search="
@@ -48,7 +50,11 @@ module OrphanedResources
                             end
 
                             h.map do |cluster, instances|
-                              { cluster: cluster, instances: instances }
+                              {
+                                cluster: cluster,
+                                instances: instances,
+                                href: [KOPS_CLUSTER_INSTANCES_URL, cluster].join("="),
+                              }
                             end
                           end
     end
