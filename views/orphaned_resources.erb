@@ -8,7 +8,11 @@
   <h2>Kops Cluster EC2 Intances</h2>
   <ul>
     <% kops_clusters.each do |k| %>
-      <li><%= %[#{k["cluster"]} (#{k["instances"]} instances)] %></li>
+      <li>
+        <a href="<%= k["href"] %>">
+          <%= %[#{k["cluster"]} (#{k["instances"]} instances)] %>
+        </a>
+      </li>
     <% end %>
   </ul>
 
