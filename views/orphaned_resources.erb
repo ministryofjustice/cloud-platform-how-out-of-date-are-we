@@ -4,6 +4,18 @@
 </p>
 
 <% if list.is_a?(Hash) %>
+  <% kops_clusters = list.delete("kops_cluster") %>
+  <h2>Kops Cluster EC2 Intances</h2>
+  <ul>
+    <% kops_clusters.each do |k| %>
+      <li>
+        <a href="<%= k["href"] %>">
+          <%= %[#{k["cluster"]} (#{k["instances"]} instances)] %>
+        </a>
+      </li>
+    <% end %>
+  </ul>
+
   <% list.keys.sort.each do |resource_type| %>
     <h2><%= snake_case_to_capitalised(resource_type) %></h2>
     <ul>

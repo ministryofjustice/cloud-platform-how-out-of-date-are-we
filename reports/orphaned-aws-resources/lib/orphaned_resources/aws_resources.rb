@@ -6,6 +6,8 @@ module OrphanedResources
     EC2_HOME = "https://eu-west-2.console.aws.amazon.com/ec2/v2/home?region=eu-west-2"
     RDS_HOME = "https://eu-west-2.console.aws.amazon.com/rds/home?region=eu-west-2"
 
+    KOPS_CLUSTER_INSTANCES_URL = "https://eu-west-2.console.aws.amazon.com/ec2/v2/home?region=eu-west-2#Instances:tag:KubernetesCluster"
+
     NAT_GATEWAY_URL = VPC_HOME + "#NatGatewayDetails:natGatewayId="
     INTERNET_GATEWAY_URL = VPC_HOME + "#InternetGateway:internetGatewayId="
     ROUTE_TABLE_URL = VPC_HOME + "#RouteTables:search="
@@ -21,11 +23,40 @@ module OrphanedResources
       "integrationtest.service.justice.gov.uk"
     ]
 
+    # The presence of this tag indicates that an EC2 instance is part of a kops cluster
+    KOPS_INSTANCE_TAG = "kops.k8s.io/instancegroup"
+    KOPS_CLUSTER_TAG = "KubernetesCluster"
+
     def initialize(params)
       @s3client = params.fetch(:s3client)
       @ec2client = params.fetch(:ec2client)
       @route53client = params.fetch(:route53client)
       @rdsclient = params.fetch(:rdsclient)
+    end
+
+    # EC2 instances which have a `kops.k8s.io/instancegroup` tag belong to a kops cluster.
+    # The cluster name is the value of the `KubernetesCluster` tag
+    def kops_clusters
+      @_kops_clusters ||= begin
+                            resource = Aws::EC2::Resource.new(client: ec2client)
+
+                            h = resource.instances.inject({}) do |hash, i|
+                              tags = i.tags.map(&:key)
+                              if tags.include?(KOPS_INSTANCE_TAG)
+                                cluster = i.tags.find {|t| t.key == "KubernetesCluster"}.value
+                                hash[cluster] = hash[cluster].to_i + 1
+                              end
+                              hash
+                            end
+
+                            h.map do |cluster, instances|
+                              {
+                                cluster: cluster,
+                                instances: instances,
+                                href: [KOPS_CLUSTER_INSTANCES_URL, cluster].join("="),
+                              }
+                            end
+                          end
     end
 
     def vpcs

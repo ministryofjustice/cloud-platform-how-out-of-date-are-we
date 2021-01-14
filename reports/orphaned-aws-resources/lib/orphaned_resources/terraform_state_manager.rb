@@ -2,6 +2,8 @@ module OrphanedResources
   class TerraformStateManager < Lister
     attr_reader :s3client, :bucket, :cache_dir
 
+    CLUSTER_SUFFIX = "cloud-platform.service.justice.gov.uk"
+
     def initialize(args)
       @s3client = args.fetch(:s3client)
       @bucket = args.fetch(:bucket)
@@ -10,6 +12,17 @@ module OrphanedResources
 
     def local_statefiles
       @files ||= download_files
+    end
+
+    def kops_clusters
+      cluster_names = local_statefiles
+        .grep(/^state-files\/cloud-platform\//)
+        .map {|f| f.split("/")[2] }  # e.g. "live-1", "cp-0401-1622"
+        .map { |c| [c, CLUSTER_SUFFIX].join(".") } # e.g. "live-1.cloud-platform.service.justice.gov.uk"
+
+      # Return a list of tuples with the same structure as the one we get from
+      # AwsResources#kops_clusters
+      cluster_names.map { |c| { cluster: c, instances: nil } }
     end
 
     def vpcs

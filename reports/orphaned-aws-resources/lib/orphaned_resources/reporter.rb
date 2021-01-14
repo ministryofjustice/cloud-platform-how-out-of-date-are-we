@@ -29,6 +29,7 @@ module OrphanedResources
         route_table_associations: compare(:route_table_associations),
         rds: compare(:rds),
         rds_cluster: compare(:rds_cluster),
+        kops_cluster: orphaned_kops_clusters,
       }
     end
 
@@ -39,6 +40,13 @@ module OrphanedResources
         @aws.send(method),
         @terraform.send(method)
       ).sort
+    end
+
+    def orphaned_kops_clusters
+      a = @aws.kops_clusters
+      t = @terraform.kops_clusters
+      orphaned = (a.map { |i| i[:cluster]}) - (t.map { |i| i[:cluster]})
+      a.filter { |c| orphaned.include?(c[:cluster]) }
     end
   end
 end
