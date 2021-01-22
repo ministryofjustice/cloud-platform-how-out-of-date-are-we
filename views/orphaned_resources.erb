@@ -5,7 +5,7 @@
 
 <% if list.is_a?(Hash) %>
   <% kops_clusters = list.delete("kops_cluster") %>
-  <h2>Kops Cluster EC2 Intances</h2>
+  <h2>Kops Cluster EC2 Instances</h2>
   <ul>
     <% kops_clusters.each do |k| %>
       <li>
