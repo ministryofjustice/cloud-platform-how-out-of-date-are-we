@@ -1,0 +1,41 @@
+name: Release
+on:
+  #release:
+  #  types: [published]
+  #TODO: remove workflow_dispatch
+  workflow_dispatch:
+    inputs:
+      release:
+        description: Release tag
+        required: true
+
+env:
+  KUBE_CLUSTER: ${{ secrets.KUBE_CLUSTER }}
+  KUBE_NAMESPACE: ${{ secrets.KUBE_NAMESPACE }}
+
+jobs:
+  main:
+    name: Push images to docker hub
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: Authenticate to live-1
+        env:
+          KUBE_CERT: ${{ secrets.KUBE_CERT }}
+          KUBE_TOKEN: ${{ secrets.KUBE_TOKEN }}
+        run: |
+          echo "${KUBE_CERT}" > ca.crt
+          kubectl config set-cluster ${KUBE_CLUSTER} --certificate-authority=./ca.crt --server=https://api.${KUBE_CLUSTER}
+          kubectl config set-credentials deploy-user --token=${KUBE_TOKEN}
+          kubectl config set-context ${KUBE_CLUSTER} --cluster=${KUBE_CLUSTER} --user=deploy-user --namespace=${KUBE_NAMESPACE}
+          kubectl config use-context ${KUBE_CLUSTER}
+      - name: Prepare Helm Chart.yaml
+        run: export RELEASE=$(echo ${github.event.inputs.release} | sed 's/refs.tags.//') && cat cloud-platform-reports/Chart.tpl | envsubst > cloud-platform-reports/Chart.yaml # TODO: GITHUB_REF
+      - name: Deploy Helm chart
+        run: |
+          helm upgrade \
+            $(helm ls --short --namespace ${KUBE_NAMESPACE} | grep cloud-platform-reports) \
+            --namespace ${KUBE_NAMESPACE} \
+            ./cloud-platform-reports \
+            --set env.CLOUD_PLATFORM_REPORTS_API_KEY="${CLOUD_PLATFORM_REPORTS_API_KEY}"
