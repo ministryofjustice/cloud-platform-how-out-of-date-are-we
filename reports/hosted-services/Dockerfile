@@ -1,6 +1,6 @@
 FROM hashicorp/terraform:0.12.17 AS terraform
 
-FROM ruby:2.5-alpine
+FROM ruby:2.7-alpine
 
 ENV \
   KUBECTL_VERSION=1.16.3
@@ -21,7 +21,9 @@ WORKDIR /app
 
 COPY Gemfile Gemfile.lock ./
 
-RUN bundle install --without development test
+RUN gem install bundler:2.2.4
+RUN bundle config set without "development test"
+RUN bundle install
 
 COPY lib ./lib
 COPY bin ./bin
