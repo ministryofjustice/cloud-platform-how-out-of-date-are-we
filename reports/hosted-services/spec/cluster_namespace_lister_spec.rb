@@ -1,3 +1,5 @@
+require "spec_helper"
+
 RSpec.describe ClusterNamespaceLister do
   let(:name_a) { double(name: "aaa") }
   let(:name_b) { double(name: "bbb") }
