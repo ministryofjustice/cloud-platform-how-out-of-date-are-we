@@ -33,4 +33,15 @@ RUN helm plugin install https://github.com/fabmation-gmbh/helm-whatup
 # Add helm repos
 RUN helm repo add jetstack https://charts.jetstack.io/; \
   helm repo add concourse https://concourse-charts.storage.googleapis.com/; \
-  helm repo add cloud-platform https://ministryofjustice.github.io/cloud-platform-helm-charts
+  helm repo add cloud-platform https://ministryofjustice.github.io/cloud-platform-helm-charts; \
+  helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx; \
+  helm repo add prometheus https://prometheus-community.github.io/helm-charts; \
+  helm repo add autoscaler https://kubernetes.github.io/autoscaler; \
+  helm repo add vmware https://kubernetes-charts.banzaicloud.com; \
+  helm repo add banzaicloud https://kubernetes-charts.banzaicloud.com; \
+  helm repo add kiam https://uswitch.github.io/kiam-helm-charts/charts; \
+  helm repo add bitnami https://charts.bitnami.com/bitnami; \
+  helm repo add kube-state-metrics https://kubernetes.github.io/kube-state-metrics; \
+  helm repo add grafana https://grafana.github.io/helm-charts; \
+  helm repo add eks https://aws.github.io/eks-charts; \
+  helm repo add hashicorp https://helm.releases.hashicorp.com
