@@ -11,5 +11,5 @@ if report == ""
 else
   puts report # <-- so we see it in the concourse log
   File.open(output_file, "w") { |f| f.puts report }
-  exit 1
+  exit 0
 end
