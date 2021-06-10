@@ -16,8 +16,8 @@ module OrphanedResources
 
     def kops_clusters
       cluster_names = local_statefiles
-        .grep(/^state-files\/cloud-platform\//)
-        .map {|f| f.split("/")[2] }  # e.g. "live-1", "cp-0401-1622"
+        .grep(/^state-files\/aws-accounts\/cloud-platform-aws\/vpc\/kops\//)
+        .map {|f| f.split("/")[5] }  # e.g. "live-1", "cp-0401-1622"
         .map { |c| [c, CLUSTER_SUFFIX].join(".") } # e.g. "live-1.cloud-platform.service.justice.gov.uk"
 
       # Return a list of tuples with the same structure as the one we get from
