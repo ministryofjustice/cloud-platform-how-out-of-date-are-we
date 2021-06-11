@@ -7,11 +7,16 @@ class DeletedClusterTerraformStateFiles
   # specific cluster, and which should therefore not be reported as orphaned by
   # this code
   IGNORE_PREFIXES = [
+    "cloud-platform-dsd",
     "cloud-platform-environments",
     "cloud-platform-concourse",
     "concourse-pipelines",
     "global-resources",
+    "account",
     "terraform.tfstate", # AWS account baseline?
+  ]
+  IGNORE_SUFFIXES = [
+    "account"
   ]
 
   S3_URL = "https://s3.console.aws.amazon.com/s3/object"
@@ -32,10 +37,13 @@ class DeletedClusterTerraformStateFiles
 
   private
 
+  # exclude clusters by fetching the cluster name from the given path
+  # This assumes the cluster name pattern as XX/YY/ZZ/<cluster-name>/terraform.tfstate
   def exclude_current_clusters(list)
     list.reject do |hash|
       file = hash.fetch(:file)
-      cluster = file.split("/")[1]
+      first_part, _, last_part = file.rpartition('/')
+      path, _, cluster = first_part.rpartition('/')
       current_clusters.include?(cluster)
     end
   end
@@ -47,8 +55,10 @@ class DeletedClusterTerraformStateFiles
   def exclude_non_cluster_files(list)
     list.reject do |hash|
       file = hash.fetch(:file)
-      prefix = file.split("/").first
-      IGNORE_PREFIXES.include?(prefix)
+      prefix = file.split("/").first # gets the first folder name of the given path
+      first_part, _, last_part = file.rpartition('/') # get the folder path trimming the terraform.tfstate
+      suffix = first_part.split("/").last # get the last folder name of the given path
+      IGNORE_PREFIXES.include?(prefix) || IGNORE_SUFFIXES.include?(suffix)
     end
   end
 
