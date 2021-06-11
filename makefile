@@ -1,4 +1,4 @@
-IMAGE := ministryofjustice/cloud-platform-how-out-of-date-are-we:2.11
+IMAGE := ministryofjustice/cloud-platform-how-out-of-date-are-we:3.7
 DEV_NAMESPACE := cloud-platform-reports-dev
 PROD_NAMESPACE := cloud-platform-reports-prod
 CRONJOB_NAMESPACE := concourse-main
@@ -12,7 +12,7 @@ upgrade:
 	make upgrade-cronjobs
 
 deploy-webapp:
-	kubectl config use-context live-1 \
+	kubectl config use-context live-1.cloud-platform.service.justice.gov.uk \
 	  && helm install \
 			--generate-name \
 			--namespace $(PROD_NAMESPACE) \
@@ -20,7 +20,7 @@ deploy-webapp:
 			--values cloud-platform-reports/secrets.yaml
 
 deploy-cronjobs:
-	kubectl config use-context manager \
+	kubectl config use-context arn:aws:eks:eu-west-2:754256621582:cluster/manager \
 		&& helm install \
 			--generate-name \
 			--namespace $(CRONJOB_NAMESPACE) \
@@ -29,7 +29,7 @@ deploy-cronjobs:
 			--values cloud-platform-reports-cronjobs/secrets.yaml
 
 upgrade-webapp:
-	kubectl config use-context live-1 \
+	kubectl config use-context live-1.cloud-platform.service.justice.gov.uk \
 		&& helm upgrade \
 			$$(helm ls --short --namespace $(PROD_NAMESPACE) | grep cloud-platform-reports) \
 			--namespace $(PROD_NAMESPACE) \
@@ -37,7 +37,7 @@ upgrade-webapp:
 			--values cloud-platform-reports/secrets.yaml
 
 upgrade-cronjobs:
-	kubectl config use-context manager \
+	kubectl config use-context arn:aws:eks:eu-west-2:754256621582:cluster/manager \
 		&& helm upgrade \
 			$$(helm ls --short --namespace $(CRONJOB_NAMESPACE) | grep cloud-platform-reports-cronjobs) \
 			--namespace $(CRONJOB_NAMESPACE) \
@@ -68,7 +68,7 @@ dev-deploy-cronjobs:
 			--generate-name \
 			--namespace $(CRONJOB_NAMESPACE) \
 			./cloud-platform-reports-cronjobs \
-			--values cloud-platform-reports-cronjobs/values-dev.yaml \
+			--values cloud-platform-reports-cronjobs/values.yaml \
 			--values cloud-platform-reports-cronjobs/secrets.yaml
 
 dev-upgrade-webapp:
