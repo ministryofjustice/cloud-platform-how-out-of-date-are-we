@@ -10,11 +10,12 @@ See the [about page](views/about.erb) for more details.
 
 The application consists of 2 Helm charts - one for the [web application](cloud-platform-reports), and one for the [cronjobs](cloud-platform-reports-cronjobs) which provide the data.
 
-The web application is deployed to the `live-1` cluster. The cronjobs are deployed to the `concourse-main` namespace of the `manager` cluster.
+The web application is deployed to the `live` cluster. The cronjobs are deployed to the `concourse-main` namespace of the `manager` cluster.
 
 ## Pre-requisites
 
-* `live-1` kube context
+* access to perform `awscli` commands in the account `cloud-platform-aws`
+* `live` kube context
 * `manager` kube context
 * `cloud-platform-reports-cronjobs/secrets.yaml` file containing Docker Hub credentials
 * `cloud-platform-reports/secrets.yaml` file defining the web application API key
@@ -23,7 +24,7 @@ The web application API key is required by both the web application and the
 cronjobs which post the report data. So the
 `cloud-platform-reports/secrets.yaml` file is also used when deploying the
 `cloud-platform-reports-cronjobs` helm chart. Equivalent secrets are created in
-both the `live-1/<web app>` and `manager/concourse-main` namespaces.
+both the `live/<web app>` and `manager/concourse-main` namespaces.
 
 ## Deploying
 
