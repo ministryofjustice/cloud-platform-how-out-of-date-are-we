@@ -12,7 +12,7 @@ upgrade:
 	make upgrade-cronjobs
 
 deploy-webapp:
-	kubectl config use-context live-1 \
+	aws eks update-kubeconfig --name live \
 	  && helm install \
 			--generate-name \
 			--namespace $(PROD_NAMESPACE) \
@@ -54,7 +54,7 @@ dev-upgrade:
 	make dev-upgrade-cronjobs
 
 dev-deploy-webapp:
-	kubectl config use-context live-1 \
+	aws eks update-kubeconfig --name live \
 	  && helm install \
 			--generate-name \
 			--namespace $(DEV_NAMESPACE) \
