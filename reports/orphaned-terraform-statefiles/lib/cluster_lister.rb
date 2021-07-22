@@ -14,6 +14,13 @@ class ClusterLister
 
   def kops_clusters
     json = `kops get clusters --output json`
+
+    # If the output json has one cluster it doesnot enclose [] and hence map cannot 
+    # dig into metadata. Check if has enclosed [] if not add a []
+    if json.chr != '[' 
+      json = "[" + json + "]"
+    end
+
     JSON.parse(json)
       .map {|h| h.dig("metadata", "name")}
       .map {|str| str.split(".").first}
