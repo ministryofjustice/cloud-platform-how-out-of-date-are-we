@@ -1,34 +1,25 @@
-FROM ruby:2.7-alpine
-
-ENV \
-  KUBECTL_VERSION=1.18.3
-
-# Install pre-requisites for building unf_ext gem
-RUN apk --update add --virtual build_deps \
-    build-base ruby-dev libc-dev linux-headers \
-    git \
-    curl
-
-# Install kubectl
-RUN curl -sLo /usr/local/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v${KUBECTL_VERSION}/bin/linux/amd64/kubectl
-
-# Ensure everything is executable
-RUN chmod +x /usr/local/bin/*
+FROM golang:1.16-buster AS build
 
 WORKDIR /app
 
-# COPY Gemfile Gemfile.lock ./
+COPY go.mod ./
+COPY go.sum ./
+RUN go mod download
 
-RUN gem install bundler:2.2.4
-RUN bundle config set without "development test"
-RUN bundle install
+COPY *.go ./
 
-# COPY lib ./lib
-COPY bin ./bin
+RUN go build -o /ingress-annotation
 
-RUN addgroup -g 1000 -S appgroup \
-  && adduser -u 1000 -S appuser -G appgroup
+##
+## Run
+##
 
-RUN chown -R appuser:appgroup /app
+FROM gcr.io/distroless/base-debian10
 
-USER 1000
+WORKDIR /
+
+COPY --from=build /ingress-annotation /ingress-annotation
+
+USER nonroot:nonroot
+
+ENTRYPOINT ["/ingress-annotation"]
