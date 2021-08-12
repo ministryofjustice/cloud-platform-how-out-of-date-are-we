@@ -6,6 +6,8 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"net/http"
+	"os"
 	"path/filepath"
 
 	v1 "k8s.io/api/networking/v1"
@@ -15,8 +17,15 @@ import (
 	"k8s.io/client-go/util/homedir"
 )
 
+var (
+	hoodawApiKey = flag.String("hoodawAPIKey", os.Getenv("HOODAW_API_KEY"), "API key to post data to the 'How out of date are we' API")
+	hoodawHost   = flag.String("hoodawHost", os.Getenv("HOODAW_HOST"), "Hostname of the 'How out of date are we' API")
+)
+
 func main() {
 	var kubeconfig *string
+	hoodawEndpoint := "/ingress-weighting"
+
 	if home := homedir.HomeDir(); home != "" {
 		kubeconfig = flag.String("kubeconfig", filepath.Join(home, ".kube", "config"), "Absolute path to the kubeconfig file.")
 	} else {
@@ -52,4 +61,18 @@ func main() {
 
 	jsonStr, err := json.Marshal(m)
 	fmt.Println(string(jsonStr))
+
+	req, err := http.NewRequest("POST", *hoodawHost+*&hoodawEndpoint, nil)
+
+	req.Header.Add("X-API-KEY", *hoodawApiKey)
+	req.Header.Add("Content-Type", "application/json")
+
+	client := &http.Client{}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatalln("Error on POST response. \n", err)
+	}
+
+	defer resp.Body.Close()
 }
