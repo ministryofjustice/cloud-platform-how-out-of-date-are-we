@@ -10,9 +10,9 @@ import (
 	"os"
 	"path/filepath"
 
-	v1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+	_ "k8s.io/client-go/plugin/pkg/client/auth/oidc"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/homedir"
 )
@@ -34,7 +34,6 @@ func main() {
 	flag.Parse()
 
 	// use the current context in kubeconfig
-
 	config, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
 	if err != nil {
 		log.Println(err.Error())
@@ -46,16 +45,18 @@ func main() {
 		log.Println(err.Error())
 	}
 
-	ingress, err := clientset.NetworkingV1().Ingresses("").List(context.TODO(), metav1.ListOptions{})
+	ingress, err := clientset.NetworkingV1beta1().Ingresses("").List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		log.Println(err.Error())
 	}
 
 	// For each ingress resource, check
-	m := make(map[string]v1.IngressTLS)
+	m := make(map[string][]string)
 	for _, i := range ingress.Items {
 		if _, ok := i.Annotations["external-dns.alpha.kubernetes.io/aws-weight"]; !ok {
-			m[i.GetNamespace()+"/"+i.GetName()] = i.Spec.TLS[0]
+			for _, v := range i.Spec.TLS {
+				m[i.GetNamespace()+"/"+i.GetName()] = v.Hosts
+			}
 		}
 	}
 
