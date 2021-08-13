@@ -8,39 +8,60 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"path/filepath"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/oidc"
 	"k8s.io/client-go/tools/clientcmd"
-	"k8s.io/client-go/util/homedir"
 )
 
 var (
-	hoodawApiKey = flag.String("hoodawAPIKey", os.Getenv("HOODAW_API_KEY"), "API key to post data to the 'How out of date are we' API")
-	hoodawHost   = flag.String("hoodawHost", os.Getenv("HOODAW_HOST"), "Hostname of the 'How out of date are we' API")
+	hoodawApiKey   = flag.String("hoodawAPIKey", os.Getenv("HOODAW_API_KEY"), "API key to post data to the 'How out of date are we' API")
+	hoodawHost     = flag.String("hoodawHost", os.Getenv("HOODAW_HOST"), "Hostname of the 'How out of date are we' API")
+	bucket         = flag.String("bucket", os.Getenv("KUBECONFIG_S3_BUCKET"), "AWS S3 bucket for kubeconfig")
+	configFile     = flag.String("configFile", os.Getenv("KUBECONFIG_S3_KEY"), "Name of kubeconfig file in S3 bucket")
+	hoodawEndpoint = "/ingress-weighting"
 )
 
 func main() {
-	var kubeconfig *string
-	hoodawEndpoint := "/ingress-weighting"
-
-	if home := homedir.HomeDir(); home != "" {
-		kubeconfig = flag.String("kubeconfig", filepath.Join(home, ".kube", "config"), "Absolute path to the kubeconfig file.")
-	} else {
-		kubeconfig = flag.String("kubeconfig", "", "Absolute path to the kubeconfig file.")
-	}
 	flag.Parse()
 
+	buff := &aws.WriteAtBuffer{}
+	downloader := s3manager.NewDownloader(session.New(&aws.Config{
+		Region: aws.String("eu-west-2"),
+	}))
+
+	numBytes, err := downloader.Download(buff, &s3.GetObjectInput{
+		Bucket: aws.String(*bucket),
+		Key:    aws.String(*configFile),
+	})
+
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+	if numBytes < 1 {
+		log.Fatalln("The file downloaded is incorrect.")
+	}
+
+	data := buff.Bytes()
+
 	// use the current context in kubeconfig
-	config, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
+	config, err := clientcmd.NewClientConfigFromBytes(data)
 	if err != nil {
 		log.Println(err.Error())
 	}
 
+	clientConfig, err := config.ClientConfig()
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
 	// create the clientset
-	clientset, err := kubernetes.NewForConfig(config)
+	clientset, err := kubernetes.NewForConfig(clientConfig)
 	if err != nil {
 		log.Println(err.Error())
 	}
