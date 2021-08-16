@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"flag"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -24,7 +25,7 @@ var (
 	hoodawHost     = flag.String("hoodawHost", os.Getenv("HOODAW_HOST"), "Hostname of the 'How out of date are we' API")
 	bucket         = flag.String("bucket", os.Getenv("KUBECONFIG_S3_BUCKET"), "AWS S3 bucket for kubeconfig")
 	configFile     = flag.String("configFile", os.Getenv("KUBECONFIG_S3_KEY"), "Name of kubeconfig file in S3 bucket")
-	hoodawEndpoint = "/ingress-weighting"
+	hoodawEndpoint = "/ingress_weighting"
 )
 
 func main() {
@@ -71,26 +72,32 @@ func main() {
 		log.Println(err.Error())
 	}
 
+	// s contains a slice of maps, each map will be iterated over when placed in a dashboard.
+	s := make([]map[string]string, 0)
+
 	// For each ingress resource, check
-	m := make(map[string]string)
 	for _, i := range ingress.Items {
 		if _, ok := i.Annotations["external-dns.alpha.kubernetes.io/aws-weight"]; !ok {
 			for _, v := range i.Spec.TLS {
-				m[i.GetNamespace()] = i.GetName() + "/" + v.Hosts[0]
+				m := make(map[string]string)
+				m["namespace"] = i.GetName()
+				m["hostname"] = v.Hosts[0]
+				s = append(s, m)
 			}
 		}
 	}
 
 	type genericMap map[string]interface{}
 	postToJson := genericMap{
-		"updated_at": time.Now(),
-		"namespace":  m,
+		"updated_at":      time.Now().Format("2006-01-2 15:4:5 UTC"),
+		"ingress_details": s,
 	}
 
-	_, err = json.Marshal(postToJson)
+	jsonStr, err := json.Marshal(postToJson)
 	if err != nil {
 		log.Fatalln(err)
 	}
+	fmt.Println(string(jsonStr))
 
 	req, err := http.NewRequest("POST", *hoodawHost+*&hoodawEndpoint, nil)
 	if err != nil {
