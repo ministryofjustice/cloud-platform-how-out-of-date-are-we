@@ -72,11 +72,11 @@ func main() {
 	}
 
 	// For each ingress resource, check
-	m := make(map[string][]string)
+	m := make(map[string]string)
 	for _, i := range ingress.Items {
 		if _, ok := i.Annotations["external-dns.alpha.kubernetes.io/aws-weight"]; !ok {
 			for _, v := range i.Spec.TLS {
-				m[i.GetNamespace()+"/"+i.GetName()] = v.Hosts
+				m[i.GetNamespace()] = i.GetName() + "/" + v.Hosts[0]
 			}
 		}
 	}
