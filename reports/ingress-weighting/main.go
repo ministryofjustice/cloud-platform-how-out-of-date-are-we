@@ -4,10 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"flag"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -81,10 +81,21 @@ func main() {
 		}
 	}
 
-	jsonStr, err := json.Marshal(m)
-	fmt.Println(string(jsonStr))
+	type genericMap map[string]interface{}
+	postToJson := genericMap{
+		"updated_at": time.Now(),
+		"namespace":  m,
+	}
+
+	_, err = json.Marshal(postToJson)
+	if err != nil {
+		log.Fatalln(err)
+	}
 
 	req, err := http.NewRequest("POST", *hoodawHost+*&hoodawEndpoint, nil)
+	if err != nil {
+		log.Fatalln(err)
+	}
 
 	req.Header.Add("X-API-KEY", *hoodawApiKey)
 	req.Header.Add("Content-Type", "application/json")
