@@ -1,10 +1,10 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"flag"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -97,9 +97,8 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	fmt.Println(string(jsonStr))
 
-	req, err := http.NewRequest("POST", *hoodawHost+*&hoodawEndpoint, nil)
+	req, err := http.NewRequest("POST", *hoodawHost+hoodawEndpoint, bytes.NewBuffer(jsonStr))
 	if err != nil {
 		log.Fatalln(err)
 	}
