@@ -47,7 +47,7 @@ def dashboard_data
     orphaned_resources: get_data_from_json_file("orphaned_resources", "orphaned_aws_resources", OrphanedResources),
     orphaned_statefiles: get_data_from_json_file("orphaned_statefiles", "data", ItemList),
     hosted_services: get_data_from_json_file("hosted_services", "namespace_details", ItemList),
-    ingress_weighting: get_data_from_json_file("ingress_weighting", "ingress_details", ItemList),
+    ingress_weighting: get_data_from_json_file("ingress_weighting", "weighting_ingress", ItemList),
   }
 
   updated_at = info.values.map(&:updated_at).min
@@ -220,7 +220,7 @@ get "/ingress_weighting" do
   if accept_json?(request)
     serve_json_data(:ingress_weighting)
   else
-    render_item_list(title: "Services without ingress weighting annotation", docpath: "ingress_weighting", key: "ingress_details")
+    render_item_list(title: "Services without ingress weighting annotation", docpath: "ingress_weighting", key: "weighting_ingress")
   end
 end
 

@@ -89,8 +89,8 @@ func main() {
 
 	type genericMap map[string]interface{}
 	postToJson := genericMap{
-		"updated_at":      time.Now().Format("2006-01-2 15:4:5 UTC"),
-		"ingress_details": s,
+		"updated_at":        time.Now().Format("2006-01-2 15:4:5 UTC"),
+		"weighting_ingress": s,
 	}
 
 	jsonStr, err := json.Marshal(postToJson)
