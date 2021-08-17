@@ -1,3 +1,4 @@
+// package authenticate creates a clientset for Kubernetes authentication.
 package authenticate
 
 import (
@@ -11,6 +12,12 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
+// FromS3Bucket accepts two strings, a bucket and a configFile. The bucket string should
+// contain the name of an S3 bucket that contains a kubeconfig file. The configFile string
+// should contain the kubeconfig file name held within the bucket. Both of these values are
+// defined by flags passed to main and default to an environment variable. The function returns
+// a Kubernetes clientset and an error, if there is one. The clientset uses the current context
+// value in the kubeconfig file, so this must be set beforehand.
 func FromS3Bucket(bucket, configFile string) (clientset *kubernetes.Clientset, err error) {
 	buff := &aws.WriteAtBuffer{}
 	downloader := s3manager.NewDownloader(session.New(&aws.Config{
