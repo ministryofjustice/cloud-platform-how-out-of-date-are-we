@@ -36,6 +36,7 @@ var (
 	configFile     = flag.String("configFile", os.Getenv("KUBECONFIG_S3_KEY"), "Name of kubeconfig file in S3 bucket")
 	annotation     = flag.String("annotation", "external-dns.alpha.kubernetes.io/aws-weight", "String of the annotation to check")
 	hoodawEndpoint = flag.String("hoodawEndpoint", "/ingress_weighting", "Endpoint to send the data to")
+	endPoint       = *hoodawHost + *hoodawEndpoint
 )
 
 func main() {
@@ -55,7 +56,7 @@ func main() {
 	}
 
 	// Post json to hoowdaw api
-	err = postToApi(jsonToPost)
+	err = postToApi(jsonToPost, hoodawApiKey, &endPoint)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
@@ -110,8 +111,8 @@ func FromS3Bucket(bucket, configFile string) (clientset *kubernetes.Clientset, e
 // provided by HOODAW. The slice of bytes should contain json using the guidelines outlined
 // by HOODAW i.e. the first entry in the key value pair should contain a string:string, which consists
 // of a string and the time POSTed.
-func postToApi(jsonToPost []byte) error {
-	req, err := http.NewRequest("POST", *hoodawHost+*hoodawEndpoint, bytes.NewBuffer(jsonToPost))
+func postToApi(jsonToPost []byte, hoodawApiKey, endPoint *string) error {
+	req, err := http.NewRequest("POST", *endPoint, bytes.NewBuffer(jsonToPost))
 	if err != nil {
 		return err
 	}
@@ -159,12 +160,12 @@ func IngressWithoutAnnotation(clientset *kubernetes.Clientset) ([]byte, error) {
 	// To handle generics in the data type, we need to create a new map,
 	// add the first key string:string and then the second key/value string:map[string]string.
 	// As per the requirements of the HOODAW API.
-	postToJson := resourceMap{
+	jsonMap := resourceMap{
 		"updated_at":        time.Now().Format("2006-01-2 15:4:5 UTC"),
 		"weighting_ingress": s,
 	}
 
-	jsonStr, err := json.Marshal(postToJson)
+	jsonStr, err := json.Marshal(jsonMap)
 	if err != nil {
 		return nil, err
 	}
