@@ -3,6 +3,7 @@ package authenticate
 
 import (
 	"errors"
+	"io/ioutil"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -18,15 +19,15 @@ import (
 // defined by flags passed to main and default to an environment variable. The function returns
 // a Kubernetes clientset and an error, if there is one. The clientset uses the current context
 // value in the kubeconfig file, so this must be set beforehand.
-func FromS3Bucket(bucket, configFile string) (clientset *kubernetes.Clientset, err error) {
+func FromS3Bucket(bucket, kubeconfig, ctx, region string) (clientset *kubernetes.Clientset, err error) {
 	buff := &aws.WriteAtBuffer{}
 	downloader := s3manager.NewDownloader(session.New(&aws.Config{
-		Region: aws.String("eu-west-2"),
+		Region: aws.String(region),
 	}))
 
 	numBytes, err := downloader.Download(buff, &s3.GetObjectInput{
 		Bucket: aws.String(bucket),
-		Key:    aws.String(configFile),
+		Key:    aws.String(kubeconfig),
 	})
 
 	if err != nil {
@@ -37,20 +38,21 @@ func FromS3Bucket(bucket, configFile string) (clientset *kubernetes.Clientset, e
 	}
 
 	data := buff.Bytes()
-
-	// use the current context in kubeconfig
-	config, err := clientcmd.NewClientConfigFromBytes(data)
+	err = ioutil.WriteFile(kubeconfig, data, 0644)
 	if err != nil {
 		return nil, err
 	}
 
-	clientConfig, err := config.ClientConfig()
+	client, err := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
+		&clientcmd.ClientConfigLoadingRules{ExplicitPath: kubeconfig},
+		&clientcmd.ConfigOverrides{
+			CurrentContext: ctx,
+		}).ClientConfig()
 	if err != nil {
 		return nil, err
 	}
 
-	// create the clientset
-	clientset, err = kubernetes.NewForConfig(clientConfig)
+	clientset, _ = kubernetes.NewForConfig(client)
 	if err != nil {
 		return nil, err
 	}

@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"flag"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -30,21 +31,23 @@ import (
 type resourceMap map[string]interface{}
 
 var (
-	hoodawApiKey   = flag.String("hoodawAPIKey", os.Getenv("HOODAW_API_KEY"), "API key to post data to the 'How out of date are we' API")
-	hoodawHost     = flag.String("hoodawHost", os.Getenv("HOODAW_HOST"), "Hostname of the 'How out of date are we' API")
-	bucket         = flag.String("bucket", os.Getenv("KUBECONFIG_S3_BUCKET"), "AWS S3 bucket for kubeconfig")
-	configFile     = flag.String("configFile", "live-1-only", "Name of kubeconfig file in S3 bucket")
 	annotation     = flag.String("annotation", "external-dns.alpha.kubernetes.io/aws-weight", "String of the annotation to check")
+	bucket         = flag.String("bucket", os.Getenv("KUBECONFIG_S3_BUCKET"), "AWS S3 bucket for kubeconfig")
+	ctx            = flag.String("context", "live-1.cloud-platform.service.justice.gov.uk", "Kubernetes context specified in kubeconfig")
+	hoodawApiKey   = flag.String("hoodawAPIKey", os.Getenv("HOODAW_API_KEY"), "API key to post data to the 'How out of date are we' API")
 	hoodawEndpoint = flag.String("hoodawEndpoint", "/ingress_weighting", "Endpoint to send the data to")
-	endPoint       = *hoodawHost + *hoodawEndpoint
+	hoodawHost     = flag.String("hoodawHost", os.Getenv("HOODAW_HOST"), "Hostname of the 'How out of date are we' API")
+	kubeconfig     = flag.String("kubeconfig", "kubeconfig", "Name of kubeconfig file in S3 bucket")
+	region         = flag.String("region", os.Getenv("AWS_REGION"), "AWS Region")
+
+	endPoint = *hoodawHost + *hoodawEndpoint
 )
 
 func main() {
 	flag.Parse()
 
 	// Gain access to a Kubernetes cluster using a config file stored in an S3 bucket.
-	// clientset, err := authenticate.FromS3Bucket(*bucket, *configFile)
-	clientset, err := FromS3Bucket(*bucket, *configFile)
+	clientset, err := FromS3Bucket(*bucket, *kubeconfig, *ctx)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
@@ -68,15 +71,15 @@ func main() {
 // defined by flags passed to main and default to an environment variable. The function returns
 // a Kubernetes clientset and an error, if there is one. The clientset uses the current context
 // value in the kubeconfig file, so this must be set beforehand.
-func FromS3Bucket(bucket, configFile string) (clientset *kubernetes.Clientset, err error) {
+func FromS3Bucket(bucket, kubeconfig, ctx string) (clientset *kubernetes.Clientset, err error) {
 	buff := &aws.WriteAtBuffer{}
 	downloader := s3manager.NewDownloader(session.New(&aws.Config{
-		Region: aws.String("eu-west-2"),
+		Region: aws.String(*region),
 	}))
 
 	numBytes, err := downloader.Download(buff, &s3.GetObjectInput{
 		Bucket: aws.String(bucket),
-		Key:    aws.String(configFile),
+		Key:    aws.String(kubeconfig),
 	})
 
 	if err != nil {
@@ -87,19 +90,21 @@ func FromS3Bucket(bucket, configFile string) (clientset *kubernetes.Clientset, e
 	}
 
 	data := buff.Bytes()
-
-	// use the current context in kubeconfig
-	config, err := clientcmd.NewClientConfigFromBytes(data)
+	err = ioutil.WriteFile(kubeconfig, data, 0644)
 	if err != nil {
 		return nil, err
 	}
 
-	clientConfig, err := config.ClientConfig()
+	client, err := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
+		&clientcmd.ClientConfigLoadingRules{ExplicitPath: kubeconfig},
+		&clientcmd.ConfigOverrides{
+			CurrentContext: ctx,
+		}).ClientConfig()
 	if err != nil {
 		return nil, err
 	}
 
-	clientset, err = kubernetes.NewForConfig(clientConfig)
+	clientset, _ = kubernetes.NewForConfig(client)
 	if err != nil {
 		return nil, err
 	}
