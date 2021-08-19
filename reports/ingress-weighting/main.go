@@ -33,7 +33,7 @@ var (
 	hoodawApiKey   = flag.String("hoodawAPIKey", os.Getenv("HOODAW_API_KEY"), "API key to post data to the 'How out of date are we' API")
 	hoodawHost     = flag.String("hoodawHost", os.Getenv("HOODAW_HOST"), "Hostname of the 'How out of date are we' API")
 	bucket         = flag.String("bucket", os.Getenv("KUBECONFIG_S3_BUCKET"), "AWS S3 bucket for kubeconfig")
-	configFile     = flag.String("configFile", os.Getenv("KUBECONFIG_S3_KEY"), "Name of kubeconfig file in S3 bucket")
+	configFile     = flag.String("configFile", "live-1-only", "Name of kubeconfig file in S3 bucket")
 	annotation     = flag.String("annotation", "external-dns.alpha.kubernetes.io/aws-weight", "String of the annotation to check")
 	hoodawEndpoint = flag.String("hoodawEndpoint", "/ingress_weighting", "Endpoint to send the data to")
 	endPoint       = *hoodawHost + *hoodawEndpoint
