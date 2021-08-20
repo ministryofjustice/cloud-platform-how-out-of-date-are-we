@@ -2,3 +2,4 @@
 dashboard-reporter/report.rb
 data/
 secrets.yaml
+kubeconfig
