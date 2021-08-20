@@ -152,7 +152,7 @@ func IngressWithoutAnnotation(clientset *kubernetes.Clientset) ([]byte, error) {
 	// loop over the slice of TLS hostnames contained in the resource, create a map, add
 	// the namespace and hostname values and add it to a slice of maps.
 	for _, i := range ingress.Items {
-		if _, ok := i.Annotations[*annotation]; !ok {
+		if _, exists := i.Annotations[*annotation]; !exists {
 			for _, v := range i.Spec.TLS {
 				m := make(map[string]string)
 				m["namespace"] = i.GetName()
