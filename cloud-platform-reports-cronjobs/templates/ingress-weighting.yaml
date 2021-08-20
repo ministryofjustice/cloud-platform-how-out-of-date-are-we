@@ -1,0 +1,35 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: {{ .Values.cronjobs.ingressWeighting.name }}
+spec:
+  schedule: "{{ .Values.cronjobs.ingressWeighting.schedule }}"
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 100
+      template:
+        spec:
+          {{- include "cloud-platform-reports-cronjobs.imagePullSecrets" . | indent 10 }}
+          containers:
+          - name: ingressWeighting-services-image
+            image: ministryofjustice/cloud-platform-ingress-weighting:{{ .Chart.AppVersion }}
+            env:
+            - name: AWS_REGION
+              value: eu-west-2
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: aws-creds
+                  key: access-key-id
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: aws-creds
+                  key: secret-access-key
+            {{- include "cloud-platform-reports-cronjobs.kubeconfigLocation" . | indent 12 }}
+            {{- include "cloud-platform-reports-cronjobs.hoodaw-credentials" . | indent 12 }}
+            args:
+              - /ingress-annotation
+          restartPolicy: OnFailure
