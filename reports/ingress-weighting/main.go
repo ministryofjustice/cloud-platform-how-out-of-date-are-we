@@ -1,26 +1,18 @@
 package main
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"flag"
-	"io/ioutil"
 	"log"
-	"net/http"
 	"os"
 	"time"
 
-	// "github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/reports/pkg/authenticate"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/reports/pkg/authenticate"
+	"github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/reports/pkg/hoodaw"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/oidc"
-	"k8s.io/client-go/tools/clientcmd"
 )
 
 // resourceMap is used to store both string:string and string:map[string]string key
@@ -47,7 +39,7 @@ func main() {
 	flag.Parse()
 
 	// Gain access to a Kubernetes cluster using a config file stored in an S3 bucket.
-	clientset, err := FromS3Bucket(*bucket, *kubeconfig, *ctx)
+	clientset, err := authenticate.FromS3Bucket(*bucket, *kubeconfig, *ctx, *region)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
@@ -59,82 +51,10 @@ func main() {
 	}
 
 	// Post json to hoowdaw api
-	err = postToApi(jsonToPost, hoodawApiKey, &endPoint)
+	err = hoodaw.PostToApi(jsonToPost, hoodawApiKey, &endPoint)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
-}
-
-// FromS3Bucket accepts two strings, a bucket and a configFile. The bucket string should
-// contain the name of an S3 bucket that contains a kubeconfig file. The configFile string
-// should contain the kubeconfig file name held within the bucket. Both of these values are
-// defined by flags passed to main and default to an environment variable. The function returns
-// a Kubernetes clientset and an error, if there is one. The clientset uses the current context
-// value in the kubeconfig file, so this must be set beforehand.
-func FromS3Bucket(bucket, kubeconfig, ctx string) (clientset *kubernetes.Clientset, err error) {
-	buff := &aws.WriteAtBuffer{}
-	downloader := s3manager.NewDownloader(session.New(&aws.Config{
-		Region: aws.String(*region),
-	}))
-
-	numBytes, err := downloader.Download(buff, &s3.GetObjectInput{
-		Bucket: aws.String(bucket),
-		Key:    aws.String(kubeconfig),
-	})
-
-	if err != nil {
-		return nil, err
-	}
-	if numBytes < 1 {
-		return nil, errors.New("The file downloaded is incorrect.")
-	}
-
-	data := buff.Bytes()
-	err = ioutil.WriteFile(kubeconfig, data, 0644)
-	if err != nil {
-		return nil, err
-	}
-
-	client, err := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
-		&clientcmd.ClientConfigLoadingRules{ExplicitPath: kubeconfig},
-		&clientcmd.ConfigOverrides{
-			CurrentContext: ctx,
-		}).ClientConfig()
-	if err != nil {
-		return nil, err
-	}
-
-	clientset, _ = kubernetes.NewForConfig(client)
-	if err != nil {
-		return nil, err
-	}
-
-	return
-}
-
-// postToApi takes a slice of bytes as an argument and attempts to POST it to the REST API
-// provided by HOODAW. The slice of bytes should contain json using the guidelines outlined
-// by HOODAW i.e. the first entry in the key value pair should contain a string:string, which consists
-// of a string and the time POSTed.
-func postToApi(jsonToPost []byte, hoodawApiKey, endPoint *string) error {
-	req, err := http.NewRequest("POST", *endPoint, bytes.NewBuffer(jsonToPost))
-	if err != nil {
-		return err
-	}
-
-	req.Header.Add("X-API-KEY", *hoodawApiKey)
-	req.Header.Add("Content-Type", "application/json")
-
-	client := &http.Client{}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return err
-	}
-
-	defer resp.Body.Close()
-
-	return nil
 }
 
 // IngressWithoutAnnotation takes a Kubernetes clientset and returns a slice of byte and an error,
