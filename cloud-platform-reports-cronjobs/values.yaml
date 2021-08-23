@@ -35,3 +35,4 @@ cronjobs:
   ingressWeighting:
     name: ingress-weighting
     schedule: "23 4 * * *"
+
