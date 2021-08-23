@@ -20,7 +20,7 @@ deploy-webapp:
 			--values cloud-platform-reports/secrets.yaml
 
 deploy-cronjobs:
-	kubectl config use-context manager \
+	aws eks update-kubeconfig --name manager \
 		&& helm install \
 			--generate-name \
 			--namespace $(CRONJOB_NAMESPACE) \
@@ -29,7 +29,7 @@ deploy-cronjobs:
 			--values cloud-platform-reports-cronjobs/secrets.yaml
 
 upgrade-webapp:
-	kubectl config use-context live-1 \
+	aws eks update-kubeconfig --name live \
 		&& helm upgrade \
 			$$(helm ls --short --namespace $(PROD_NAMESPACE) | grep cloud-platform-reports) \
 			--namespace $(PROD_NAMESPACE) \
@@ -37,7 +37,7 @@ upgrade-webapp:
 			--values cloud-platform-reports/secrets.yaml
 
 upgrade-cronjobs:
-	kubectl config use-context manager \
+	aws eks update-kubeconfig --name manager \
 		&& helm upgrade \
 			$$(helm ls --short --namespace $(CRONJOB_NAMESPACE) | grep cloud-platform-reports-cronjobs) \
 			--namespace $(CRONJOB_NAMESPACE) \
