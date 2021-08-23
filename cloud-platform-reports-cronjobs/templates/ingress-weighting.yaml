@@ -13,7 +13,7 @@ spec:
         spec:
           {{- include "cloud-platform-reports-cronjobs.imagePullSecrets" . | indent 10 }}
           containers:
-          - name: ingressWeighting-services-image
+          - name: ingressweighting-services-image
             image: ministryofjustice/cloud-platform-ingress-weighting:{{ .Chart.AppVersion }}
             env:
             - name: AWS_REGION
