@@ -32,3 +32,6 @@ cronjobs:
   githubRepositories:
     name: github-repositories
     schedule: "12 5 * * *"
+  ingressWeighting:
+    name: ingress-weighting
+    schedule: "12 5 * * *"
