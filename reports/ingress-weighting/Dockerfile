@@ -1,6 +1,10 @@
-FROM golang:1.16-buster AS build
+FROM golang:1.16
 
 WORKDIR /app
+
+ENV XDG_CACHE_HOME=/tmp/.cache
+
+RUN useradd nonroot --uid 1001 -U -M
 
 COPY go.mod ./
 COPY go.sum ./
@@ -8,18 +12,8 @@ RUN go mod download
 
 COPY *.go ./
 
-RUN go build -o /ingress-annotation
+RUN go build .
 
-##
-## Run
-##
+RUN chown -R nonroot:nonroot /app
 
-FROM gcr.io/distroless/base-debian10
-
-WORKDIR /
-
-COPY --from=build /ingress-annotation /ingress-annotation
-
-USER nonroot:nonroot
-
-ENTRYPOINT ["/ingress-annotation"]
+USER 1001
