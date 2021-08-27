@@ -3,11 +3,13 @@ package main
 import (
 	"encoding/json"
 	"flag"
-	"fmt"
 	"log"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/gocolly/colly"
+	"github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/reports/pkg/hoodaw"
 )
 
 // resourceMap is used to store both string:string and string:map[string]string key
@@ -18,35 +20,42 @@ import (
 type ResourceMap map[string]interface{}
 
 var (
-	userGuide   = flag.String("userGuide", "user-guide.cloud-platform.service.justice.gov.uk", "Full URL of the userguide.")
-	runBook     = flag.String("runBook", "runbooks.cloud-platform.service.justice.gov.uk", "Full URL of the runbook site.")
 	currentTime = time.Now()
+
+	hoodawApiKey   = flag.String("hoodawAPIKey", os.Getenv("HOODAW_API_KEY"), "API key to post data to the 'How out of date are we' API")
+	hoodawEndpoint = flag.String("hoodawEndpoint", "/documentation", "Endpoint to send the data to")
+	hoodawHost     = flag.String("hoodawHost", os.Getenv("HOODAW_HOST"), "Hostname of the 'How out of date are we' API")
+	runBook        = flag.String("runBook", "runbooks.cloud-platform.service.justice.gov.uk", "Full URL of the runbook site.")
+	userGuide      = flag.String("userGuide", "user-guide.cloud-platform.service.justice.gov.uk", "Full URL of the userguide.")
+
+	endPoint = *hoodawHost + *hoodawEndpoint
 )
 
 func main() {
 	flag.Parse()
 
-	expired, err := collect()
+	jsonToPost, err := collect()
 	if err != nil {
 		log.Fatalln("Failed to collect expired links:", err)
 	}
 
-	fmt.Println(string(expired))
+	err = hoodaw.PostToApi(jsonToPost, hoodawApiKey, &endPoint)
+	if err != nil {
+		log.Fatalln("Failed to post to hoodaw:", err)
+	}
 }
 
 func collect() ([]byte, error) {
-	// spider url looking for links to other pages
-	// return a hash of pages: { pageUrl : needsReview? }
 	c := colly.NewCollector(
 		colly.AllowedDomains(*userGuide, *runBook),
 		colly.Async(true),
+		colly.UserAgent("How-out-of-date-are-we/documentation"),
 	)
 
 	c.Limit(&colly.LimitRule{
 		DomainGlob:  "justice",
 		Parallelism: 2,
-		Delay:       1 * time.Second,
-		RandomDelay: 1 * time.Second,
+		RandomDelay: 5 * time.Second,
 	})
 
 	// Find and visit all links on the parent page.
@@ -61,10 +70,15 @@ func collect() ([]byte, error) {
 	c.OnHTML("div[data-last-reviewed-on]", func(e *colly.HTMLElement) {
 		lastReviewed, _ := e.DOM.Attr("data-last-reviewed-on")
 		page := e.Request.URL.String()
+		title := strings.Split(page, "/")
+
 		// Add the page url as a key and the date of last review as a value.
 		if lastReviewed < currentTime.Format("2006-01-02") {
-			expired := make(map[string]string)
-			expired[page] = lastReviewed
+			expired := map[string]string{
+				"url":   page,
+				"title": title[len(title)-1],
+				"site":  title[2],
+			}
 			s = append(s, expired)
 		}
 	})
@@ -78,7 +92,7 @@ func collect() ([]byte, error) {
 		"updated_at": time.Now().Format("2006-01-2 15:4:5 UTC"),
 		// Adding z to the string name ensures the first key listed will be "updated_at", as
 		// required by the HOODAW API.
-		"zExpired": s,
+		"pages": s,
 	}
 
 	jsonStr, err := json.Marshal(jsonMap)
