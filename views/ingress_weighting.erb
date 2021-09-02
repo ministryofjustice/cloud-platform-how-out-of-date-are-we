@@ -4,6 +4,7 @@
   <thead class="thead-dark">
     <tr>
       <th scope="col">Namespace</th>
+      <th scope="col">Ingress Name</th>
       <th scope="col">Host</th>
     </tr>
   </thead>
@@ -11,6 +12,7 @@
   <% list.each do |service| %>
     <tr>
       <td><%= service["namespace"] %></td>
+      <td><%= service["resource"] %></td>
       <td><%= service["hostname"] %></td>
     </tr>
   <% end %>
