@@ -75,7 +75,8 @@ func IngressWithoutAnnotation(clientset *kubernetes.Clientset) ([]byte, error) {
 		if _, exists := i.Annotations[*annotation]; !exists {
 			for _, v := range i.Spec.TLS {
 				m := make(map[string]string)
-				m["namespace"] = i.GetName()
+				m["namespace"] = i.Namespace
+				m["resource"] = i.GetName()
 				m["hostname"] = v.Hosts[0]
 				s = append(s, m)
 			}
