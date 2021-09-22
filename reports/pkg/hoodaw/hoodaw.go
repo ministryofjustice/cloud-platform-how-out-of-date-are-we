@@ -2,8 +2,44 @@ package hoodaw
 
 import (
 	"bytes"
+	"io/ioutil"
 	"net/http"
+	"time"
 )
+
+const host = "https://reports.cloud-platform.service.justice.gov.uk/"
+
+// QueryApi takes the name of an endpoint and uses the http package to
+// return a slice of bytes.
+func QueryApi(endPoint string) ([]byte, error) {
+	client := &http.Client{
+		Timeout: time.Second * 2,
+	}
+
+	req, err := http.NewRequest(http.MethodGet, host+endPoint, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("User-Agent", "hoodaw-pkg")
+	req.Header.Set("Accept", "application/json")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.Body != nil {
+		defer resp.Body.Close()
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return body, nil
+}
 
 // postToApi takes a slice of bytes as an argument and attempts to POST it to the REST API
 // provided by HOODAW. The slice of bytes should contain json using the guidelines outlined
