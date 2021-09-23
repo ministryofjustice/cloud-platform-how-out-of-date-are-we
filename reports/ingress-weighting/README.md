@@ -1,6 +1,10 @@
 # Get all ingress resources that don't have an annotation
 
-This report was created out of the requirement to capture all ingress resources that don't have a required annotation for migration to a new cluster. This annotation is very specific, so the report checks for the existence of the key: "external-dns.alpha.kubernetes.io/aws-weight", this annotation can be changed by setting the flag `annotation="<insert-annotation>"`.
+This report was created out of the requirement to capture all ingress resources that don't have a required annotation for migration to a new cluster. This annotation is very specific, so the report checks for 2 specific annotations
+1. existence of the annotation: "external-dns.alpha.kubernetes.io/aws-weight" 
+2. value of the annotation: "external-dns.alpha.kubernetes.io/aws-weight" is in certain format
+
+This annotation can be changed by setting the flag `annotation="<insert-annotation>"`.
 
 The main package in this report will perform the following steps:
 
