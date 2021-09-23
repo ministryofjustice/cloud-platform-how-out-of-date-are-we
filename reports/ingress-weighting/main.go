@@ -6,6 +6,7 @@ import (
 	"flag"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/reports/pkg/authenticate"
@@ -23,14 +24,15 @@ import (
 type resourceMap map[string]interface{}
 
 var (
-	annotation     = flag.String("annotation", "external-dns.alpha.kubernetes.io/aws-weight", "String of the annotation to check")
-	bucket         = flag.String("bucket", os.Getenv("KUBECONFIG_S3_BUCKET"), "AWS S3 bucket for kubeconfig")
-	ctx            = flag.String("context", "live-1.cloud-platform.service.justice.gov.uk", "Kubernetes context specified in kubeconfig")
-	hoodawApiKey   = flag.String("hoodawAPIKey", os.Getenv("HOODAW_API_KEY"), "API key to post data to the 'How out of date are we' API")
-	hoodawEndpoint = flag.String("hoodawEndpoint", "/ingress_weighting", "Endpoint to send the data to")
-	hoodawHost     = flag.String("hoodawHost", os.Getenv("HOODAW_HOST"), "Hostname of the 'How out of date are we' API")
-	kubeconfig     = flag.String("kubeconfig", "kubeconfig", "Name of kubeconfig file in S3 bucket")
-	region         = flag.String("region", os.Getenv("AWS_REGION"), "AWS Region")
+	awsweightAnnotation     = flag.String("awsweightAnnotation", "external-dns.alpha.kubernetes.io/aws-weight", "String of the aws weight annotation to check")
+	setIdentifierAnnotation = flag.String("setIdentifierAnnotation", "external-dns.alpha.kubernetes.io/set-idenitifier", "String of the set-identiifer annotation to check")
+	bucket                  = flag.String("bucket", os.Getenv("KUBECONFIG_S3_BUCKET"), "AWS S3 bucket for kubeconfig")
+	ctx                     = flag.String("context", "live-1.cloud-platform.service.justice.gov.uk", "Kubernetes context specified in kubeconfig")
+	hoodawApiKey            = flag.String("hoodawAPIKey", os.Getenv("HOODAW_API_KEY"), "API key to post data to the 'How out of date are we' API")
+	hoodawEndpoint          = flag.String("hoodawEndpoint", "/ingress_weighting", "Endpoint to send the data to")
+	hoodawHost              = flag.String("hoodawHost", os.Getenv("HOODAW_HOST"), "Hostname of the 'How out of date are we' API")
+	kubeconfig              = flag.String("kubeconfig", "kubeconfig", "Name of kubeconfig file in S3 bucket")
+	region                  = flag.String("region", os.Getenv("AWS_REGION"), "AWS Region")
 
 	endPoint = *hoodawHost + *hoodawEndpoint
 )
@@ -72,13 +74,19 @@ func IngressWithoutAnnotation(clientset *kubernetes.Clientset) ([]byte, error) {
 	// loop over the slice of TLS hostnames contained in the resource, create a map, add
 	// the namespace and hostname values and add it to a slice of maps.
 	for _, i := range ingress.Items {
-		if _, exists := i.Annotations[*annotation]; !exists {
+		//	if _, exists := i.Annotations[*annotation]; !exists {
+
+		_, exists := i.Annotations[*awsweightAnnotation]
+		setIdentifierInIngress, _ := i.Annotations[*setIdentifierAnnotation]
+		if !exists || setIdentifierInIngress != strings.Join([]string{i.Namespace, i.GetName(), "blue"}, "-") {
 			for _, v := range i.Spec.TLS {
-				m := make(map[string]string)
-				m["namespace"] = i.Namespace
-				m["resource"] = i.GetName()
-				m["hostname"] = v.Hosts[0]
-				s = append(s, m)
+				if len(v.Hosts) > 0 {
+					m := make(map[string]string)
+					m["namespace"] = i.Namespace
+					m["resource"] = i.GetName()
+					m["hostname"] = v.Hosts[0]
+					s = append(s, m)
+				}
 			}
 		}
 	}
