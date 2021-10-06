@@ -48,13 +48,13 @@ func main() {
 		log.Fatalln(err.Error())
 	}
 
-	// Grab all ingress resources
+	// Get all ingress resources
 	ingress, err := GetAllIngresses(clientset)
 	fmt.Println(ingress)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
-	// without required annotation
+	// get all ingresses without required annotation
 	jsonToPost, err := IngressWithoutAnnotation(ingress)
 	if err != nil {
 		log.Fatalln(err.Error())
@@ -67,8 +67,7 @@ func main() {
 	}
 }
 
-// IngressWithoutAnnotation takes a Kubernetes clientset and returns a slice of byte and an error,
-// if there is one. Due to the requirement of the API, we have to sculpt the []byte data a very specific way.
+// GetAllIngresses takes a Kubernetes clientset and returns all ingress with type *v1beta1.IngressList and an error,
 func GetAllIngresses(clientset *kubernetes.Clientset) (*v1beta1.IngressList, error) {
 	ingressList, err := clientset.NetworkingV1beta1().Ingresses("").List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
@@ -77,6 +76,8 @@ func GetAllIngresses(clientset *kubernetes.Clientset) (*v1beta1.IngressList, err
 	return ingressList, nil
 }
 
+// IngressWithoutAnnotation takes a list of ingress in  type *v1beta1.IngressList and returns a slice of byte and an error,
+// if there is one. Due to the requirement of the API, we have to sculpt the []byte data a very specific way.
 func IngressWithoutAnnotation(ingressList *v1beta1.IngressList) ([]byte, error) {
 	// s contains a slice of maps, each map will be iterated over when placed in a dashboard.
 	s := make([]map[string]string, 0)
