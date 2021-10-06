@@ -1,80 +1,46 @@
 package main
 
 import (
+	"strings"
 	"testing"
 
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/oidc"
+
+	networking "k8s.io/api/networking/v1beta1"
 )
 
-func TestFromS3Bucket(t *testing.T) {
-	type args struct {
-		bucket     string
-		configFile string
-	}
-	tests := []struct {
-		name    string
-		args    args
-		wantErr bool
-	}{
-		{
-			name: "environment vars set",
-			args: args{
-				bucket:     "cloud-platform-concourse-kubeconfig",
-				configFile: "live-1-only",
-			},
-			wantErr: false,
-		},
-		{
-			name: "wrong bucket and config file",
-			args: args{
-				bucket:     "doesn't-exist-probably",
-				configFile: "nofile",
-			},
-			wantErr: true,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			_, err := FromS3Bucket(tt.args.bucket, tt.args.configFile)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("FromS3Bucket() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-		})
-	}
-}
+func TestIngressWithoutAnnotation(t *testing.T) {
 
-func Test_postToApi(t *testing.T) {
-	var (
-		hoodawApiKey = "soopersekrit"
-		endPoint     = "http://localhost:4567/test_endpoint"
-	)
-	type args struct {
-		jsonToPost   []byte
-		hoodawApiKey *string
-		endPoint     *string
-	}
-	tests := []struct {
-		name    string
-		args    args
-		wantErr bool
-	}{
-		{
-			name: "Post random json to localhost",
-			args: args{
-				jsonToPost:   []byte{'A'},
-				hoodawApiKey: &hoodawApiKey,
-				endPoint:     &endPoint,
+	want := "\"weighting_ingress\":[]"
+	var ingress_01 = &networking.IngressList{
+		Items: []networking.Ingress{
+			{
+				ObjectMeta: v1.ObjectMeta{
+					Name:      "ingress-01",
+					Namespace: "ns-01",
+					Annotations: map[string]string{
+						"external-dns.alpha.kubernetes.io/aws-weight":     "true",
+						"external-dns.alpha.kubernetes.io/set-identifier": "ingress-01-ns-01-blue",
+					},
+				},
+				Spec: networking.IngressSpec{
+					Rules: []networking.IngressRule{
+						{
+							Host: "example.com",
+						},
+					},
+				},
 			},
-			wantErr: false,
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if err := postToApi(tt.args.jsonToPost, tt.args.hoodawApiKey, tt.args.endPoint); (err != nil) != tt.wantErr {
-				t.Errorf("postToApi() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
+	got, err := IngressWithoutAnnotation(ingress_01)
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err.Error())
 	}
+	if !strings.Contains(string(got), want) {
+		t.Errorf("Unexpected error: %s", got)
+	}
+
 }
