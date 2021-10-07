@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"flag"
-	"fmt"
 	"log"
 	"os"
 	"strings"
@@ -50,7 +49,6 @@ func main() {
 
 	// Get all ingress resources
 	ingress, err := GetAllIngresses(clientset)
-	fmt.Println(ingress)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
