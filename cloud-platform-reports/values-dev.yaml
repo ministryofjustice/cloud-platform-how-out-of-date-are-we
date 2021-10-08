@@ -1,2 +1,22 @@
 ingress:
   hostname: cloud-platform-reports.apps.live.cloud-platform.service.justice.gov.uk
+  name: cloud-platform-reports-app-ingress
+  annotations:
+    external-dns.alpha.kubernetes.io/set-identifier: "cloud-platform-reports-app-ingress-cloud-platform-reports-dev-green"
+    external-dns.alpha.kubernetes.io/aws-weight: "100"
+service:
+  name: cloud-platform-reports-service
+  port: 4567
+
+deployment:
+  replicas: 1
+  name: cloud-platform-reports
+  labels:
+    app: cloud-platform-reports-app
+  containers:
+    webapp:
+      name: cloud-platform-reports
+      image: ministryofjustice/cloud-platform-how-out-of-date-are-we
+
+dynamodb:
+  secretName: cloud-platform-reports-dynamodb-output
