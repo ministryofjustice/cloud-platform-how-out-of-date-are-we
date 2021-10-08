@@ -48,12 +48,17 @@ func main() {
 	}
 
 	// Get all ingress resources
-	ingress, err := GetAllIngresses(clientset)
+	ingressList, err := GetAllIngresses(clientset)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
 	// get all ingresses without required annotation
-	jsonToPost, err := IngressWithoutAnnotation(ingress)
+	ingressesWithoutAnnotation, err := IngressWithoutAnnotation(ingressList)
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	jsonToPost, err := BuildJsonMap(ingressesWithoutAnnotation)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
@@ -76,7 +81,7 @@ func GetAllIngresses(clientset *kubernetes.Clientset) (*v1beta1.IngressList, err
 
 // IngressWithoutAnnotation takes a list of ingress in  type *v1beta1.IngressList and returns a slice of byte and an error,
 // if there is one. Due to the requirement of the API, we have to sculpt the []byte data a very specific way.
-func IngressWithoutAnnotation(ingressList *v1beta1.IngressList) ([]byte, error) {
+func IngressWithoutAnnotation(ingressList *v1beta1.IngressList) ([]map[string]string, error) {
 	// s contains a slice of maps, each map will be iterated over when placed in a dashboard.
 	s := make([]map[string]string, 0)
 
@@ -98,13 +103,16 @@ func IngressWithoutAnnotation(ingressList *v1beta1.IngressList) ([]byte, error) 
 			}
 		}
 	}
+	return s, nil
+}
 
+func BuildJsonMap(ingressesWithoutAnnotation []map[string]string) ([]byte, error) {
 	// To handle generics in the data type, we need to create a new map,
 	// add the first key string:string and then the second key/value string:map[string]string.
 	// As per the requirements of the HOODAW API.
 	jsonMap := resourceMap{
 		"updated_at":        time.Now().Format("2006-01-2 15:4:5 UTC"),
-		"weighting_ingress": s,
+		"weighting_ingress": ingressesWithoutAnnotation,
 	}
 
 	jsonStr, err := json.Marshal(jsonMap)

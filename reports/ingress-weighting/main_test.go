@@ -1,14 +1,12 @@
 package main
 
 import (
-	"fmt"
-	"strings"
 	"testing"
-	"time"
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/oidc"
 
+	assert "github.com/stretchr/testify/assert"
 	"k8s.io/api/networking/v1beta1"
 	networking "k8s.io/api/networking/v1beta1"
 )
@@ -21,7 +19,7 @@ func TestIngressWithoutAnnotation(t *testing.T) {
 	tests := []struct {
 		name          string
 		args          args
-		shouldContain string
+		shouldContain []map[string]string
 	}{
 		{
 			name: "Both annotations exists",
@@ -53,12 +51,7 @@ func TestIngressWithoutAnnotation(t *testing.T) {
 					},
 				},
 			},
-			shouldContain: `{
-				{
-				"updated_at":        `+time.Now().Format("2006-01-2 15:4:5 UTC")+`,
-				"weighting_ingress": [],
-				}`,
-			},
+			shouldContain: []map[string]string{},
 		},
 		{
 			name: "Only aws-weight annotation exists",
@@ -86,21 +79,93 @@ func TestIngressWithoutAnnotation(t *testing.T) {
 					},
 				},
 			},
-			shouldContain: `{
+			shouldContain: []map[string]string{
 				{
-				"updated_at":        `+time.Now().Format("2006-01-2 15:4:5 UTC")+`,
-				"weighting_ingress": [],
-				}`,
+					"hostname":  "example-02.com",
+					"namespace": "ns-02",
+					"resource":  "ingress-02",
+				},
+			},
+		},
+		{
+			name: "Only set-identifier annotation exists",
+			args: args{
+				ingressList: &networking.IngressList{
+					Items: []networking.Ingress{
+						{
+							ObjectMeta: v1.ObjectMeta{
+								Name:      "ingress-03",
+								Namespace: "ns-03",
+							},
+							Spec: networking.IngressSpec{
+								TLS: []networking.IngressTLS{
+									{
+										Hosts: []string{"example-03.com"},
+									},
+								},
+								Rules: []networking.IngressRule{
+									{
+										Host: "example-03.com",
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			shouldContain: []map[string]string{
+				{
+					"hostname":  "example-03.com",
+					"namespace": "ns-03",
+					"resource":  "ingress-03",
+				},
+			},
+		},
+		{
+			name: "Both annotation doesnot exists",
+			args: args{
+				ingressList: &networking.IngressList{
+					Items: []networking.Ingress{
+						{
+							ObjectMeta: v1.ObjectMeta{
+								Name:      "ingress-04",
+								Namespace: "ns-04",
+							},
+							Spec: networking.IngressSpec{
+								TLS: []networking.IngressTLS{
+									{
+										Hosts: []string{"example-04.com"},
+									},
+								},
+								Rules: []networking.IngressRule{
+									{
+										Host: "example-04.com",
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			shouldContain: []map[string]string{
+				{
+					"hostname":  "example-04.com",
+					"namespace": "ns-04",
+					"resource":  "ingress-04",
+				},
+			},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := IngressWithoutAnnotation(tt.args.ingressList)
-			fmt.Printf("got = %s, want = %s", string(got), tt.shouldContain)
-			if (err != nil) && strings.ContainsAny(string(got), tt.shouldContain) {
-				t.Errorf("IngressWithoutAnnotation() error = %v, got = %v, wantErr %v", err, string(got), tt.shouldContain)
+			if err != nil {
+				t.Errorf("IngressWithoutAnnotation() error = %v", err)
 				return
+			}
+			if !assert.Equal(t, got, tt.shouldContain) {
+				t.Errorf("IngressWithoutAnnotation() got = %v, wantErr %v", got, tt.shouldContain)
 			}
 		})
 	}
