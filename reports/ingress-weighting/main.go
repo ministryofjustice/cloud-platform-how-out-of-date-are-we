@@ -52,7 +52,7 @@ func main() {
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
-	// get all ingresses without required annotation
+	// Find all ingress resources without the required external-dns annotations
 	ingressesWithoutAnnotation, err := IngressWithoutAnnotation(ingressList)
 	if err != nil {
 		log.Fatalln(err.Error())
@@ -70,7 +70,7 @@ func main() {
 	}
 }
 
-// GetAllIngresses takes a Kubernetes clientset and returns all ingress with type *v1beta1.IngressList and an error,
+// GetAllIngresses takes a Kubernetes clientset and returns all ingress with type *v1beta1.IngressList and an error.
 func GetAllIngresses(clientset *kubernetes.Clientset) (*v1beta1.IngressList, error) {
 	ingressList, err := clientset.NetworkingV1beta1().Ingresses("").List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
@@ -106,6 +106,7 @@ func IngressWithoutAnnotation(ingressList *v1beta1.IngressList) ([]map[string]st
 	return s, nil
 }
 
+// BuildJsonMap takes a slice of maps and return a json encoded map
 func BuildJsonMap(ingressesWithoutAnnotation []map[string]string) ([]byte, error) {
 	// To handle generics in the data type, we need to create a new map,
 	// add the first key string:string and then the second key/value string:map[string]string.
