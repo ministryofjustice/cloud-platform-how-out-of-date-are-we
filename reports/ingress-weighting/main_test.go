@@ -3,78 +3,171 @@ package main
 import (
 	"testing"
 
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/oidc"
+
+	assert "github.com/stretchr/testify/assert"
+	"k8s.io/api/networking/v1beta1"
+	networking "k8s.io/api/networking/v1beta1"
 )
 
-func TestFromS3Bucket(t *testing.T) {
+func TestIngressWithoutAnnotation(t *testing.T) {
+
 	type args struct {
-		bucket     string
-		configFile string
+		ingressList *v1beta1.IngressList
 	}
 	tests := []struct {
-		name    string
-		args    args
-		wantErr bool
+		name          string
+		args          args
+		shouldContain []map[string]string
 	}{
 		{
-			name: "environment vars set",
+			name: "Both annotations exists",
 			args: args{
-				bucket:     "cloud-platform-concourse-kubeconfig",
-				configFile: "live-1-only",
+				ingressList: &networking.IngressList{
+					Items: []networking.Ingress{
+						{
+							ObjectMeta: v1.ObjectMeta{
+								Name:      "ingress-01",
+								Namespace: "ns-01",
+								Annotations: map[string]string{
+									"external-dns.alpha.kubernetes.io/aws-weight":     "true",
+									"external-dns.alpha.kubernetes.io/set-identifier": "ingress-01-ns-01-blue",
+								},
+							},
+							Spec: networking.IngressSpec{
+								TLS: []networking.IngressTLS{
+									{
+										Hosts: []string{"example-01.com"},
+									},
+								},
+								Rules: []networking.IngressRule{
+									{
+										Host: "example-01.com",
+									},
+								},
+							},
+						},
+					},
+				},
 			},
-			wantErr: false,
+			shouldContain: []map[string]string{},
 		},
 		{
-			name: "wrong bucket and config file",
+			name: "Only aws-weight annotation exists",
 			args: args{
-				bucket:     "doesn't-exist-probably",
-				configFile: "nofile",
+				ingressList: &networking.IngressList{
+					Items: []networking.Ingress{
+						{
+							ObjectMeta: v1.ObjectMeta{
+								Name:      "ingress-02",
+								Namespace: "ns-02",
+							},
+							Spec: networking.IngressSpec{
+								TLS: []networking.IngressTLS{
+									{
+										Hosts: []string{"example-02.com"},
+									},
+								},
+								Rules: []networking.IngressRule{
+									{
+										Host: "example-02.com",
+									},
+								},
+							},
+						},
+					},
+				},
 			},
-			wantErr: true,
+			shouldContain: []map[string]string{
+				{
+					"hostname":  "example-02.com",
+					"namespace": "ns-02",
+					"resource":  "ingress-02",
+				},
+			},
+		},
+		{
+			name: "Only set-identifier annotation exists",
+			args: args{
+				ingressList: &networking.IngressList{
+					Items: []networking.Ingress{
+						{
+							ObjectMeta: v1.ObjectMeta{
+								Name:      "ingress-03",
+								Namespace: "ns-03",
+							},
+							Spec: networking.IngressSpec{
+								TLS: []networking.IngressTLS{
+									{
+										Hosts: []string{"example-03.com"},
+									},
+								},
+								Rules: []networking.IngressRule{
+									{
+										Host: "example-03.com",
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			shouldContain: []map[string]string{
+				{
+					"hostname":  "example-03.com",
+					"namespace": "ns-03",
+					"resource":  "ingress-03",
+				},
+			},
+		},
+		{
+			name: "Both annotation doesnot exists",
+			args: args{
+				ingressList: &networking.IngressList{
+					Items: []networking.Ingress{
+						{
+							ObjectMeta: v1.ObjectMeta{
+								Name:      "ingress-04",
+								Namespace: "ns-04",
+							},
+							Spec: networking.IngressSpec{
+								TLS: []networking.IngressTLS{
+									{
+										Hosts: []string{"example-04.com"},
+									},
+								},
+								Rules: []networking.IngressRule{
+									{
+										Host: "example-04.com",
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			shouldContain: []map[string]string{
+				{
+					"hostname":  "example-04.com",
+					"namespace": "ns-04",
+					"resource":  "ingress-04",
+				},
+			},
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := FromS3Bucket(tt.args.bucket, tt.args.configFile)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("FromS3Bucket() error = %v, wantErr %v", err, tt.wantErr)
+			got, err := IngressWithoutAnnotation(tt.args.ingressList)
+			if err != nil {
+				t.Errorf("IngressWithoutAnnotation() error = %v", err)
 				return
 			}
-		})
-	}
-}
-
-func Test_postToApi(t *testing.T) {
-	var (
-		hoodawApiKey = "soopersekrit"
-		endPoint     = "http://localhost:4567/test_endpoint"
-	)
-	type args struct {
-		jsonToPost   []byte
-		hoodawApiKey *string
-		endPoint     *string
-	}
-	tests := []struct {
-		name    string
-		args    args
-		wantErr bool
-	}{
-		{
-			name: "Post random json to localhost",
-			args: args{
-				jsonToPost:   []byte{'A'},
-				hoodawApiKey: &hoodawApiKey,
-				endPoint:     &endPoint,
-			},
-			wantErr: false,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if err := postToApi(tt.args.jsonToPost, tt.args.hoodawApiKey, tt.args.endPoint); (err != nil) != tt.wantErr {
-				t.Errorf("postToApi() error = %v, wantErr %v", err, tt.wantErr)
+			if !assert.Equal(t, got, tt.shouldContain) {
+				t.Errorf("IngressWithoutAnnotation() got = %v, wantErr %v", got, tt.shouldContain)
 			}
 		})
 	}
+
 }

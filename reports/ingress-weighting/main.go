@@ -11,6 +11,7 @@ import (
 
 	"github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/reports/pkg/authenticate"
 	"github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/reports/pkg/hoodaw"
+	"k8s.io/api/networking/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/oidc"
@@ -25,7 +26,7 @@ type resourceMap map[string]interface{}
 
 var (
 	awsweightAnnotation     = flag.String("awsweightAnnotation", "external-dns.alpha.kubernetes.io/aws-weight", "String of the aws weight annotation to check")
-	setIdentifierAnnotation = flag.String("setIdentifierAnnotation", "external-dns.alpha.kubernetes.io/set-idenitifier", "String of the set-identiifer annotation to check")
+	setIdentifierAnnotation = flag.String("setIdentifierAnnotation", "external-dns.alpha.kubernetes.io/set-identifier", "String of the set-identiifer annotation to check")
 	bucket                  = flag.String("bucket", os.Getenv("KUBECONFIG_S3_BUCKET"), "AWS S3 bucket for kubeconfig")
 	ctx                     = flag.String("context", "live-1.cloud-platform.service.justice.gov.uk", "Kubernetes context specified in kubeconfig")
 	hoodawApiKey            = flag.String("hoodawAPIKey", os.Getenv("HOODAW_API_KEY"), "API key to post data to the 'How out of date are we' API")
@@ -46,8 +47,18 @@ func main() {
 		log.Fatalln(err.Error())
 	}
 
-	// Grab all ingress resources without required annotation
-	jsonToPost, err := IngressWithoutAnnotation(clientset)
+	// Get all ingress resources
+	ingressList, err := GetAllIngresses(clientset)
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+	// Find all ingress resources without the required external-dns annotations
+	ingressesWithoutAnnotation, err := IngressWithoutAnnotation(ingressList)
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	jsonToPost, err := BuildJsonMap(ingressesWithoutAnnotation)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
@@ -59,24 +70,28 @@ func main() {
 	}
 }
 
-// IngressWithoutAnnotation takes a Kubernetes clientset and returns a slice of byte and an error,
-// if there is one. Due to the requirement of the API, we have to sculpt the []byte data a very specific way.
-func IngressWithoutAnnotation(clientset *kubernetes.Clientset) ([]byte, error) {
-	ingress, err := clientset.NetworkingV1beta1().Ingresses("").List(context.TODO(), metav1.ListOptions{})
+// GetAllIngresses takes a Kubernetes clientset and returns all ingress with type *v1beta1.IngressList and an error.
+func GetAllIngresses(clientset *kubernetes.Clientset) (*v1beta1.IngressList, error) {
+	ingressList, err := clientset.NetworkingV1beta1().Ingresses("").List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		return nil, err
 	}
+	return ingressList, nil
+}
 
+// IngressWithoutAnnotation takes a list of ingress in  type *v1beta1.IngressList and returns a slice of byte and an error,
+// if there is one. Due to the requirement of the API, we have to sculpt the []byte data a very specific way.
+func IngressWithoutAnnotation(ingressList *v1beta1.IngressList) ([]map[string]string, error) {
 	// s contains a slice of maps, each map will be iterated over when placed in a dashboard.
 	s := make([]map[string]string, 0)
 
 	// For each ingress resource, check if it contains the required annotation. If not,
 	// loop over the slice of TLS hostnames contained in the resource, create a map, add
 	// the namespace and hostname values and add it to a slice of maps.
-	for _, i := range ingress.Items {
+	for _, i := range ingressList.Items {
 		_, exists := i.Annotations[*awsweightAnnotation]
-		setIdentifierInIngress, _ := i.Annotations[*setIdentifierAnnotation]
-		if !exists || setIdentifierInIngress != strings.Join([]string{i.Namespace, i.GetName(), "blue"}, "-") {
+		setIdentifierInIngress, identifierExists := i.Annotations[*setIdentifierAnnotation]
+		if !exists || (!identifierExists || setIdentifierInIngress != strings.Join([]string{i.GetName(), i.Namespace, "blue"}, "-")) {
 			for _, v := range i.Spec.TLS {
 				if len(v.Hosts) > 0 {
 					m := make(map[string]string)
@@ -88,13 +103,17 @@ func IngressWithoutAnnotation(clientset *kubernetes.Clientset) ([]byte, error) {
 			}
 		}
 	}
+	return s, nil
+}
 
+// BuildJsonMap takes a slice of maps and return a json encoded map
+func BuildJsonMap(ingressesWithoutAnnotation []map[string]string) ([]byte, error) {
 	// To handle generics in the data type, we need to create a new map,
 	// add the first key string:string and then the second key/value string:map[string]string.
 	// As per the requirements of the HOODAW API.
 	jsonMap := resourceMap{
 		"updated_at":        time.Now().Format("2006-01-2 15:4:5 UTC"),
-		"weighting_ingress": s,
+		"weighting_ingress": ingressesWithoutAnnotation,
 	}
 
 	jsonStr, err := json.Marshal(jsonMap)
