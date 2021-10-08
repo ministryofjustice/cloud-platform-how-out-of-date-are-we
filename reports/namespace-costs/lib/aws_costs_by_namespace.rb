@@ -7,9 +7,9 @@ class AwsCostsByNamespace
   SHARED_COSTS = "SHARED_COSTS"
   DAYS_PER_MONTH = 30 # An average, to convert daily amounts to monthly
 
-  # Annual cost of the Cloud Platform team is £1,260,000
+  # Monthly cost taken from monthly Cloud Platform Metrics
   # This is the monthly cost in USD
-  MONTHLY_TEAM_COST = 136_000
+  MONTHLY_TEAM_COST = 99_583
 
   REGION = "us-east-1" # AWS CostExplorer only works with this region value
 
