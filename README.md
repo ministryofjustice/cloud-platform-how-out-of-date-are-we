@@ -109,14 +109,19 @@ This section describes how to install and update the front-end app and scheduled
 * access to perform `awscli` commands in the account `cloud-platform-aws`
 * `live` kube context
 * `manager` kube context
-* `cloud-platform-reports-cronjobs/secrets.yaml` file containing Docker Hub credentials
-* `cloud-platform-reports/secrets.yaml` file defining the web application API key
+* `cloud-platform-reports-cronjobs/secrets.yaml` file containing Docker Hub credentials and API key in double encoded format
+* `cloud-platform-reports/secrets.yaml` file defining the web application API key in encoded format
 
 The web application API key is required by both the web application and the
-cronjobs which post the report data. So the
-`cloud-platform-reports/secrets.yaml` file is also used when deploying the
-`cloud-platform-reports-cronjobs` helm chart. Equivalent secrets are created in
-both the `live/<web app>` and `manager/concourse-main` namespaces.
+cronjobs which post the report data. 
+
+When deploying the web application from `cloud-platform-reports`, the API key defined in the
+`cloud-platform-reports/secrets.yaml` file should be in encoded format. 
+
+When deploying the cronjob from `cloud-platform-reports-cronjobs`, the API key defined in the
+`cloud-platform-reports-cronjobs/secrets.yaml` should be encoded again(double encoded from real API key). That way when the kubernetes secret is decoded from the cronjob and the API key still remains in encoded format when sending the data via the POST which then matches the value of the secret in `cloud-platform-reports/secrets.yaml`.
+
+ Equivalent secrets are created in both the `live/<web app>` and `manager/concourse-main` namespaces.
 
 ### Install
 

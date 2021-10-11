@@ -1,4 +1,4 @@
-IMAGE := ministryofjustice/cloud-platform-how-out-of-date-are-we:2.11
+IMAGE := ministryofjustice/cloud-platform-how-out-of-date-are-we:3.11
 DEV_NAMESPACE := cloud-platform-reports-dev
 PROD_NAMESPACE := cloud-platform-reports-prod
 CRONJOB_NAMESPACE := concourse-main
@@ -25,7 +25,6 @@ deploy-cronjobs:
 			--generate-name \
 			--namespace $(CRONJOB_NAMESPACE) \
 			./cloud-platform-reports-cronjobs \
-			--values cloud-platform-reports/secrets.yaml \
 			--values cloud-platform-reports-cronjobs/secrets.yaml
 
 upgrade-webapp:
@@ -42,7 +41,6 @@ upgrade-cronjobs:
 			$$(helm ls --short --namespace $(CRONJOB_NAMESPACE) | grep cloud-platform-reports-cronjobs) \
 			--namespace $(CRONJOB_NAMESPACE) \
 			./cloud-platform-reports-cronjobs \
-			--values cloud-platform-reports/secrets.yaml \
 			--values cloud-platform-reports-cronjobs/secrets.yaml
 
 dev-deploy:
@@ -63,7 +61,7 @@ dev-deploy-webapp:
 			--values cloud-platform-reports/values-dev.yaml
 
 dev-deploy-cronjobs:
-	kubectl config use-context manager \
+	aws eks update-kubeconfig --name manager \
 		&& helm install \
 			--generate-name \
 			--namespace $(CRONJOB_NAMESPACE) \
@@ -72,7 +70,7 @@ dev-deploy-cronjobs:
 			--values cloud-platform-reports-cronjobs/secrets.yaml
 
 dev-upgrade-webapp:
-	kubectl config use-context live-1 \
+	aws eks update-kubeconfig --name live \
 		&& helm upgrade \
 			$$(helm ls --short --namespace $(DEV_NAMESPACE) | grep cloud-platform-reports) \
 			--namespace $(DEV_NAMESPACE) \
@@ -81,13 +79,13 @@ dev-upgrade-webapp:
 			--values cloud-platform-reports/values-dev.yaml
 
 dev-upgrade-cronjobs:
-	kubectl config use-context manager \
+	aws eks update-kubeconfig --name manager \
 		&& helm upgrade \
 			$$(helm ls --short --namespace $(CRONJOB_NAMESPACE) | grep cloud-platform-reports-cronjobs) \
 			--namespace $(CRONJOB_NAMESPACE) \
 			./cloud-platform-reports-cronjobs \
 			--values cloud-platform-reports-cronjobs/values-dev.yaml \
-			--values cloud-platform-reports-cronjobs/secrets.yaml
+			--values cloud-platform-reports-cronjobs/secrets-dev.yaml
 
 dev-server:
 	API_KEY=soopersekrit ./app.rb -o 0.0.0.0
