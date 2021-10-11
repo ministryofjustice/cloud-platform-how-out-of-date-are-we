@@ -115,11 +115,11 @@ This section describes how to install and update the front-end app and scheduled
 The web application API key is required by both the web application and the
 cronjobs which post the report data. 
 
-When deploying the web application from `cloud-platform-reports`, the API key should be encoded when passing from the
-`cloud-platform-reports/secrets.yaml` file.
+When deploying the web application from `cloud-platform-reports`, the API key defined in the
+`cloud-platform-reports/secrets.yaml` file should be in encoded format. 
 
-When deploying the cronjob from `cloud-platform-reports-cronjobs`, the API key should be encoded again(double encoded from real API key) when passing from 
-`cloud-platform-reports-cronjobs/secrets.yaml`. That way when the kubernetes secret is decoded from the cronjob and the API key still remains in encoded format when sending the data via the POST which then matches the value of the secret in `cloud-platform-reports/secrets.yaml`.
+When deploying the cronjob from `cloud-platform-reports-cronjobs`, the API key defined in the
+`cloud-platform-reports-cronjobs/secrets.yaml` should be encoded again(double encoded from real API key). That way when the kubernetes secret is decoded from the cronjob and the API key still remains in encoded format when sending the data via the POST which then matches the value of the secret in `cloud-platform-reports/secrets.yaml`.
 
  Equivalent secrets are created in both the `live/<web app>` and `manager/concourse-main` namespaces.
 
