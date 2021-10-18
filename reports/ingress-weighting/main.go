@@ -42,7 +42,12 @@ func main() {
 	flag.Parse()
 
 	// Gain access to a Kubernetes cluster using a config file stored in an S3 bucket.
-	clientset, err := authenticate.FromS3Bucket(*bucket, *kubeconfig, *ctx, *region)
+	err := authenticate.KubeConfigFromS3Bucket(*bucket, *kubeconfig, *region)
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	clientset, err := authenticate.KubeClientFromConfig("~/.kube/config", *ctx)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
