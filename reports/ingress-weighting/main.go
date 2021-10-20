@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/reports/pkg/authenticate"
+	"github.com/ministryofjustice/cloud-platform-environments/pkg/authenticate"
 	"github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/reports/pkg/hoodaw"
 	"k8s.io/api/networking/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -42,7 +42,7 @@ func main() {
 	flag.Parse()
 
 	// Gain access to a Kubernetes cluster using a config file stored in an S3 bucket.
-	clientset, err := authenticate.FromS3Bucket(*bucket, *kubeconfig, *ctx, *region)
+	clientset, err := authenticate.CreateClientFromS3Bucket(*bucket, *kubeconfig, *region, *ctx)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
