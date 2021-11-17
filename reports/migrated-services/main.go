@@ -35,7 +35,7 @@ var (
 
 	endPoint = *hoodawHost + *hoodawEndpoint
 
-	prPageCount       = 1
+	prPageCount       = 5
 	nsMigratedBaseNum = 4
 
 	// Based on live-1 user folders in the env repo as of 16 Nov and number of ns migrated to live,
@@ -46,26 +46,28 @@ var (
 func main() {
 	flag.Parse()
 
+	// Authenticate to github using auth token
 	client, err := authenticate.GitHubClient(*token)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
 
-	// query the list of files in all namespaces and add it to a slice
+	// query PRs that are merged and have the migratedSkip file deleted
+	// and add the merged dates to a slice
 	migratedDates, err := fetchMigratedDates(client)
 	if err != nil {
 		log.Fatalln(err.Error())
 
 	}
 
-	//fmt.Println(migratedDates)
-
+	// group the dates and count the occurance
 	nsCountMigrated := perdayCount(migratedDates)
 	if err != nil {
 		log.Fatalln(err.Error())
 
 	}
 
+	// Build the migrated report slice
 	migratedMapSlice := buildMigratedSlice(nsCountMigrated)
 
 	jsonToPost, err := BuildJsonMap(migratedMapSlice)
@@ -81,6 +83,10 @@ func main() {
 
 }
 
+// fetchMigratedDates paginate through the PRs, filter down the ones that are merged
+// Then, it list the changedFiles and check if migratedSkip file is deleted in that PR.
+// This represents that the namespace is deleted from `live-1` in that PR.
+// It then added the merged date to a slice of strings and return the same
 func fetchMigratedDates(client *github.Client) ([]string, error) {
 
 	migratedDates := make([]string, 0)
@@ -88,7 +94,6 @@ func fetchMigratedDates(client *github.Client) ([]string, error) {
 	// Increase the page if you cannot get the full list of PRs related to migration
 
 	for page := 1; page <= prPageCount; page++ {
-		fmt.Println("Page:", page)
 		opts := &github.PullRequestListOptions{
 			State:       "closed",
 			Sort:        "updated",
@@ -122,6 +127,8 @@ func fetchMigratedDates(client *github.Client) ([]string, error) {
 	return migratedDates, nil
 }
 
+// perdayCount get the slice of dates and group them by date and add the number of occurance of dates
+// in to a map. The occurence of date represents a namespace that got clean up due to migration
 func perdayCount(migratedDates []string) map[string]int {
 
 	nsCountPerDate := make(map[string]int)
@@ -141,6 +148,8 @@ func perdayCount(migratedDates []string) map[string]int {
 
 }
 
+// buildMigratedSlice gets a map of dates, sort the dates and build a slice of maps
+// with details required for the report
 func buildMigratedSlice(nsCountPerDate map[string]int) []map[string]string {
 
 	nsCountMigratedSlice := make([]map[string]string, 0)
@@ -164,7 +173,6 @@ func buildMigratedSlice(nsCountPerDate map[string]int) []map[string]string {
 		}
 		i++
 
-		fmt.Println("Date:", date, "Count:", nsCountPerDate[date])
 		nsCountMigratedMap["date"] = date
 		nsCountMigratedMap["todayCount"] = strconv.Itoa(nsCountPerDate[date])
 		nsCountMigratedMap["tillCount"] = strconv.Itoa(tillCount)
