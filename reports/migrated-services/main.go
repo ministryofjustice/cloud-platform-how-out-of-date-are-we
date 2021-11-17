@@ -25,7 +25,7 @@ import (
 type resourceMap map[string]interface{}
 
 var (
-	migratedSkipFilename = flag.String("migratedSkipFilename", "MIGRATED_SKIP_APPLY_THIS_NAMESPACE", "String of the aws weight annotation to check")
+	migratedSkipFilename = flag.String("migratedSkipFilename", "MIGRATED_SKIP_APPLY_THIS_NAMESPACE", "Skip filename to look in the PR changedfiles")
 	hoodawApiKey         = flag.String("hoodawAPIKey", os.Getenv("HOODAW_API_KEY"), "API key to post data to the 'How out of date are we' API")
 	hoodawEndpoint       = flag.String("hoodawEndpoint", "/migrated_services", "Endpoint to send the data to")
 	hoodawHost           = flag.String("hoodawHost", os.Getenv("HOODAW_HOST"), "Hostname of the 'How out of date are we' API")
@@ -35,7 +35,11 @@ var (
 
 	endPoint = *hoodawHost + *hoodawEndpoint
 
-	prPageCount       = 5
+	// Nunber of pages of PRs to look in github
+	prPageCount = 5
+
+	// This is the number of namespaces migrated
+	// before the migrateSkip file was introduced and needs to be added to total
 	nsMigratedBaseNum = 4
 
 	// Based on live-1 user folders in the env repo as of 16 Nov and number of ns migrated to live,
