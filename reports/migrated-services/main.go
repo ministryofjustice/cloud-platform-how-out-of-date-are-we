@@ -7,12 +7,14 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/google/go-github/github"
 	"github.com/ministryofjustice/cloud-platform-environments/pkg/authenticate"
+	"github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/reports/pkg/hoodaw"
 )
 
 // resourceMap is used to store both string:string and string:map[string]string key
@@ -33,10 +35,11 @@ var (
 
 	endPoint = *hoodawHost + *hoodawEndpoint
 
-	prPageCount       = 5
+	prPageCount       = 1
 	nsMigratedBaseNum = 4
 
-	// Based on live-1 user folders in the env repo as of 16 Nov and number of ns migrated to live
+	// Based on live-1 user folders in the env repo as of 16 Nov and number of ns migrated to live,
+	// this is the baseline number of namespaces to be migrated
 	live1NsMigrationPool = 358
 )
 
@@ -49,13 +52,15 @@ func main() {
 	}
 
 	// query the list of files in all namespaces and add it to a slice
-	nsPerDate, err := fetchNamespaceFolders(client)
+	migratedDates, err := fetchMigratedDates(client)
 	if err != nil {
 		log.Fatalln(err.Error())
 
 	}
 
-	nsCountMigrated := perdayCount(nsPerDate)
+	//fmt.Println(migratedDates)
+
+	nsCountMigrated := perdayCount(migratedDates)
 	if err != nil {
 		log.Fatalln(err.Error())
 
@@ -63,26 +68,22 @@ func main() {
 
 	migratedMapSlice := buildMigratedSlice(nsCountMigrated)
 
-	// for i, map := range migratedMapSlice {
-	fmt.Println(migratedMapSlice)
-	// }
-
-	_, err = BuildJsonMap(migratedMapSlice)
+	jsonToPost, err := BuildJsonMap(migratedMapSlice)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
 
-	// // Post json to hoowdaw api
-	// err = hoodaw.PostToApi(jsonToPost, hoodawApiKey, &endPoint)
-	// if err != nil {
-	// 	log.Fatalln(err.Error())
-	// }
+	// Post json to hoowdaw api
+	err = hoodaw.PostToApi(jsonToPost, hoodawApiKey, &endPoint)
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
 
 }
 
-func fetchNamespaceFolders(client *github.Client) ([]map[string]string, error) {
+func fetchMigratedDates(client *github.Client) ([]string, error) {
 
-	ns := make([]map[string]string, 0)
+	migratedDates := make([]string, 0)
 	// There is an assumption that the migration PRs are in the last 500 PRs which are in last 5 pages
 	// Increase the page if you cannot get the full list of PRs related to migration
 
@@ -109,15 +110,7 @@ func fetchNamespaceFolders(client *github.Client) ([]map[string]string, error) {
 				for _, files := range commitFiles {
 
 					if strings.Contains(*files.Filename, *migratedSkipFilename) && (*files.Status == "removed") {
-						// namespaces filepaths are assumed to come in
-						// the format: namespaces/live-1.cloud-platform.service.justice.gov.uk/<namespaceName>
-						//s := strings.Split(*files.Filename, "/")
-
-						m := make(map[string]string)
-						//m["namespace"] = s[2]
-						//mergedTime := pull.MergedAt.Format("2006-01-02")
-						m["prmerged_date"] = pull.MergedAt.Format("2006-01-02")
-						ns = append(ns, m)
+						migratedDates = append(migratedDates, pull.MergedAt.Format("2006-01-02"))
 					}
 				}
 
@@ -126,17 +119,15 @@ func fetchNamespaceFolders(client *github.Client) ([]map[string]string, error) {
 
 	}
 
-	return ns, nil
+	return migratedDates, nil
 }
 
-func perdayCount(nsPerDate []map[string]string) map[string]int {
+func perdayCount(migratedDates []string) map[string]int {
 
 	nsCountPerDate := make(map[string]int)
 
-	for _, item := range nsPerDate {
+	for _, date := range migratedDates {
 		// check if the item/element exist in the duplicate_frequency map
-
-		date := item["prmerged_date"]
 		_, exist := nsCountPerDate[date]
 
 		if exist {
@@ -146,7 +137,6 @@ func perdayCount(nsPerDate []map[string]string) map[string]int {
 		}
 	}
 
-	//sort.Strings(nsCountPerDate)
 	return nsCountPerDate
 
 }
@@ -157,21 +147,28 @@ func buildMigratedSlice(nsCountPerDate map[string]int) []map[string]string {
 
 	i, tillCount := 0, 0
 
-	for date, nsCount := range nsCountPerDate {
+	// sort the dates before building the Slice so the dates are in asc order
+	keys := make([]string, 0, len(nsCountPerDate))
+	for k := range nsCountPerDate {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	for _, date := range keys {
 		nsCountMigratedMap := make(map[string]string)
 
 		if i == 0 {
 			tillCount = nsMigratedBaseNum + nsCountPerDate[date]
 		} else {
-			tillCount += nsCount
+			tillCount += nsCountPerDate[date]
 		}
 		i++
 
-		fmt.Println("Date:", date, "Count:", nsCount)
+		fmt.Println("Date:", date, "Count:", nsCountPerDate[date])
 		nsCountMigratedMap["date"] = date
-		nsCountMigratedMap["todayCount"] = strconv.Itoa(nsCount)
+		nsCountMigratedMap["todayCount"] = strconv.Itoa(nsCountPerDate[date])
 		nsCountMigratedMap["tillCount"] = strconv.Itoa(tillCount)
-		nsCountMigratedMap["percentage"] = fmt.Sprintf("%f", (float64(tillCount)/float64(live1NsMigrationPool))*100)
+		nsCountMigratedMap["percentage"] = fmt.Sprintf("%.2f", (float64(tillCount)/float64(live1NsMigrationPool))*100)
 		nsCountMigratedSlice = append(nsCountMigratedSlice, nsCountMigratedMap)
 	}
 
