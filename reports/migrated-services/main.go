@@ -25,7 +25,7 @@ import (
 type resourceMap map[string]interface{}
 
 var (
-	migratedSkipFilename = flag.String("migratedSkipFilename", "MIGRATED_SKIP_APPLY_THIS_NAMESPACE", "Skip filename to look in the PR changedfiles")
+	migratedSkipFilename = flag.String("skipfile", "MIGRATED_SKIP_APPLY_THIS_NAMESPACE", "Name of the skip file in namespace")
 	hoodawApiKey         = flag.String("hoodawAPIKey", os.Getenv("HOODAW_API_KEY"), "API key to post data to the 'How out of date are we' API")
 	hoodawEndpoint       = flag.String("hoodawEndpoint", "/migrated_services", "Endpoint to send the data to")
 	hoodawHost           = flag.String("hoodawHost", os.Getenv("HOODAW_HOST"), "Hostname of the 'How out of date are we' API")
