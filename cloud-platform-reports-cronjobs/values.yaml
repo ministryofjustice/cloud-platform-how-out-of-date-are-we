@@ -35,3 +35,6 @@ cronjobs:
   ingressWeighting:
     name: ingress-weighting
     schedule: "*/2 * * * *"
+  migratedServices:
+    name: migrated-services
+    schedule: "0 */3 * * *"

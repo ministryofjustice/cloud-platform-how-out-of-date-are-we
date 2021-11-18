@@ -107,3 +107,12 @@ jobs:
           path: reports/ingress-weighting
           repository: ministryofjustice/cloud-platform-ingress-weighting
           tag_with_ref: true
+      - name: Push migrated-services image to docker hub
+        uses: docker/build-push-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          path: reports/migrated-services
+          repository: ministryofjustice/cloud-platform-migrated-services
+          tag_with_ref: true
+      

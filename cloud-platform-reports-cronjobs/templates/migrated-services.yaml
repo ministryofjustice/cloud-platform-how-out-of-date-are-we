@@ -1,0 +1,30 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: {{ .Values.cronjobs.migratedServices.name }}
+spec:
+  schedule: "{{ .Values.cronjobs.migratedServices.schedule }}"
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          {{- include "cloud-platform-reports-cronjobs.imagePullSecrets" . | indent 10 }}
+          containers:
+          - name: migrated-services-image
+            image: ministryofjustice/cloud-platform-migrate-services:{{ .Chart.AppVersion }}
+            imagePullPolicy: Always
+            env:
+            - name: GITHUB_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: how-out-of-date-are-we-github-token
+                  key: token
+            {{- include "cloud-platform-reports-cronjobs.kubeconfigLocation" . | indent 12 }}
+            {{- include "cloud-platform-reports-cronjobs.hoodaw-credentials" . | indent 12 }}
+            command:
+            - /bin/sh
+            - -c
+            - ./migrated-services
+          restartPolicy: OnFailure
