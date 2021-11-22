@@ -13,10 +13,10 @@ spec:
           {{- include "cloud-platform-reports-cronjobs.imagePullSecrets" . | indent 10 }}
           containers:
           - name: migrated-services-image
-            image: ministryofjustice/cloud-platform-migrate-services:{{ .Chart.AppVersion }}
+            image: ministryofjustice/cloud-platform-migrated-services:{{ .Chart.AppVersion }}
             imagePullPolicy: Always
             env:
-            - name: GITHUB_TOKEN
+            - name: GITHUB_OAUTH_TOKEN
               valueFrom:
                 secretKeyRef:
                   name: how-out-of-date-are-we-github-token
