@@ -155,7 +155,7 @@ end
 def hosted_services_for_namespace(namespace)
   json = store.retrieve_file("data/hosted_services.json")
   data = JSON.parse(json)
-  ns = data["namespace_details"].find {|h| h["namespace"] == namespace}
+  ns = data["namespace_details"].find {|h| h["namespace"] == namespace} || ns = JSON.parse('{"namespace": "not-found"}')
   ns.merge("updated_at" => DateTime.parse(data["updated_at"]))
 end
 
