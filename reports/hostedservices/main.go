@@ -6,6 +6,7 @@ import (
 	"flag"
 	"log"
 	"os"
+	"sort"
 	"strings"
 	"time"
 
@@ -82,19 +83,16 @@ func main() {
 		log.Fatalln(err.Error())
 	}
 
-	ingressMap := make(map[string][]string, 0)
+	// Build the ingresses Map
+	ingressesMap := BuildIngressesMap(ingressList.Items)
 
-	for _, i := range ingressList.Items {
-
-		for _, v := range i.Spec.TLS {
-			if len(v.Hosts) > 0 {
-				ingressMap[i.Namespace] = append(ingressMap[i.Namespace], v.Hosts[0])
-			}
-		}
-	}
-
+	// Add the ingress slice to the namespace Details map for all namespaces
 	for k, v := range nsDetailsMap {
-		v.DomainNames = ingressMap[v.Name]
+		if _, exist := ingressesMap[v.Name]; exist {
+			v.DomainNames = ingressesMap[v.Name]
+		} else {
+			v.DomainNames = append(v.DomainNames, " ")
+		}
 		nsDetailsMap[k] = v
 	}
 
@@ -126,12 +124,11 @@ func GetNamespaceDetails(ns v1.Namespace) namespace {
 	namespaceDetails.GithubURL = ns.Annotations["cloud-platform.justice.gov.uk/source-code"]
 	namespaceDetails.TeamName = ns.Annotations["cloud-platform.justice.gov.uk/team-name"]
 	namespaceDetails.TeamSlackChannel = ns.Annotations["cloud-platform.justice.gov.uk/slack-channel"]
-	namespaceDetails.DomainNames = []string{"[ ]"}
+	namespaceDetails.DomainNames = []string{}
 	return namespaceDetails
 }
 
-// GetNamespaces takes a Kubernetes clientset and returns all namespaces with type *v1beta1.IngressList and an error.
-
+// GetNamespaces takes a Kubernetes clientset and returns all namespaces with type *v1beta1.IngressList and an error.s
 func GetNamespaces(clientSet *kubernetes.Clientset) ([]v1.Namespace, error) {
 
 	namespaces, err := clientSet.CoreV1().Namespaces().List(context.TODO(), metav1.ListOptions{})
@@ -152,15 +149,41 @@ func GetAllIngresses(clientset *kubernetes.Clientset) (*v1beta1.IngressList, err
 	return ingressList, nil
 }
 
-// BuildJsonMap takes a slice of maps and return a json encoded map
+// BuildIngressesMap takes the Ingress list and return a map with key as namespace and value
+// with slices of string containing hosts urls
+func BuildIngressesMap(ingressItems []v1beta1.Ingress) map[string][]string {
+
+	ingressMap := make(map[string][]string, 0)
+
+	for _, i := range ingressItems {
+
+		for _, v := range i.Spec.TLS {
+			if len(v.Hosts) > 0 {
+				ingressMap[i.Namespace] = append(ingressMap[i.Namespace], v.Hosts[0])
+			}
+		}
+	}
+	return ingressMap
+}
+
+// BuildJsonMap takes a map with namespce key and namespace struct as value, sort the map, flatten to a
+// slice and return a json encoded map
 func BuildJsonMap(hostedservices map[string]namespace) ([]byte, error) {
 	// To handle generics in the data type, we need to create a new map,
 	// add the first key string:string and then the second key/value string:map[string]string.
 	// As per the requirements of the HOODAW API.
 
+	// sort the keys by ascending order
+	keys := make([]string, 0, len(hostedservices))
+	for key := range hostedservices {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+
+	// flatten the map to a slice which is expected by the HOODAW API
 	flattenMap := make([]namespace, 0)
-	for _, value := range hostedservices {
-		flattenMap = append(flattenMap, value)
+	for _, k := range keys {
+		flattenMap = append(flattenMap, hostedservices[k])
 	}
 
 	// fmt.Println(flattenMap)
