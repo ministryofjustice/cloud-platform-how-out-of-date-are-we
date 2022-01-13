@@ -7,7 +7,6 @@ import (
 	"log"
 	"os"
 	"sort"
-	"strings"
 	"time"
 
 	"github.com/ministryofjustice/cloud-platform-environments/pkg/authenticate"
@@ -117,8 +116,6 @@ func GetNamespaceDetails(ns v1.Namespace) namespace {
 
 	namespaceDetails.Name = ns.Name
 	namespaceDetails.Application = ns.Annotations["cloud-platform.justice.gov.uk/application"]
-	cluster := strings.SplitN(*ctx, ".", 2)
-	namespaceDetails.Cluster = cluster[0]
 	namespaceDetails.BusinessUnit = ns.Annotations["cloud-platform.justice.gov.uk/business-unit"]
 	namespaceDetails.DeploymentType = ns.Labels["cloud-platform.justice.gov.uk/environment-name"]
 	namespaceDetails.GithubURL = ns.Annotations["cloud-platform.justice.gov.uk/source-code"]
