@@ -89,8 +89,6 @@ func main() {
 	for k, v := range nsDetailsMap {
 		if _, exist := ingressesMap[v.Name]; exist {
 			v.DomainNames = ingressesMap[v.Name]
-		} else {
-			v.DomainNames = append(v.DomainNames, " ")
 		}
 		nsDetailsMap[k] = v
 	}
