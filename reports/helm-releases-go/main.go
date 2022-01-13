@@ -72,7 +72,7 @@ func main() {
 		log.Fatalln("error switching context")
 	}
 
-	listReleaseManger, err = getAllHelmReleases()
+	listReleaseManger, err := getAllHelmReleases()
 	if err != nil {
 		log.Fatalln("error in getting helm releases")
 	}
@@ -84,7 +84,7 @@ func main() {
 		log.Fatalln("error switching context")
 	}
 
-	listReleaseLive_1, err = getAllHelmReleases()
+	listReleaseLive_1, err := getAllHelmReleases()
 	if err != nil {
 		log.Fatalln("error in getting helm releases")
 	}
