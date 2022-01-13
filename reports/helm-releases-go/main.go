@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/ministryofjustice/cloud-platform-environments/pkg/authenticate"
-	"k8s.io/client-go/rest"
+	"github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/reports/pkg/hoodaw"
 	"k8s.io/client-go/tools/clientcmd"
 )
 
@@ -53,24 +53,62 @@ func main() {
 		log.Fatalln("error in getting config")
 	}
 
-	// kube context switch to Manger and output the results of `helm whatup`
+	// kube context switch to Live and output the results of `helm whatup`
 
-	_, err = switchContext(*ctxManager, *KubeConfigPath)
+	err = switchContext(*ctxLive, *KubeConfigPath)
 	if err != nil {
 		log.Fatalln("error switching context")
 	}
 
-	listReleaseManager, err := getAllHelmReleases()
+	helmReleaseLive, err := getAllHelmReleases()
 	if err != nil {
 		log.Fatalln("error in getting helm releases")
 	}
 
-	fmt.Println(listReleaseManager)
+	// kube context switch to Manager and output the results of `helm whatup`
 
-	var clusters map[string]interface{}
-    clusters = {"name:", "live-1"}; {"apps:", helm_releases}
+	err = switchContext(*ctxManager, *KubeConfigPath)
+	if err != nil {
+		log.Fatalln("error switching context")
+	}
 
-    jsonToPost, err := BuildJsonMap(clusters)
+	listReleaseManger, err = getAllHelmReleases()
+	if err != nil {
+		log.Fatalln("error in getting helm releases")
+	}
+
+	// kube context switch to Live-1 and output the results of `helm whatup`
+
+	err = switchContext(*ctxLive_1, *KubeConfigPath)
+	if err != nil {
+		log.Fatalln("error switching context")
+	}
+
+	listReleaseLive_1, err = getAllHelmReleases()
+	if err != nil {
+		log.Fatalln("error in getting helm releases")
+	}
+
+	var clusters []resourceMap
+
+	cluster_live := resourceMap{
+		"name": "live-1",
+		"apps": helmReleaseLive,
+	}
+
+	cluster_manager := resourceMap{
+		"name": "live",
+		"apps": listReleaseManger,
+	}
+
+	cluster_live_1 := resourceMap{
+		"name": "live",
+		"apps": listReleaseLive_1,
+	}
+
+	clusters = append(clusters, cluster_live, cluster_manager, cluster_live_1)
+
+	jsonToPost, err := BuildJsonMap(clusters)
     if err != nil {
      log.Fatalln(err.Error())
     }
@@ -146,7 +184,6 @@ func helmReleasesInNamespace(namespace string) ([]helmRelease, error){
 	err := cmd.Run()
 	if err != nil {
 		fmt.Println("Error: ", err)
-		return nil, err
 	}
 	helmWhatupJson := out.String()
 
@@ -177,10 +214,27 @@ func BuildJsonMap(clusters []helmRelease) ([]byte, error) {
 	return jsonStr, nil
 }
 
-func switchContext(context, kubeconfigPath string) (*rest.Config, error) {
-	return clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
-			&clientcmd.ClientConfigLoadingRules{ExplicitPath: kubeconfigPath},
-			&clientcmd.ConfigOverrides{
-					CurrentContext: context,
-			}).ClientConfig()
+func switchContext(context, kubeconfigPath string) error {
+	kubeconfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
+		&clientcmd.ClientConfigLoadingRules{ExplicitPath: kubeconfigPath},
+		&clientcmd.ConfigOverrides{
+			CurrentContext: context,
+		})
+	config, err := kubeconfig.RawConfig()
+	if err != nil {
+		return fmt.Errorf("error getting RawConfig: %w", err)
+	}
+
+	if config.Contexts[context] == nil {
+		return fmt.Errorf("context %s doesn't exists", context)
+	}
+
+	config.CurrentContext = context
+	err = clientcmd.ModifyConfig(clientcmd.NewDefaultPathOptions(), config, true)
+	if err != nil {
+		return fmt.Errorf("error ModifyConfig: %w", err)
+	}
+
+	fmt.Printf("Switched to context \"%s\"", context)
+	return nil
 }
