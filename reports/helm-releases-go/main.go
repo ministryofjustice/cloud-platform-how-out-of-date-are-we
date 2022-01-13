@@ -92,21 +92,23 @@ func main() {
 	var clusters []resourceMap
 
 	cluster_live := resourceMap{
-		"name": "live-1",
+		"name": "live",
 		"apps": helmReleaseLive,
 	}
 
 	cluster_manager := resourceMap{
-		"name": "live",
+		"name": "manager",
 		"apps": listReleaseManger,
 	}
 
 	cluster_live_1 := resourceMap{
-		"name": "live",
+		"name": "live-1",
 		"apps": listReleaseLive_1,
 	}
 
 	clusters = append(clusters, cluster_live, cluster_manager, cluster_live_1)
+
+	fmt.Println(clusters)
 
 	jsonToPost, err := BuildJsonMap(clusters)
     if err != nil {
@@ -197,7 +199,7 @@ func helmReleasesInNamespace(namespace string) ([]helmRelease, error){
 }
 
 // BuildJsonMap takes a slice of maps and return a json encoded map
-func BuildJsonMap(clusters []helmRelease) ([]byte, error) {
+func BuildJsonMap(clusters []resourceMap) ([]byte, error) {
 	// To handle generics in the data type, we need to create a new map,
 	// add the first key string:string and then the second key/value string:map[string]string.
 	// As per the requirements of the HOODAW API.
