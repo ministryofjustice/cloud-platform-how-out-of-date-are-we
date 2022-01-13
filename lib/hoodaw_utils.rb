@@ -24,8 +24,10 @@ module HoodawUtils
   end
 
   def links_to_domain_names(domain_names)
-    domain_names.map { |domain_name| link_to(domain_name, "https://" + domain_name) }
-      .join("<br/> ")
+    unless domain_names.empty?
+      domain_names.map { |domain_name| link_to(domain_name, "https://" + domain_name) }
+        .join("<br/> ")
+    end
   end
 
   def link_to_repo(url)
