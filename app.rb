@@ -152,6 +152,11 @@ def namespace_usage_from_json
   NamespaceUsage.new(json: json)
 end
 
+def hosted_services_from_json
+  json = store.retrieve_file("data/hosted_services.json")
+  HostedServices.new(json: json)
+end
+
 def hosted_services_for_namespace(namespace)
   json = store.retrieve_file("data/hosted_services.json")
   data = JSON.parse(json)
@@ -242,9 +247,20 @@ get "/hosted_services" do
   if accept_json?(request)
     serve_json_data(:hosted_services)
   else
-    render_item_list(title: "Hosted Services", docpath: "hosted_services", key: "namespace_details")
+    hs = hosted_services_from_json
+
+    locals = {
+      title: "Hosted Services",
+      total_ns: hs.total_ns,
+      total_apps: hs.unique_apps,
+      details: hs.namespaces,
+      updated_at: hs.updated_at,
+    }
+    erb :hosted_services, locals: locals
+
   end
 end
+
 
 get "/costs_by_namespace" do
   costs = namespace_costs
