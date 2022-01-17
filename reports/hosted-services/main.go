@@ -10,6 +10,8 @@ import (
 	"time"
 
 	"github.com/ministryofjustice/cloud-platform-environments/pkg/authenticate"
+	"github.com/ministryofjustice/cloud-platform-environments/pkg/ingress"
+	"github.com/ministryofjustice/cloud-platform-environments/pkg/namespace"
 	"github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/reports/pkg/hoodaw"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/api/networking/v1beta1"
@@ -24,20 +26,6 @@ import (
 // of Kubernetes namespaces and hostnames that don't contain the annotation contained within
 // the variable 'annotation'.
 type resourceMap map[string]interface{}
-
-// Namespace describes a Cloud Platform namespace object.
-type namespace struct {
-	Application      string
-	BusinessUnit     string
-	DeploymentType   string
-	Cluster          string
-	DomainNames      []string
-	GithubURL        string
-	Name             string
-	RbacTeam         []string
-	TeamName         string
-	TeamSlackChannel string
-}
 
 // // AllNamespaces contains the list of namespaces of type Namespace.
 // type allNamespaces struct {
@@ -65,13 +53,13 @@ func main() {
 		log.Fatalln(err.Error())
 	}
 
-	namespaces, err := GetNamespaces(clientset)
+	namespaces, err := namespace.GetAllNamespacesFromCluster(clientset)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
 
 	//make namespace map
-	nsDetailsMap := make(map[string]namespace, 0)
+	nsDetailsMap := make(map[string]namespace.Namespace, 0)
 
 	for _, ns := range namespaces {
 
@@ -80,7 +68,7 @@ func main() {
 	}
 
 	// Get all ingress resources
-	ingressList, err := GetAllIngresses(clientset)
+	ingressList, err := ingress.GetAllIngressesFromCluster(clientset)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
@@ -111,31 +99,17 @@ func main() {
 
 // GetNamespaces takes a Kubernetes clientset and returns all namespaces with type *v1beta1.IngressList and an error.
 
-func GetNamespaceDetails(ns v1.Namespace) namespace {
-
-	var namespaceDetails namespace
-
-	namespaceDetails.Name = ns.Name
-	namespaceDetails.Application = ns.Annotations["cloud-platform.justice.gov.uk/application"]
-	namespaceDetails.BusinessUnit = ns.Annotations["cloud-platform.justice.gov.uk/business-unit"]
-	namespaceDetails.DeploymentType = ns.Labels["cloud-platform.justice.gov.uk/environment-name"]
-	namespaceDetails.GithubURL = ns.Annotations["cloud-platform.justice.gov.uk/source-code"]
-	namespaceDetails.TeamName = ns.Annotations["cloud-platform.justice.gov.uk/team-name"]
-	namespaceDetails.TeamSlackChannel = ns.Annotations["cloud-platform.justice.gov.uk/slack-channel"]
-	namespaceDetails.DomainNames = []string{}
-	return namespaceDetails
-}
-
-// GetNamespaces takes a Kubernetes clientset and returns all namespaces with type *v1beta1.IngressList and an error.s
-func GetNamespaces(clientSet *kubernetes.Clientset) ([]v1.Namespace, error) {
-
-	namespaces, err := clientSet.CoreV1().Namespaces().List(context.TODO(), metav1.ListOptions{})
-	if err != nil {
-		log.Fatalln("Can'list namespaces", err.Error())
-		return nil, err
+func GetNamespaceDetails(ns v1.Namespace) namespace.Namespace {
+	return namespace.Namespace{
+		Name:             ns.Name,
+		Application:      ns.Annotations["cloud-platform.justice.gov.uk/application"],
+		BusinessUnit:     ns.Annotations["cloud-platform.justice.gov.uk/business-unit"],
+		DeploymentType:   ns.Labels["cloud-platform.justice.gov.uk/environment-name"],
+		GithubURL:        ns.Annotations["cloud-platform.justice.gov.uk/source-code"],
+		TeamName:         ns.Annotations["cloud-platform.justice.gov.uk/team-name"],
+		TeamSlackChannel: ns.Annotations["cloud-platform.justice.gov.uk/slack-channel"],
+		DomainNames:      []string{},
 	}
-
-	return namespaces.Items, nil
 }
 
 // GetAllIngresses takes a Kubernetes clientset and returns all ingress with type *v1beta1.IngressList and an error.
@@ -166,7 +140,7 @@ func BuildIngressesMap(ingressItems []v1beta1.Ingress) map[string][]string {
 
 // BuildJsonMap takes a map with namespce key and namespace struct as value, sort the map, flatten to a
 // slice and return a json encoded map
-func BuildJsonMap(hostedservices map[string]namespace) ([]byte, error) {
+func BuildJsonMap(hostedservices map[string]namespace.Namespace) ([]byte, error) {
 	// To handle generics in the data type, we need to create a new map,
 	// add the first key string:string and then the second key/value string:map[string]string.
 	// As per the requirements of the HOODAW API.
@@ -179,12 +153,12 @@ func BuildJsonMap(hostedservices map[string]namespace) ([]byte, error) {
 	sort.Strings(keys)
 
 	// flatten the map to a slice which is expected by the HOODAW API
-	flattenMap := make([]namespace, 0)
+	flattenMap := make([]namespace.Namespace, 0)
+
 	for _, k := range keys {
 		flattenMap = append(flattenMap, hostedservices[k])
 	}
 
-	// fmt.Println(flattenMap)
 	jsonMap := resourceMap{
 		"updated_at":        time.Now().Format("2006-01-2 15:4:5 UTC"),
 		"namespace_details": flattenMap,
