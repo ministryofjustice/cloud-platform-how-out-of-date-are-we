@@ -65,7 +65,10 @@ func main() {
 		log.Fatalln(err.Error())
 	}
 
-	namespaces, _ := GetNamespaces(clientset)
+	namespaces, err := GetNamespaces(clientset)
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
 
 	//make namespace map
 	nsDetailsMap := make(map[string]namespace, 0)
