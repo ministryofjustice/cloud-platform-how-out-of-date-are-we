@@ -9,8 +9,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-var cluster = "test-cluster"
-
 func TestGetNamespaceDetails(t *testing.T) {
 	type args struct {
 		ns v1.Namespace
