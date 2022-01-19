@@ -16,30 +16,30 @@ import (
 )
 
 var (
-	bucket          = flag.String("bucket", os.Getenv("KUBECONFIG_S3_BUCKET"), "AWS S3 bucket for kubeconfig")
-	ctxLive         = flag.String("contextLive", "live.cloud-platform.service.justice.gov.uk", "Kubernetes context specified in kubeconfig")
-	ctxManager      = flag.String("contextManager", "manager.cloud-platform.service.justice.gov.uk", "Kubernetes context specified in kubeconfig")
-	ctxLive_1       = flag.String("contextLive_1", "live-1.cloud-platform.service.justice.gov.uk", "Kubernetes context specified in kubeconfig")
-	hoodawApiKey    = flag.String("hoodawAPIKey", os.Getenv("HOODAW_API_KEY"), "API key to post data to the 'How out of date are we' API")
-	hoodawEndpoint  = flag.String("hoodawEndpoint", "/ingress_weighting", "Endpoint to send the data to")
-	hoodawHost      = flag.String("hoodawHost", os.Getenv("HOODAW_HOST"), "Hostname of the 'How out of date are we' API")
-	kubeconfig      = flag.String("kubeconfig", "kubeconfig", "Name of kubeconfig file in S3 bucket")
-	region          = flag.String("region", os.Getenv("AWS_REGION"), "AWS Region")
-	KubeConfigPath  = flag.String("KubeConfigPath", "/tmp/config", "kubectl config path")
+	bucket         = flag.String("bucket", os.Getenv("KUBECONFIG_S3_BUCKET"), "AWS S3 bucket for kubeconfig")
+	ctxLive        = flag.String("contextLive", "live.cloud-platform.service.justice.gov.uk", "Kubernetes context specified in kubeconfig")
+	ctxManager     = flag.String("contextManager", "manager.cloud-platform.service.justice.gov.uk", "Kubernetes context specified in kubeconfig")
+	ctxLive_1      = flag.String("contextLive_1", "live-1.cloud-platform.service.justice.gov.uk", "Kubernetes context specified in kubeconfig")
+	hoodawApiKey   = flag.String("hoodawAPIKey", os.Getenv("HOODAW_API_KEY"), "API key to post data to the 'How out of date are we' API")
+	hoodawEndpoint = flag.String("hoodawEndpoint", "/helm_whatup", "Endpoint to send the data to")
+	hoodawHost     = flag.String("hoodawHost", os.Getenv("HOODAW_HOST"), "Hostname of the 'How out of date are we' API")
+	kubeconfig     = flag.String("kubeconfig", "kubeconfig", "Name of kubeconfig file in S3 bucket")
+	region         = flag.String("region", os.Getenv("AWS_REGION"), "AWS Region")
+	KubeConfigPath = flag.String("KubeConfigPath", "/tmp/config", "kubectl config path")
 
 	endPoint = *hoodawHost + *hoodawEndpoint
 )
 
 type helmNamespace struct {
-	Namespace string 
+	Namespace string
 }
 
 type helmRelease struct {
-	Name string `json:"name"`
-	Namespace string `json:"namespace"`
+	Name             string `json:"name"`
+	Namespace        string `json:"namespace"`
 	InstalledVersion string `json:"installed_version"`
-	LatestVersion string `json:"latest_version"`
-	Chart string `json:"chart"`
+	LatestVersion    string `json:"latest_version"`
+	Chart            string `json:"chart"`
 }
 
 type resourceMap map[string]interface{}
@@ -53,6 +53,7 @@ func main() {
 		log.Fatalln("error in getting config")
 	}
 
+	os.Setenv("KUBECONFIG", "/tmp/config")
 	// kube context switch to Live and output the results of `helm whatup`
 
 	err = switchContext(*ctxLive, *KubeConfigPath)
@@ -108,21 +109,19 @@ func main() {
 
 	clusters = append(clusters, cluster_live, cluster_manager, cluster_live_1)
 
-	fmt.Println(clusters)
-
 	jsonToPost, err := BuildJsonMap(clusters)
-    if err != nil {
-     log.Fatalln(err.Error())
-    }
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
 
-    // Post json to hoowdaw api
-    err = hoodaw.PostToApi(jsonToPost, hoodawApiKey, &endPoint)
-    if err != nil {
-     log.Fatalln(err.Error())
-    }
+	// Post json to hoowdaw api
+	err = hoodaw.PostToApi(jsonToPost, hoodawApiKey, &endPoint)
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
 }
 
-func getAllHelmReleases() ([]helmRelease, error){
+func getAllHelmReleases() ([]helmRelease, error) {
 
 	// Get al helm releases in namespaces
 	var releases []helmRelease
@@ -130,8 +129,8 @@ func getAllHelmReleases() ([]helmRelease, error){
 	if err != nil {
 		return nil, err
 	}
-	
-	for _, ns := range namespaces{
+
+	for _, ns := range namespaces {
 		release, err := helmReleasesInNamespace(ns)
 		if err != nil {
 			log.Fatalln(err.Error())
@@ -141,7 +140,7 @@ func getAllHelmReleases() ([]helmRelease, error){
 	return releases, nil
 }
 
-func namespacesWithHelmReleases() ([]string, error){
+func namespacesWithHelmReleases() ([]string, error) {
 	cmd := exec.Command("helm", "list", "--all-namespaces", "-o", "json")
 
 	var out bytes.Buffer
@@ -155,11 +154,11 @@ func namespacesWithHelmReleases() ([]string, error){
 
 	var namespaces []helmNamespace
 	json.Unmarshal([]byte(helmListJson), &namespaces)
-	
+
 	var nsList []string
 	for ns := range namespaces {
 		nsList = append(nsList, namespaces[ns].Namespace)
-		
+
 	}
 	return deduplicateList(nsList), nil
 }
@@ -177,7 +176,7 @@ func deduplicateList(s []string) (list []string) {
 	return
 }
 
-func helmReleasesInNamespace(namespace string) ([]helmRelease, error){
+func helmReleasesInNamespace(namespace string) ([]helmRelease, error) {
 	cmd := exec.Command("helm", "whatup", "--namespace", namespace, "-o", "json")
 
 	var out bytes.Buffer
@@ -187,14 +186,16 @@ func helmReleasesInNamespace(namespace string) ([]helmRelease, error){
 	if err != nil {
 		fmt.Println("Error: ", err)
 	}
-	helmWhatupJson := out.String()
 
-	fmt.Println(helmWhatupJson)
+	var rel map[string][]helmRelease
 
-	var releases []helmRelease
-	json.Unmarshal([]byte(helmWhatupJson), &releases)
+	if err := json.Unmarshal(out.Bytes(), &rel); err != nil {
+		fmt.Println("Unable to unmarshal JSON: ", err)
+		return nil, err
+	}
 
-	return releases, nil
+	//	fmt.Printf("marshal %+v", rel["releases"])
+	return rel["releases"], nil
 
 }
 
@@ -204,8 +205,8 @@ func BuildJsonMap(clusters []resourceMap) ([]byte, error) {
 	// add the first key string:string and then the second key/value string:map[string]string.
 	// As per the requirements of the HOODAW API.
 	jsonMap := resourceMap{
-		"updated_at":        time.Now().Format("2006-01-2 15:4:5 UTC"),
-		"clusters": clusters,
+		"updated_at": time.Now().Format("2006-01-2 15:4:5 UTC"),
+		"clusters":   clusters,
 	}
 
 	jsonStr, err := json.Marshal(jsonMap)

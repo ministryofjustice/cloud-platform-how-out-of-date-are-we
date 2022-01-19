@@ -3,7 +3,9 @@ module github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/report
 go 1.17
 
 require (
-	github.com/ministryofjustice/cloud-platform-environments v1.1.3
+	github.com/ministryofjustice/cloud-platform-environments v1.1.4-0.20220117141925-6b4caae9372c
+	github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/reports/pkg/hoodaw v0.0.0-20211217103200-e7b20d21a0d5
+	k8s.io/client-go v0.22.3
 )
 
 require (
@@ -20,7 +22,6 @@ require (
 	github.com/imdario/mergo v0.3.12 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/reports/pkg/hoodaw v0.0.0-20211217103200-e7b20d21a0d5 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
@@ -37,7 +38,6 @@ require (
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 	k8s.io/api v0.22.3 // indirect
 	k8s.io/apimachinery v0.22.3 // indirect
-	k8s.io/client-go v0.22.3 // indirect
 	k8s.io/klog/v2 v2.30.0 // indirect
 	k8s.io/utils v0.0.0-20210930125809-cb0fa318a74b // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.2.0 // indirect
