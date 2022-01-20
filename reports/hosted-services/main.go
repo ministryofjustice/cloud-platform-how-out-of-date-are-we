@@ -48,6 +48,7 @@ func main() {
 		log.Fatalln(err.Error())
 	}
 
+	// Get the list of namespaces from the cluster which is set in the clientset
 	namespaces, err := namespace.GetAllNamespacesFromCluster(clientset)
 	if err != nil {
 		log.Fatalln(err.Error())
@@ -56,8 +57,8 @@ func main() {
 	//make namespace map
 	nsDetailsMap := make(map[string]namespace.Namespace, 0)
 
+	// get required details of each namespace and store it in namespace map
 	for _, ns := range namespaces {
-
 		namespaceDetails := GetNamespaceDetails(ns)
 		nsDetailsMap[namespaceDetails.Name] = namespaceDetails
 	}
@@ -92,8 +93,8 @@ func main() {
 
 }
 
-// GetNamespaces takes a Kubernetes clientset and returns all namespaces with type *v1beta1.IngressList and an error.
-
+// GetNamespaceDetails takes a Namespace of type v1.namespace and stores the required annotations
+// and labels into a struct and return the result
 func GetNamespaceDetails(ns v1.Namespace) namespace.Namespace {
 	return namespace.Namespace{
 		Name:             ns.Name,
