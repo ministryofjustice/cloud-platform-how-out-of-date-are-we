@@ -27,11 +27,6 @@ import (
 // the variable 'annotation'.
 type resourceMap map[string]interface{}
 
-// // AllNamespaces contains the list of namespaces of type Namespace.
-// type allNamespaces struct {
-// 	Namespaces []namespace
-// }
-
 var (
 	bucket         = flag.String("bucket", os.Getenv("KUBECONFIG_S3_BUCKET"), "AWS S3 bucket for kubeconfig")
 	ctx            = flag.String("context", "live.cloud-platform.service.justice.gov.uk", "Kubernetes context specified in kubeconfig")
