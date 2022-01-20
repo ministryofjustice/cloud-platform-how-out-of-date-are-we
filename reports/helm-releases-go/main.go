@@ -54,60 +54,23 @@ func main() {
 	}
 
 	os.Setenv("KUBECONFIG", "/tmp/config")
-	// kube context switch to Live and output the results of `helm whatup`
 
-	err = switchContext(*ctxLive, *KubeConfigPath)
-	if err != nil {
-		log.Fatalln("error switching context")
-	}
-
-	helmReleaseLive, err := getAllHelmReleases()
+	helmReleaseLive, err := getHelmReleases("live")
 	if err != nil {
 		log.Fatalln("error in getting helm releases")
 	}
 
-	// kube context switch to Manager and output the results of `helm whatup`
-
-	err = switchContext(*ctxManager, *KubeConfigPath)
-	if err != nil {
-		log.Fatalln("error switching context")
-	}
-
-	listReleaseManger, err := getAllHelmReleases()
+	helmReleaseManager, err := getHelmReleases("manager")
 	if err != nil {
 		log.Fatalln("error in getting helm releases")
 	}
 
-	// kube context switch to Live-1 and output the results of `helm whatup`
-
-	err = switchContext(*ctxLive_1, *KubeConfigPath)
-	if err != nil {
-		log.Fatalln("error switching context")
-	}
-
-	listReleaseLive_1, err := getAllHelmReleases()
+	helmReleaseLive1, err := getHelmReleases("live-1")
 	if err != nil {
 		log.Fatalln("error in getting helm releases")
 	}
 
-	var clusters []resourceMap
-
-	cluster_live := resourceMap{
-		"name": "live",
-		"apps": helmReleaseLive,
-	}
-
-	cluster_manager := resourceMap{
-		"name": "manager",
-		"apps": listReleaseManger,
-	}
-
-	cluster_live_1 := resourceMap{
-		"name": "live-1",
-		"apps": listReleaseLive_1,
-	}
-
-	clusters = append(clusters, cluster_live, cluster_manager, cluster_live_1)
+	clusters := joinAllHelmReleases(helmReleaseLive, helmReleaseManager, helmReleaseLive1)
 
 	jsonToPost, err := BuildJsonMap(clusters)
 	if err != nil {
@@ -121,15 +84,78 @@ func main() {
 	}
 }
 
-func getAllHelmReleases() ([]helmRelease, error) {
+func getHelmReleases(cluster string) ([]helmRelease, error) {
 
-	// Get al helm releases in namespaces
-	var releases []helmRelease
-	namespaces, err := namespacesWithHelmReleases()
+	switch cluster {
+	case "live":
+		err := switchContext(*ctxLive, *KubeConfigPath)
+		if err != nil {
+			return nil, err
+		}
+	case "live-1":
+		err := switchContext(*ctxLive_1, *KubeConfigPath)
+		if err != nil {
+			return nil, err
+		}
+	case "manager":
+		err := switchContext(*ctxManager, *KubeConfigPath)
+		if err != nil {
+			return nil, err
+		}
+	default:
+		fmt.Println("No cluster given")
+	}
+
+	// Get all helm releases in namespaces
+
+	helmListJson, err := executeHelmList()
 	if err != nil {
 		return nil, err
 	}
 
+	namespaces, err := getNamespaces(helmListJson)
+	if err != nil {
+		return nil, err
+	}
+
+	releases, err := getHelmReleasesInNamespaces(namespaces)
+	if err != nil {
+		return nil, err
+	}
+	return releases, nil
+
+}
+
+func executeHelmList() (string, error) {
+	cmd := exec.Command("helm", "list", "--all-namespaces", "-o", "json")
+
+	var out bytes.Buffer
+	var stderr bytes.Buffer
+	cmd.Stdout = &out
+	cmd.Stderr = &stderr
+
+	err := cmd.Run()
+	if err != nil {
+		fmt.Println(fmt.Sprint(err) + ": " + stderr.String())
+		return "", err
+	}
+	return out.String(), nil
+}
+
+func getNamespaces(helmListJson string) ([]string, error) {
+
+	var namespaces []helmNamespace
+	json.Unmarshal([]byte(helmListJson), &namespaces)
+
+	var nsList []string
+	for ns := range namespaces {
+		nsList = append(nsList, namespaces[ns].Namespace)
+	}
+	return deduplicateList(nsList), nil
+}
+
+func getHelmReleasesInNamespaces(namespaces []string) ([]helmRelease, error) {
+	var releases []helmRelease
 	for _, ns := range namespaces {
 		release, err := helmReleasesInNamespace(ns)
 		if err != nil {
@@ -138,29 +164,6 @@ func getAllHelmReleases() ([]helmRelease, error) {
 		releases = append(releases, release...)
 	}
 	return releases, nil
-}
-
-func namespacesWithHelmReleases() ([]string, error) {
-	cmd := exec.Command("helm", "list", "--all-namespaces", "-o", "json")
-
-	var out bytes.Buffer
-	cmd.Stdout = &out
-
-	err := cmd.Run()
-	if err != nil {
-		return nil, err
-	}
-	helmListJson := out.String()
-
-	var namespaces []helmNamespace
-	json.Unmarshal([]byte(helmListJson), &namespaces)
-
-	var nsList []string
-	for ns := range namespaces {
-		nsList = append(nsList, namespaces[ns].Namespace)
-
-	}
-	return deduplicateList(nsList), nil
 }
 
 func deduplicateList(s []string) (list []string) {
@@ -180,11 +183,13 @@ func helmReleasesInNamespace(namespace string) ([]helmRelease, error) {
 	cmd := exec.Command("helm", "whatup", "--namespace", namespace, "-o", "json")
 
 	var out bytes.Buffer
+	var stderr bytes.Buffer
 	cmd.Stdout = &out
-
+	cmd.Stderr = &stderr
 	err := cmd.Run()
 	if err != nil {
-		fmt.Println("Error: ", err)
+		fmt.Println(fmt.Sprint(err) + ": " + stderr.String())
+		return nil, err
 	}
 
 	var rel map[string][]helmRelease
@@ -194,9 +199,33 @@ func helmReleasesInNamespace(namespace string) ([]helmRelease, error) {
 		return nil, err
 	}
 
-	//	fmt.Printf("marshal %+v", rel["releases"])
+	fmt.Printf("%+v", rel["releases"])
 	return rel["releases"], nil
 
+}
+
+func joinAllHelmReleases(helmReleaseLive, helmReleaseManger, helmReleaseLive_1 []helmRelease) []resourceMap {
+	var clusters []resourceMap
+
+	cluster_live := resourceMap{
+		"name": "live",
+		"apps": helmReleaseLive,
+	}
+
+	cluster_manager := resourceMap{
+		"name": "manager",
+		"apps": helmReleaseManger,
+	}
+
+	cluster_live_1 := resourceMap{
+		"name": "live-1",
+		"apps": helmReleaseLive_1,
+	}
+
+	clusters = append(clusters, cluster_live, cluster_manager, cluster_live_1)
+
+	fmt.Println(clusters)
+	return clusters
 }
 
 // BuildJsonMap takes a slice of maps and return a json encoded map
