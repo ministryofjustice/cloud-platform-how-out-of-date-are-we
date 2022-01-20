@@ -4,6 +4,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/ministryofjustice/cloud-platform-environments/pkg/namespace"
 	v1 "k8s.io/api/core/v1"
 	networking "k8s.io/api/networking/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -16,7 +17,7 @@ func TestGetNamespaceDetails(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
-		want namespace
+		want namespace.Namespace
 	}{
 		{
 			name: "ns1",
@@ -39,7 +40,7 @@ func TestGetNamespaceDetails(t *testing.T) {
 					},
 				},
 			},
-			want: namespace{
+			want: namespace.Namespace{
 				Name:             "ns1",
 				Application:      "test-app",
 				BusinessUnit:     "test-bu",
