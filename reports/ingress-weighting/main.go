@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/ministryofjustice/cloud-platform-environments/pkg/authenticate"
+	"github.com/ministryofjustice/cloud-platform-environments/pkg/ingress"
 	"github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/reports/pkg/hoodaw"
 	"k8s.io/api/networking/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -48,7 +49,7 @@ func main() {
 	}
 
 	// Get all ingress resources
-	ingressList, err := GetAllIngresses(clientset)
+	ingressList, err := ingress.GetAllIngressesFromCluster(clientset)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}

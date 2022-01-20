@@ -3,7 +3,7 @@ module ingress-weight
 go 1.17
 
 require (
-	github.com/ministryofjustice/cloud-platform-environments v1.1.3
+	github.com/ministryofjustice/cloud-platform-environments v1.1.4-0.20220120140104-0811e00369db
 	github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/reports/pkg/hoodaw v0.0.0-20211102114020-9ce4671b775b
 	github.com/stretchr/testify v1.7.0
 	k8s.io/api v0.22.3
