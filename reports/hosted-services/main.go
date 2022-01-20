@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"flag"
 	"log"
@@ -15,9 +14,6 @@ import (
 	"github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/reports/pkg/hoodaw"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/api/networking/v1beta1"
-	"k8s.io/client-go/kubernetes"
-
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // resourceMap is used to store both string:string and string:map[string]string key
@@ -106,15 +102,6 @@ func GetNamespaceDetails(ns v1.Namespace) namespace.Namespace {
 		TeamSlackChannel: ns.Annotations["cloud-platform.justice.gov.uk/slack-channel"],
 		DomainNames:      []string{},
 	}
-}
-
-// GetAllIngresses takes a Kubernetes clientset and returns all ingress with type *v1beta1.IngressList and an error.
-func GetAllIngresses(clientset *kubernetes.Clientset) (*v1beta1.IngressList, error) {
-	ingressList, err := clientset.NetworkingV1beta1().Ingresses("").List(context.TODO(), metav1.ListOptions{})
-	if err != nil {
-		return nil, err
-	}
-	return ingressList, nil
 }
 
 // BuildIngressesMap takes the Ingress list and return a map with key as namespace and value

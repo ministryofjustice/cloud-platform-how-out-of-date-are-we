@@ -36,7 +36,7 @@ var (
 	endPoint = *hoodawHost + *hoodawEndpoint
 
 	// Nunber of pages of PRs to look in github
-	prPageCount = 5
+	prPageCount = 20
 
 	// This is the number of namespaces migrated
 	// before the migrateSkip file was introduced and needs to be added to total
@@ -73,6 +73,8 @@ func main() {
 
 	// Build the migrated report slice
 	migratedMapSlice := buildMigratedSlice(nsCountMigrated)
+
+	fmt.Println(migratedMapSlice)
 
 	jsonToPost, err := BuildJsonMap(migratedMapSlice)
 	if err != nil {
