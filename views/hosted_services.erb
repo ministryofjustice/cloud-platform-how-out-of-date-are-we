@@ -1,7 +1,34 @@
-<% if list.any? %>
+<h2>Summary</h2>
+<div class="row mb-3">
+  <div class="col-sm-4">
+    <div class="card">
+      <div class="card-body">
+              <b>Total namespaces: </b>
+              <%= total_ns %>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-4">
+    <div class="card">
+      <div class="card-body">
+              <b>Unique Apps: </b>
+              <%= total_apps %>
+      </div>
+    </div>
+  </div>
+
+</div>
+    
+<div class="row">
+<% if details.any? %>
   <div class="table-responsive">
-    <table class="table">
-  <thead class="thead-dark">
+  <h2>Service details</h2>
+  <p>Type any business unit, application or any text to filter the list:</p>  
+  <input class="form-control" id="searchInput" type="text" placeholder="Search..">
+  <br>
+
+  <table class="table">
+  <thead class="thead">
     <tr>
       <th scope="col">Namespace</th>
       <th scope="col">Application</th>
@@ -12,27 +39,26 @@
       <th scope="col">Domain names</th>
     </tr>
   </thead>
-  <tbody>
-  <% list.each do |service| %>
-    <% namespace = service["namespace"] %>
+  <tbody id="namespaceTable">
+  <% details.each do |service| %>
+    <% namespace = service["Name"] %>
     <tr>
       <th scope="row">
         <%= link_to namespace, "/namespace/#{namespace}" %>
       </th>
-      <td><%= service["application"] %></td>
-      <td><%= service["business_unit"] %></td>
-      <td><%= link_to_github_team service["team_name"] %></td>
-      <td><%= service["team_slack_channel"] %></td>
-      <td><%= link_to_repo service["github_url"] %></td>
-      <td><%= links_to_domain_names service["domain_names"] %></td>
+      <td><%= service["Application"] %></td>
+      <td><%= service["BusinessUnit"] %></td>
+      <td><%= link_to_github_team service["TeamName"] %></td>
+      <td><%= service["TeamSlackChannel"] %></td>
+      <td><%= link_to_repo service["GithubURL"] %></td>
+      <td><%= links_to_domain_names service["DomainNames"] %></td>
     </tr>
     <% end %>
     </tbody>
     </table>
     </div>
-    <% else %>
+<% else %>
   <h1>
     Awaiting data
   </h1>
-
 <% end %>
