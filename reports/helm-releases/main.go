@@ -84,13 +84,13 @@ func getHelmReleases(cluster string) ([]helmRelease, error) {
 		if err != nil {
 			return nil, err
 		}
-	case "live-1":
-		err := authenticate.SwitchContextFromS3Bucket(*bucket, *kubeconfig, *region, *ctxLive_1)
+	case "manager":
+		err := authenticate.SwitchContextFromS3Bucket(*bucket, *kubeconfig, *region, *ctxManager)
 		if err != nil {
 			return nil, err
 		}
-	case "manager":
-		err := authenticate.SwitchContextFromS3Bucket(*bucket, *kubeconfig, *region, *ctxManager)
+	case "live-1":
+		err := authenticate.SwitchContextFromS3Bucket(*bucket, *kubeconfig, *region, *ctxLive_1)
 		if err != nil {
 			return nil, err
 		}
@@ -191,7 +191,6 @@ func helmReleasesInNamespace(namespace string) ([]helmRelease, error) {
 		return nil, err
 	}
 
-	fmt.Printf("%+v", rel["releases"])
 	return rel["releases"], nil
 
 }
