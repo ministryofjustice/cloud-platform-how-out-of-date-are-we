@@ -3,9 +3,8 @@ module github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/report
 go 1.17
 
 require (
-	github.com/ministryofjustice/cloud-platform-environments v1.1.4-0.20220117141925-6b4caae9372c
+	github.com/ministryofjustice/cloud-platform-environments v1.1.4-0.20220121135409-d1937907b10f
 	github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/reports/pkg/hoodaw v0.0.0-20211217103200-e7b20d21a0d5
-	k8s.io/client-go v0.22.3
 )
 
 require (

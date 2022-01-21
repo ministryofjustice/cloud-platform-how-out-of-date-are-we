@@ -12,7 +12,6 @@ import (
 
 	"github.com/ministryofjustice/cloud-platform-environments/pkg/authenticate"
 	"github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/reports/pkg/hoodaw"
-	"k8s.io/client-go/tools/clientcmd"
 )
 
 var (
@@ -25,7 +24,6 @@ var (
 	hoodawHost     = flag.String("hoodawHost", os.Getenv("HOODAW_HOST"), "Hostname of the 'How out of date are we' API")
 	kubeconfig     = flag.String("kubeconfig", "kubeconfig", "Name of kubeconfig file in S3 bucket")
 	region         = flag.String("region", os.Getenv("AWS_REGION"), "AWS Region")
-	KubeConfigPath = flag.String("KubeConfigPath", "/tmp/config", "kubectl config path")
 
 	endPoint = *hoodawHost + *hoodawEndpoint
 )
@@ -46,13 +44,7 @@ type resourceMap map[string]interface{}
 
 func main() {
 
-	// Gain access to a Kubernetes cluster using a config file stored in an S3 bucket.
-
-	err := authenticate.KubeConfigFromS3Bucket(*bucket, *kubeconfig, *region)
-	if err != nil {
-		log.Fatalln("error in getting config")
-	}
-
+	// export kube config file path.
 	os.Setenv("KUBECONFIG", "/tmp/config")
 
 	helmReleaseLive, err := getHelmReleases("live")
@@ -88,17 +80,17 @@ func getHelmReleases(cluster string) ([]helmRelease, error) {
 
 	switch cluster {
 	case "live":
-		err := switchContext(*ctxLive, *KubeConfigPath)
+		err := authenticate.SwitchContextFromS3Bucket(*bucket, *kubeconfig, *region, *ctxLive)
 		if err != nil {
 			return nil, err
 		}
 	case "live-1":
-		err := switchContext(*ctxLive_1, *KubeConfigPath)
+		err := authenticate.SwitchContextFromS3Bucket(*bucket, *kubeconfig, *region, *ctxLive_1)
 		if err != nil {
 			return nil, err
 		}
 	case "manager":
-		err := switchContext(*ctxManager, *KubeConfigPath)
+		err := authenticate.SwitchContextFromS3Bucket(*bucket, *kubeconfig, *region, *ctxManager)
 		if err != nil {
 			return nil, err
 		}
@@ -244,29 +236,4 @@ func BuildJsonMap(clusters []resourceMap) ([]byte, error) {
 	}
 
 	return jsonStr, nil
-}
-
-func switchContext(context, kubeconfigPath string) error {
-	kubeconfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
-		&clientcmd.ClientConfigLoadingRules{ExplicitPath: kubeconfigPath},
-		&clientcmd.ConfigOverrides{
-			CurrentContext: context,
-		})
-	config, err := kubeconfig.RawConfig()
-	if err != nil {
-		return fmt.Errorf("error getting RawConfig: %w", err)
-	}
-
-	if config.Contexts[context] == nil {
-		return fmt.Errorf("context %s doesn't exists", context)
-	}
-
-	config.CurrentContext = context
-	err = clientcmd.ModifyConfig(clientcmd.NewDefaultPathOptions(), config, true)
-	if err != nil {
-		return fmt.Errorf("error ModifyConfig: %w", err)
-	}
-
-	fmt.Printf("Switched to context \"%s\"", context)
-	return nil
 }

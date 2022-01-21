@@ -1,12 +1,17 @@
-FROM python:alpine3.12
+FROM golang:1.17-alpine3.15
 
-RUN pip install awscli \
-  && apk add bash git curl ruby
-RUN gem install json_pure
+RUN \
+  apk add \
+    --no-cache \
+    --no-progress \
+    --update \
+    bash \
+    curl \
+    git
 
 ENV \
   HELM_VERSION=3.4.0 \
-  KUBECTL_VERSION=1.17.12
+  KUBECTL_VERSION=1.20.7
 
 # kubectl
 RUN curl -sLo /usr/local/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v${KUBECTL_VERSION}/bin/linux/amd64/kubectl \
@@ -22,9 +27,16 @@ RUN addgroup -g 1000 -S appgroup && \
 
 WORKDIR /app
 
-COPY bin ./bin
+COPY go.mod ./
+COPY go.sum ./
+RUN go mod download
 
-RUN chown 1000:1000 /app
+COPY *.go ./
+
+RUN go build .
+RUN pwd && ls
+
+RUN chown -R 1000:1000 /app
 USER 1000
 
 # Install helm-whatup
