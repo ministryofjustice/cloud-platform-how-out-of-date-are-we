@@ -34,5 +34,5 @@ spec:
             command:
             - /bin/sh
             - -c
-            - ./hosted-services
+            - ./hostedservices
           restartPolicy: OnFailure
