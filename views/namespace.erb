@@ -5,28 +5,29 @@
   <div class="col-sm-12">
     <div class="card">
       <div class="card-body">
+      <% if !details["Application"].nil? %>
         <table class="table table-striped">
           <tbody>
             <tr>
               <th>Application</th>
-              <td><%= details["application"] %></td>
+              <td><%= details["Application"] %></td>
             </tr>
             <tr>
               <th>Business Unit</th>
-              <td><%= details["business_unit"] %></td>
+              <td><%= details["BusinessUnit"] %></td>
             </tr>
             <tr>
               <th>Team</th>
-              <td><%= details["team_name"] %></td>
+              <td><%= details["TeamName"] %></td>
             </tr>
             <tr>
               <th>Slack channel</th>
-              <td><%= details["team_slack_channel"] %></td>
+              <td><%= details["TeamSlackChannel"] %></td>
             </tr>
             <tr>
               <th>Source code</th>
               <td>
-                <% details["github_url"].split(",").each do |url| %>
+                <% details["GithubURL"].split(",").each do |url| %>
                   <%= link_to_repo url %><br />
                 <% end %>
               </td>
@@ -34,13 +35,18 @@
             <tr>
               <th>Domain names</th>
               <td>
-                <% details["domain_names"].each do |domain| %>
+                <% details["DomainNames"].each do |domain| %>
                   <%= link_to domain, "https://#{domain}" %><br />
                 <% end %>
               </td>
             </tr>
           </tbody>
         </table>
+        <% else %>
+        <h1>
+         Awaiting data
+        </h1>
+        <% end %>
       </div>
     </div>
   </div>
@@ -51,6 +57,7 @@
     <div class="card">
       <div class="card-body">
         <h5 class="card-title">Costs</h5>
+        <% if namespace_costs["resource_costs"].any? %>
         <table class="table table-striped">
           <thead>
             <tr>
@@ -73,6 +80,11 @@
             </tr>
           </tfoot>
         </table>
+        <% else %>
+          <h1>
+            Awaiting data
+          </h1>
+        <% end %>
       </div>
     </div>
   </div>
@@ -80,6 +92,7 @@
     <div class="card">
       <div class="card-body">
         <h5 class="card-title">Namespace Usage</h5>
+       <% if !usage.nil? %> 
         <ul class="list-group list-group-flush">
           <li class="list-group-item">
             <h5>CPU (millicores)</h5>
@@ -97,6 +110,11 @@
             <h5>Containers: <%= usage.fetch("container_count").to_i %></h5>
           </li>
         </ul>
+        <% else %>
+          <h1>
+            Awaiting data
+          </h1>
+        <% end %>
       </div>
     </div>
   </div>
