@@ -1,4 +1,21 @@
-FROM golang:1.17-alpine3.15
+FROM golang:1.17-stretch AS helm_release_builder
+
+ENV GO111MODULE=on \
+    CGO_ENABLED=0 \
+    GOOS=linux
+
+WORKDIR /app
+
+COPY go.mod ./
+COPY go.sum ./
+RUN go mod download
+COPY *.go ./
+RUN go build .
+
+FROM alpine:3.11.0
+
+ENV \
+  HELM_VERSION=3.4.0
 
 RUN \
   apk add \
@@ -9,34 +26,20 @@ RUN \
     curl \
     git
 
-ENV \
-  HELM_VERSION=3.4.0 \
-  KUBECTL_VERSION=1.20.7
+WORKDIR /app
 
-# kubectl
-RUN curl -sLo /usr/local/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v${KUBECTL_VERSION}/bin/linux/amd64/kubectl \
-  && chmod 755 /usr/local/bin/kubectl
+COPY --from=helm_release_builder /app/helm-releases ./
 
 # Install helm
 RUN curl -sL https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz \
     | tar -xzC /usr/local/bin --strip-components 1 linux-amd64/helm \
     && chmod 755 /usr/local/bin/helm
 
-RUN addgroup -g 1000 -S appgroup && \
-    adduser -u 1000 -S appuser -G appgroup
+RUN addgroup -g 1000 -S appgroup \
+  && adduser -u 1000 -S appuser -G appgroup
 
-WORKDIR /app
+RUN chown -R appuser:appgroup /app
 
-COPY go.mod ./
-COPY go.sum ./
-RUN go mod download
-
-COPY *.go ./
-
-RUN go build .
-RUN pwd && ls
-
-RUN chown -R 1000:1000 /app
 USER 1000
 
 # Install helm-whatup
