@@ -17,7 +17,7 @@ import (
 
 var (
 	bucket           = flag.String("bucket", os.Getenv("KUBECONFIG_S3_BUCKET"), "AWS S3 bucket for kubeconfig")
-	kubecfgBucketKey = flag.String("kubeconfig", os.Getenv("KUBECONFIG_S3_KEY"), "Name of kubeconfig file in S3 bucket")
+	kubecfgBucketKey = flag.String("kubecfgBucketKey", os.Getenv("KUBECONFIG_S3_KEY"), "Name of kubeconfig file in S3 bucket")
 	ctxLive          = flag.String("contextLive", "live.cloud-platform.service.justice.gov.uk", "Kubernetes context specified in kubeconfig")
 	ctxManager       = flag.String("contextManager", "manager.cloud-platform.service.justice.gov.uk", "Kubernetes context specified in kubeconfig")
 	ctxLive_1        = flag.String("contextLive_1", "live-1.cloud-platform.service.justice.gov.uk", "Kubernetes context specified in kubeconfig")
@@ -25,6 +25,7 @@ var (
 	hoodawEndpoint   = flag.String("hoodawEndpoint", "/helm_whatup", "Endpoint to send the data to")
 	hoodawHost       = flag.String("hoodawHost", os.Getenv("HOODAW_HOST"), "Hostname of the 'How out of date are we' API")
 	region           = flag.String("region", os.Getenv("AWS_REGION"), "AWS Region")
+	kubeCfgPath      = flag.String("kubeCfgPath", os.Getenv("KUBECONFIG"), "Path of the kube config file")
 
 	endPoint = *hoodawHost + *hoodawEndpoint
 )
@@ -45,15 +46,13 @@ type resourceMap map[string]interface{}
 
 func main() {
 
-	// export kube config file path.
-	os.Setenv("KUBECONFIG", "/tmp/config")
 
 	contexts := []string{*ctxLive, *ctxManager, *ctxLive_1}
 
 	var clusters []resourceMap
 	// Output the results of `helm whatup` as JSON, for each production cluster
 	for _, ctx := range contexts {
-		err := authenticate.SwitchContextFromS3Bucket(*bucket, *kubecfgBucketKey, *region, ctx)
+		err := authenticate.SwitchContextFromS3Bucket(*bucket, *kubecfgBucketKey, *region, ctx, *kubeCfgPath)
 		if err != nil {
 			log.Fatalln("error in switching context", err)
 		}
