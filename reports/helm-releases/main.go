@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"strings"
 	"time"
 
 	"github.com/ministryofjustice/cloud-platform-environments/pkg/authenticate"
@@ -47,22 +48,37 @@ func main() {
 	// export kube config file path.
 	os.Setenv("KUBECONFIG", "/tmp/config")
 
-	helmReleaseLive, err := getHelmReleases("live")
-	if err != nil {
-		log.Fatalln("error in getting helm releases")
-	}
+	contexts := []string{*ctxLive, *ctxManager, *ctxLive_1}
 
-	helmReleaseManager, err := getHelmReleases("manager")
-	if err != nil {
-		log.Fatalln("error in getting helm releases")
-	}
+	var clusters []resourceMap
+	// Output the results of `helm whatup` as JSON, for each production cluster
+	for _, ctx := range contexts {
+		err := authenticate.SwitchContextFromS3Bucket(*bucket, *kubeconfig, *region, ctx)
+		if err != nil {
+			log.Fatalln("error in switching context", err)
+		}
 
-	helmReleaseLive1, err := getHelmReleases("live-1")
-	if err != nil {
-		log.Fatalln("error in getting helm releases")
-	}
+		helmListJson, err := executeHelmList()
+		if err != nil {
+			log.Fatalln("error in executing helm list", err)
+		}
 
-	clusters := joinAllHelmReleases(helmReleaseLive, helmReleaseManager, helmReleaseLive1)
+		namespaces, err := getNamespaces(helmListJson)
+		if err != nil {
+			log.Fatalln("error in getting namespaces", err)
+		}
+
+		releases, err := getHelmReleasesInNamespaces(namespaces)
+		if err != nil {
+			log.Fatalln("error in executing helm whatup", err)
+		}
+
+		cluster := resourceMap{
+			"name": strings.Split(ctx, ".")[0],
+			"apps": releases,
+		}
+		clusters = append(clusters, cluster)
+	}
 
 	jsonToPost, err := BuildJsonMap(clusters)
 	if err != nil {
@@ -76,48 +92,7 @@ func main() {
 	}
 }
 
-func getHelmReleases(cluster string) ([]helmRelease, error) {
-
-	switch cluster {
-	case "live":
-		err := authenticate.SwitchContextFromS3Bucket(*bucket, *kubeconfig, *region, *ctxLive)
-		if err != nil {
-			return nil, err
-		}
-	case "manager":
-		err := authenticate.SwitchContextFromS3Bucket(*bucket, *kubeconfig, *region, *ctxManager)
-		if err != nil {
-			return nil, err
-		}
-	case "live-1":
-		err := authenticate.SwitchContextFromS3Bucket(*bucket, *kubeconfig, *region, *ctxLive_1)
-		if err != nil {
-			return nil, err
-		}
-	default:
-		fmt.Println("No cluster given")
-	}
-
-	// Get all helm releases in namespaces
-
-	helmListJson, err := executeHelmList()
-	if err != nil {
-		return nil, err
-	}
-
-	namespaces, err := getNamespaces(helmListJson)
-	if err != nil {
-		return nil, err
-	}
-
-	releases, err := getHelmReleasesInNamespaces(namespaces)
-	if err != nil {
-		return nil, err
-	}
-	return releases, nil
-
-}
-
+// Execute helm list all namespaces output as json
 func executeHelmList() (string, error) {
 	cmd := exec.Command("helm", "list", "--all-namespaces", "-o", "json")
 
@@ -134,6 +109,7 @@ func executeHelmList() (string, error) {
 	return out.String(), nil
 }
 
+// getNamespaces takes json output and get list of namespaces 
 func getNamespaces(helmListJson string) ([]string, error) {
 
 	var namespaces []helmNamespace
@@ -146,6 +122,7 @@ func getNamespaces(helmListJson string) ([]string, error) {
 	return deduplicateList(nsList), nil
 }
 
+// getHelmReleasesInNamespaces takes namespace name and return helm release struct
 func getHelmReleasesInNamespaces(namespaces []string) ([]helmRelease, error) {
 	var releases []helmRelease
 	for _, ns := range namespaces {
@@ -171,6 +148,7 @@ func deduplicateList(s []string) (list []string) {
 	return
 }
 
+// helmReleasesInNamespace takes namespace name and execute helm whatup to return releases
 func helmReleasesInNamespace(namespace string) ([]helmRelease, error) {
 	cmd := exec.Command("helm", "whatup", "--namespace", namespace, "-o", "json")
 
@@ -193,30 +171,6 @@ func helmReleasesInNamespace(namespace string) ([]helmRelease, error) {
 
 	return rel["releases"], nil
 
-}
-
-func joinAllHelmReleases(helmReleaseLive, helmReleaseManger, helmReleaseLive_1 []helmRelease) []resourceMap {
-	var clusters []resourceMap
-
-	cluster_live := resourceMap{
-		"name": "live",
-		"apps": helmReleaseLive,
-	}
-
-	cluster_manager := resourceMap{
-		"name": "manager",
-		"apps": helmReleaseManger,
-	}
-
-	cluster_live_1 := resourceMap{
-		"name": "live-1",
-		"apps": helmReleaseLive_1,
-	}
-
-	clusters = append(clusters, cluster_live, cluster_manager, cluster_live_1)
-
-	fmt.Println(clusters)
-	return clusters
 }
 
 // BuildJsonMap takes a slice of maps and return a json encoded map
