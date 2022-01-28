@@ -10,7 +10,7 @@ import (
 	namespace "github.com/ministryofjustice/cloud-platform-environments/pkg/namespace"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
-	resourcehelper "k8s.io/kubectl/pkg/util/resource"
+	"k8s.io/metrics/pkg/apis/metrics/v1beta1"
 )
 
 var (
@@ -26,12 +26,16 @@ var (
 )
 
 type NamespaceResource struct {
-	CPURequests    float64
-	CPULimits      float64
-	MemoryRequests float64
-	MemoryLimits   float64
-	Pods           int
-	Namespace      string
+	CPU       float64
+	Memory    float64
+	Pods      int
+	Namespace string
+}
+type UsageReport struct {
+	Requested  NamespaceResource
+	Used       NamespaceResource
+	Hardlimits NamespaceResource
+	Namespace  string
 }
 
 func main() {
@@ -62,12 +66,14 @@ func main() {
 		log.Fatalln(err.Error())
 	}
 
-	nsResMap := make(map[string]NamespaceResource, 0)
+	//nsReqMap := make(map[string]NamespaceResource, 0)
+
+	var nsReq []NamespaceResource
 
 	// get resource request and limits of each pod and store it in namespace map
 	for _, pod := range podsList {
-		nsRes := GetPodResourceDetails(pod)
-		nsResMap[nsRes.Namespace] = nsRes
+		req := GetPodResourceDetails(pod)
+		nsReq = append(nsReq, req)
 	}
 
 	// count of containers spec.containers.count per namespace
@@ -75,26 +81,62 @@ func main() {
 	// resource_used
 	// Get top pods of all namespaces and map it with pod map - resource_used
 
+	//podMetricsList := []v1beta1.PodMetrics
 	// Get the list of namespaces from the cluster which is set in the clientset
 	podMetricsList, err := namespace.GetAllPodMetricsesFromCluster(mclientset)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
-	// hard_limits
-	// ns_quota
+
+	var nsUsed []NamespaceResource
+	// get resource request and limits of each pod and store it in namespace map
+	for _, podMetrics := range podMetricsList {
+		used := GetPodUsageDetails(podMetrics)
+		nsUsed = append(nsUsed, used)
+
+	}
 	// get namespace quota to find hard limits of pods
 
 }
 
 // GetPodResourceDetails takes a Pod of type v1.Pod and collect
 // all resources summed up for all containers of the pod and return the result
-func GetPodResourceDetails(pod v1.Pod) (nsRes NamespaceResource) {
-	nsRes.Namespace = pod.Namespace
-	req, limit := resourcehelper.PodRequestsAndLimits(&pod)
-	cpuReq, cpuLimit, memoryReq, memoryLimit := req[corev1.ResourceCPU], limit[corev1.ResourceCPU], req[corev1.ResourceMemory], limit[corev1.ResourceMemory]
-	nsRes.CPURequests = float64(cpuReq.MilliValue())
-	nsRes.CPULimits = float64(cpuLimit.MilliValue())
-	nsRes.MemoryRequests = float64(memoryReq.Value())
-	nsRes.MemoryLimits = float64(memoryLimit.Value())
+func GetPodResourceDetails(pod v1.Pod) (r NamespaceResource) {
+	reqs, _ := corev1.ResourceList{}, corev1.ResourceList{}
+	for _, container := range pod.Spec.Containers {
+		addResourceList(reqs, container.Resources.Requests)
+	}
+	cpuReq, memoryReq := reqs[corev1.ResourceCPU], reqs[corev1.ResourceMemory]
+
+	r.CPU = float64(cpuReq.MilliValue())
+	r.Memory = float64(memoryReq.Value() / 1048576)
+	r.Namespace = pod.Namespace
 	return
+}
+
+// GetPodResourceDetails takes a Pod of type v1.Pod and collect
+// all resources summed up for all containers of the pod and return the result
+func GetPodUsageDetails(PodMetrics v1beta1.PodMetrics) (u NamespaceResource) {
+
+	usage := corev1.ResourceList{}
+	for _, container := range PodMetrics.Containers {
+		addResourceList(usage, container.Usage)
+	}
+	cpuUsage, memoryUsage := usage[corev1.ResourceCPU], usage[corev1.ResourceMemory]
+	u.CPU = float64(cpuUsage.MilliValue())
+	u.Memory = float64(memoryUsage.Value() / 1048576)
+	u.Namespace = PodMetrics.Namespace
+	return
+}
+
+// addResourceList adds the resources in newList to list
+func addResourceList(list, new corev1.ResourceList) {
+	for name, quantity := range new {
+		if value, ok := list[name]; !ok {
+			list[name] = quantity.DeepCopy()
+		} else {
+			value.Add(quantity)
+			list[name] = value
+		}
+	}
 }
