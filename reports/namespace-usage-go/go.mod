@@ -3,10 +3,8 @@ module github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/report
 go 1.17
 
 require (
-	github.com/jinzhu/copier v0.3.5
 	github.com/ministryofjustice/cloud-platform-environments v1.1.4-0.20220120140104-0811e00369db
 	k8s.io/api v0.23.3
-	k8s.io/kubectl v0.23.2
 	k8s.io/metrics v0.23.3
 )
 
