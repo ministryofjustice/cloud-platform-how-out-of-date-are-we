@@ -16,15 +16,15 @@ import (
 )
 
 var (
-	bucket         = flag.String("bucket", os.Getenv("KUBECONFIG_S3_BUCKET"), "AWS S3 bucket for kubeconfig")
-	ctxLive        = flag.String("contextLive", "live.cloud-platform.service.justice.gov.uk", "Kubernetes context specified in kubeconfig")
-	ctxManager     = flag.String("contextManager", "manager.cloud-platform.service.justice.gov.uk", "Kubernetes context specified in kubeconfig")
-	ctxLive_1      = flag.String("contextLive_1", "live-1.cloud-platform.service.justice.gov.uk", "Kubernetes context specified in kubeconfig")
-	hoodawApiKey   = flag.String("hoodawAPIKey", os.Getenv("HOODAW_API_KEY"), "API key to post data to the 'How out of date are we' API")
-	hoodawEndpoint = flag.String("hoodawEndpoint", "/helm_whatup", "Endpoint to send the data to")
-	hoodawHost     = flag.String("hoodawHost", os.Getenv("HOODAW_HOST"), "Hostname of the 'How out of date are we' API")
-	kubeconfig     = flag.String("kubeconfig", "kubeconfig", "Name of kubeconfig file in S3 bucket")
-	region         = flag.String("region", os.Getenv("AWS_REGION"), "AWS Region")
+	bucket           = flag.String("bucket", os.Getenv("KUBECONFIG_S3_BUCKET"), "AWS S3 bucket for kubeconfig")
+	kubecfgBucketKey = flag.String("kubeconfig", os.Getenv("KUBECONFIG_S3_KEY"), "Name of kubeconfig file in S3 bucket")
+	ctxLive          = flag.String("contextLive", "live.cloud-platform.service.justice.gov.uk", "Kubernetes context specified in kubeconfig")
+	ctxManager       = flag.String("contextManager", "manager.cloud-platform.service.justice.gov.uk", "Kubernetes context specified in kubeconfig")
+	ctxLive_1        = flag.String("contextLive_1", "live-1.cloud-platform.service.justice.gov.uk", "Kubernetes context specified in kubeconfig")
+	hoodawApiKey     = flag.String("hoodawAPIKey", os.Getenv("HOODAW_API_KEY"), "API key to post data to the 'How out of date are we' API")
+	hoodawEndpoint   = flag.String("hoodawEndpoint", "/helm_whatup", "Endpoint to send the data to")
+	hoodawHost       = flag.String("hoodawHost", os.Getenv("HOODAW_HOST"), "Hostname of the 'How out of date are we' API")
+	region           = flag.String("region", os.Getenv("AWS_REGION"), "AWS Region")
 
 	endPoint = *hoodawHost + *hoodawEndpoint
 )
@@ -53,7 +53,7 @@ func main() {
 	var clusters []resourceMap
 	// Output the results of `helm whatup` as JSON, for each production cluster
 	for _, ctx := range contexts {
-		err := authenticate.SwitchContextFromS3Bucket(*bucket, *kubeconfig, *region, ctx)
+		err := authenticate.SwitchContextFromS3Bucket(*bucket, *kubecfgBucketKey, *region, ctx)
 		if err != nil {
 			log.Fatalln("error in switching context", err)
 		}
@@ -109,7 +109,7 @@ func executeHelmList() (string, error) {
 	return out.String(), nil
 }
 
-// getNamespaces takes json output and get list of namespaces 
+// getNamespaces takes json output and get list of namespaces
 func getNamespaces(helmListJson string) ([]string, error) {
 
 	var namespaces []helmNamespace
