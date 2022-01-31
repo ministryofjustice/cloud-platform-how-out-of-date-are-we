@@ -18,7 +18,7 @@ class NamespaceUsage
   end
 
   def total_pods
-    namespaces.sum { |n| n.dig("resources_used", "pods") }
+    namespaces.sum { |n| n.dig("Used", "Pods") }
   end
 
   def updated_at
@@ -26,28 +26,28 @@ class NamespaceUsage
   end
 
   def total_requested(property)
-    namespaces.map { |ns| ns.dig("resources_requested", property) }.map(&:to_i).sum
+    namespaces.map { |ns| ns.dig("Requested", property) }.map(&:to_i).sum
   end
 
   def namespace(name)
-    namespaces.find { |n| n["name"] == name }
+    namespaces.find { |n| n["Name"] == name }
   end
 
   private
 
   def namespace_pods_values(namespace)
     [
-      namespace.fetch("name").to_s,
-      namespace.dig("hard_limit", "pods").to_i,
-      namespace.dig("resources_used", "pods").to_i,
+      namespace.fetch("Name").to_s,
+      namespace.dig("Hardlimits", "Pods").to_i,
+      namespace.dig("Used", "Pods").to_i,
     ]
   end
 
   def namespace_values(namespace, order_by)
     [
-      namespace.fetch("name").to_s,
-      namespace.dig("resources_requested", order_by).to_i,
-      namespace.dig("resources_used", order_by).to_i,
+      namespace.fetch("Name").to_s,
+      namespace.dig("Requested", order_by).to_i,
+      namespace.dig("Used", order_by).to_i,
     ]
   end
 

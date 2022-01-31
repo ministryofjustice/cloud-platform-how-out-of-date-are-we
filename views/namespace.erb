@@ -96,18 +96,18 @@
         <ul class="list-group list-group-flush">
           <li class="list-group-item">
             <h5>CPU (millicores)</h5>
-            Requested: <%= usage.dig("resources_requested", "cpu").to_i %><br />
-            Used: <%= usage.dig("resources_used", "cpu").to_i %><br />
-            Per container (avg): <%= (usage.dig("resources_used", "cpu").to_f / usage.fetch("container_count").to_i).round(2) %><br />
+            Requested: <%= usage.dig("Requested", "CPU").to_i %><br />
+            Used: <%= usage.dig("Used", "CPU").to_i %><br />
+            Per container (avg): <%= (usage.dig("Used", "CPU").to_f / usage.fetch("ContainerCount").to_i).round(2) %><br />
           </li>
           <li class="list-group-item">
             <h5>Memory (mebibytes)</h5>
-            Requested: <%= usage.dig("resources_requested", "memory").to_i %><br />
-            Used: <%= usage.dig("resources_used", "memory").to_i %><br />
-            Per container (avg): <%= (usage.dig("resources_used", "memory").to_f / usage.fetch("container_count").to_i).round(2) %><br />
+            Requested: <%= usage.dig("Requested", "Memory").to_i %><br />
+            Used: <%= usage.dig("Used", "Memory").to_i %><br />
+            Per container (avg): <%= (usage.dig("Used", "Memory").to_f / usage.fetch("ContainerCount").to_i).round(2) %><br />
           </li>
           <li class="list-group-item">
-            <h5>Containers: <%= usage.fetch("container_count").to_i %></h5>
+            <h5>Containers: <%= usage.fetch("ContainerCount").to_i %></h5>
           </li>
         </ul>
         <% else %>
