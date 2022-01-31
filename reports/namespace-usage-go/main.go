@@ -1,15 +1,17 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
-	"fmt"
 	"log"
 	"os"
 	"path/filepath"
 	"strconv"
+	"time"
 
 	authenticate "github.com/ministryofjustice/cloud-platform-environments/pkg/authenticate"
 	namespace "github.com/ministryofjustice/cloud-platform-environments/pkg/namespace"
+	"github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/reports/pkg/hoodaw"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/metrics/pkg/apis/metrics/v1beta1"
@@ -19,7 +21,7 @@ var (
 	bucket         = flag.String("bucket", os.Getenv("KUBECONFIG_S3_BUCKET"), "AWS S3 bucket for kubeconfig")
 	ctx            = flag.String("context", "live-1.cloud-platform.service.justice.gov.uk", "Kubernetes context specified in kubeconfig")
 	hoodawApiKey   = flag.String("hoodawAPIKey", os.Getenv("HOODAW_API_KEY"), "API key to post data to the 'How out of date are we' API")
-	hoodawEndpoint = flag.String("hoodawEndpoint", "/hosted_services", "Endpoint to send the data to")
+	hoodawEndpoint = flag.String("hoodawEndpoint", "/namespace_usage", "Endpoint to send the data to")
 	hoodawHost     = flag.String("hoodawHost", os.Getenv("HOODAW_HOST"), "Hostname of the 'How out of date are we' API")
 	kubeconfig     = flag.String("kubeconfig", "kubeconfig", "Name of kubeconfig file in S3 bucket")
 	region         = flag.String("region", os.Getenv("AWS_REGION"), "AWS Region")
@@ -47,8 +49,8 @@ func main() {
 
 	// Gain access to a Kubernetes cluster using a config file stored in an S3 bucket.
 
-	configFileLocation := filepath.Join("/", "tmp", "config")
-	err := authenticate.KubeConfigFromS3Bucket(*bucket, *kubeconfig, *region)
+	configFileLocation := filepath.Join("/", "tmp", "kubeconfig")
+	err := authenticate.KubeConfigFromS3Bucket(*bucket, *kubeconfig, *region, configFileLocation)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
@@ -141,10 +143,16 @@ func main() {
 		usageReports = append(usageReports, usageReport)
 	}
 
-	for ns, rep := range usageReports {
-		fmt.Println("ns", ns, "value", rep)
+	jsonToPost, err := BuildJsonMap(usageReports)
+	if err != nil {
+		log.Fatalln(err.Error())
 	}
 
+	// Post json to hoowdaw api
+	err = hoodaw.PostToApi(jsonToPost, hoodawApiKey, &endPoint)
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
 }
 
 // GetPodResourceDetails takes a Pod of type v1.Pod and collect
@@ -206,4 +214,22 @@ func addResourceList(list, new corev1.ResourceList) {
 			list[name] = value
 		}
 	}
+}
+
+// BuildJsonMap takes a array of usageReport struct and return a json encoded map
+func BuildJsonMap(usageReports []UsageReport) ([]byte, error) {
+	// To handle generics in the data type, we need to create a new map,
+	// add the first key string:string and then the second key/value string:map[string]string.
+	// As per the requirements of the HOODAW API.
+	jsonMap := hoodaw.ResourceMap{
+		"updated_at": time.Now().Format("2006-01-2 15:4:5 UTC"),
+		"data":       usageReports,
+	}
+
+	jsonStr, err := json.Marshal(jsonMap)
+	if err != nil {
+		return nil, err
+	}
+
+	return jsonStr, nil
 }

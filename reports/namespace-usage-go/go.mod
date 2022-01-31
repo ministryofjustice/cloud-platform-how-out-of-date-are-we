@@ -48,3 +48,4 @@ require (
 )
 
 replace github.com/ministryofjustice/cloud-platform-environments => /Users/pkrishnasamy/go/src/github.com/ministryofjustice/cloud-platform-environments
+replace github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/reports/pkg/hoodaw => /Users/pkrishnasamy/go/src/github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/reports/pkg/hoodaw
