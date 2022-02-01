@@ -31,21 +31,20 @@ var (
 )
 
 type helmNamespace struct {
-	Namespace string
+	Namespace string // key of JSON object "namespace" from helm list
 }
 
 type helmRelease struct {
-	Name             string `json:"name"`
-	Namespace        string `json:"namespace"`
-	InstalledVersion string `json:"installed_version"`
-	LatestVersion    string `json:"latest_version"`
-	Chart            string `json:"chart"`
+	Name             string `json:"name"`              // key of JSON object "name" from helm whatup
+	Namespace        string `json:"namespace"`         // key of JSON object "namespace" from helm whatup
+	InstalledVersion string `json:"installed_version"` // key of JSON object "installed_version" from helm whatup
+	LatestVersion    string `json:"latest_version"`    // key of JSON object "latest_version" from helm whatup
+	Chart            string `json:"chart"`             // key of JSON object "chart" from helm whatup
 }
 
 type resourceMap map[string]interface{}
 
 func main() {
-
 
 	contexts := []string{*ctxLive, *ctxManager, *ctxLive_1}
 
@@ -91,7 +90,7 @@ func main() {
 	}
 }
 
-// Execute helm list all namespaces output as json
+// executeHelmList execute helm list all namespaces amd return output as string
 func executeHelmList() (string, error) {
 	cmd := exec.Command("helm", "list", "--all-namespaces", "-o", "json")
 
@@ -134,6 +133,7 @@ func getHelmReleasesInNamespaces(namespaces []string) ([]helmRelease, error) {
 	return releases, nil
 }
 
+// deduplicateList will take a slice of strings and return a deduplicated version.
 func deduplicateList(s []string) (list []string) {
 	keys := make(map[string]bool)
 

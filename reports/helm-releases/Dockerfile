@@ -1,7 +1,6 @@
 FROM golang:1.17-stretch AS helm_release_builder
 
-ENV GO111MODULE=on \
-    CGO_ENABLED=0 \
+ENV CGO_ENABLED=0 \
     GOOS=linux
 
 WORKDIR /app
