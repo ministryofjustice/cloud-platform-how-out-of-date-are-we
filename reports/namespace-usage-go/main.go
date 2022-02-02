@@ -5,35 +5,33 @@ import (
 	"flag"
 	"log"
 	"os"
-	"path/filepath"
 	"strconv"
 	"time"
 
 	authenticate "github.com/ministryofjustice/cloud-platform-environments/pkg/authenticate"
 	namespace "github.com/ministryofjustice/cloud-platform-environments/pkg/namespace"
 	"github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/reports/pkg/hoodaw"
-	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/metrics/pkg/apis/metrics/v1beta1"
 )
 
 var (
 	bucket         = flag.String("bucket", os.Getenv("KUBECONFIG_S3_BUCKET"), "AWS S3 bucket for kubeconfig")
-	ctx            = flag.String("context", "live-1.cloud-platform.service.justice.gov.uk", "Kubernetes context specified in kubeconfig")
+	ctx            = flag.String("context", "live.cloud-platform.service.justice.gov.uk", "Kubernetes context specified in kubeconfig")
 	hoodawApiKey   = flag.String("hoodawAPIKey", os.Getenv("HOODAW_API_KEY"), "API key to post data to the 'How out of date are we' API")
 	hoodawEndpoint = flag.String("hoodawEndpoint", "/namespace_usage", "Endpoint to send the data to")
 	hoodawHost     = flag.String("hoodawHost", os.Getenv("HOODAW_HOST"), "Hostname of the 'How out of date are we' API")
 	kubeconfig     = flag.String("kubeconfig", "kubeconfig", "Name of kubeconfig file in S3 bucket")
 	region         = flag.String("region", os.Getenv("AWS_REGION"), "AWS Region")
+	kubeCfgPath    = flag.String("kubeCfgPath", os.Getenv("KUBECONFIG"), "Path of the kube config file")
 
 	endPoint = *hoodawHost + *hoodawEndpoint
 )
 
 type NamespaceResource struct {
-	CPU       float64
-	Memory    float64
-	Pods      int
-	Namespace string
+	CPU    float64
+	Memory float64
+	Pods   int
 }
 type UsageReport struct {
 	Requested      NamespaceResource
@@ -47,25 +45,25 @@ func main() {
 
 	flag.Parse()
 
-	// Gain access to a Kubernetes cluster using a config file stored in an S3 bucket.
-
-	configFileLocation := filepath.Join("/", "tmp", "kubeconfig")
-	err := authenticate.KubeConfigFromS3Bucket(*bucket, *kubeconfig, *region, configFileLocation)
+	// Get the kubeconfig file stored in an S3 bucket.
+	err := authenticate.KubeConfigFromS3Bucket(*bucket, *kubeconfig, *region, *kubeCfgPath)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
 
-	kclientset, err := authenticate.CreateClientFromConfigFile(configFileLocation, *ctx)
+	// Get the clientset to access the k8s cluster
+	kclientset, err := authenticate.CreateClientFromConfigFile(*kubeCfgPath, *ctx)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
 
-	mclientset, err := authenticate.CreateMetricsClientFromConfigFile(configFileLocation, *ctx)
+	// Get the clientset object to access cluster metrics
+	mclientset, err := authenticate.CreateMetricsClientFromConfigFile(*kubeCfgPath, *ctx)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
 
-	// Get the list of pods from the cluster which is set in the kclientset
+	// Get the list of namespaces from the cluster which is set in the kclientset
 	nsList, err := namespace.GetAllNamespacesFromCluster(kclientset)
 	if err != nil {
 		log.Fatalln(err.Error())
@@ -96,7 +94,6 @@ func main() {
 	}
 
 	// Get top pods(resource used) of all namespaces from the cluster which is set in the mclientset
-	// podMetricsList := []v1beta1.PodMetrics
 	podMetricsList, err := namespace.GetAllPodMetricsesFromCluster(mclientset)
 	if err != nil {
 		log.Fatalln(err.Error())
@@ -132,7 +129,7 @@ func main() {
 	}
 
 	var usageReports []UsageReport
-
+	// Build the total usageReport
 	for _, ns := range nsList {
 		var usageReport UsageReport
 		usageReport.Name = ns.Name
@@ -158,12 +155,12 @@ func main() {
 // GetPodResourceDetails takes a Pod of type v1.Pod and collect
 // all resources summed up for all containers of the pod and return the result
 func GetPodResourceDetails(pod v1.Pod) (r NamespaceResource, namespace string, containerCount int) {
-	reqs, _ := corev1.ResourceList{}, corev1.ResourceList{}
+	reqs, _ := v1.ResourceList{}, v1.ResourceList{}
 	for _, container := range pod.Spec.Containers {
 		addResourceList(reqs, container.Resources.Requests)
 		containerCount++
 	}
-	cpuReq, memoryReq := reqs[corev1.ResourceCPU], reqs[corev1.ResourceMemory]
+	cpuReq, memoryReq := reqs[v1.ResourceCPU], reqs[v1.ResourceMemory]
 
 	r.CPU = float64(cpuReq.MilliValue())
 	r.Memory = float64(memoryReq.Value() / 1048576)
@@ -173,22 +170,21 @@ func GetPodResourceDetails(pod v1.Pod) (r NamespaceResource, namespace string, c
 
 // GetPodResourceDetails takes a Pod of type v1.Pod and collect
 // all resources summed up for all containers of the pod and return the result
-func GetPodUsageDetails(PodMetrics v1beta1.PodMetrics) (u NamespaceResource, namespace string) {
-
-	usage := corev1.ResourceList{}
-	for _, container := range PodMetrics.Containers {
+func GetPodUsageDetails(podMetrics v1beta1.PodMetrics) (u NamespaceResource, namespace string) {
+	usage := v1.ResourceList{}
+	for _, container := range podMetrics.Containers {
 		addResourceList(usage, container.Usage)
 	}
-	cpuUsage, memoryUsage := usage[corev1.ResourceCPU], usage[corev1.ResourceMemory]
+	cpuUsage, memoryUsage := usage[v1.ResourceCPU], usage[v1.ResourceMemory]
 	u.CPU = float64(cpuUsage.MilliValue())
 	u.Memory = float64(memoryUsage.Value() / 1048576)
-	namespace = PodMetrics.Namespace
+	namespace = podMetrics.Namespace
 	return
 }
 
 // GetPodResourceDetails takes a Pod of type v1.Pod and collect
 // all resources summed up for all containers of the pod and return the result
-func GetPodHardLimits(resourceQuota corev1.ResourceQuota) (h NamespaceResource, namespace string, err error) {
+func GetPodHardLimits(resourceQuota v1.ResourceQuota) (h NamespaceResource, namespace string, err error) {
 	hardLimits := resourceQuota.Status.Hard["pods"].DeepCopy()
 	h.Pods, err = strconv.Atoi(hardLimits.String())
 	namespace = resourceQuota.Namespace
@@ -205,7 +201,7 @@ func (list *NamespaceResource) addNamespaceResource(new NamespaceResource) {
 }
 
 // addResourceList adds the resources in newList to list
-func addResourceList(list, new corev1.ResourceList) {
+func addResourceList(list, new v1.ResourceList) {
 	for name, quantity := range new {
 		if value, ok := list[name]; !ok {
 			list[name] = quantity.DeepCopy()

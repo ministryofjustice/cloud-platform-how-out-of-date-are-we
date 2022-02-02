@@ -6,6 +6,8 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/metrics/pkg/apis/metrics/v1beta1"
 )
 
@@ -20,8 +22,42 @@ func TestGetPodResourceDetails(t *testing.T) {
 		wantNamespace      string
 		wantContainerCount int
 	}{
-		// TODO: Add test cases.
+		{
+			name: "Pod with resource requests",
+			args: args{
+				pod: v1.Pod{
+					ObjectMeta: metav1.ObjectMeta{Namespace: "test", Name: "foo"},
+					Spec: v1.PodSpec{
+						Containers: []v1.Container{
+							{Resources: v1.ResourceRequirements{
+								Requests: v1.ResourceList{
+									"cpu":    resource.MustParse("1"),
+									"memory": resource.MustParse("100Mi"),
+								},
+								Limits: v1.ResourceList{
+									"cpu":    resource.MustParse("10"),
+									"memory": resource.MustParse("1000Mi"),
+								},
+							}},
+						},
+					},
+					Status: v1.PodStatus{
+						Conditions: []v1.PodCondition{
+							{Type: v1.PodInitialized, Status: v1.ConditionTrue},
+						},
+					},
+				},
+			},
+			wantR: NamespaceResource{
+				CPU:    1000,
+				Memory: 100,
+				Pods:   0,
+			},
+			wantNamespace:      "test",
+			wantContainerCount: 1,
+		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			gotR, gotNamespace, gotContainerCount := GetPodResourceDetails(tt.args.pod)
@@ -40,7 +76,7 @@ func TestGetPodResourceDetails(t *testing.T) {
 
 func TestGetPodUsageDetails(t *testing.T) {
 	type args struct {
-		PodMetrics v1beta1.PodMetrics
+		podMetrics v1beta1.PodMetrics
 	}
 	tests := []struct {
 		name          string
@@ -48,11 +84,34 @@ func TestGetPodUsageDetails(t *testing.T) {
 		wantU         NamespaceResource
 		wantNamespace string
 	}{
-		// TODO: Add test cases.
+		{
+			name: "Pod with resource Metrics",
+			args: args{
+				podMetrics: v1beta1.PodMetrics{
+					ObjectMeta: metav1.ObjectMeta{Namespace: "test", Name: "foo"},
+					Containers: []v1beta1.ContainerMetrics{
+						{
+							Name: "app1",
+							Usage: v1.ResourceList{
+								"cpu":    resource.MustParse("1"),
+								"memory": resource.MustParse("200Mi"),
+							},
+						},
+					},
+				},
+			},
+			wantU: NamespaceResource{
+				CPU:    1000,
+				Memory: 200,
+				Pods:   0,
+			},
+			wantNamespace: "test",
+		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotU, gotNamespace := GetPodUsageDetails(tt.args.PodMetrics)
+			gotU, gotNamespace := GetPodUsageDetails(tt.args.podMetrics)
 			if !reflect.DeepEqual(gotU, tt.wantU) {
 				t.Errorf("GetPodUsageDetails() gotU = %v, want %v", gotU, tt.wantU)
 			}
@@ -74,7 +133,29 @@ func TestGetPodHardLimits(t *testing.T) {
 		wantNamespace string
 		wantErr       bool
 	}{
-		// TODO: Add test cases.
+		{
+			name: "resourcequota for given namespace",
+			args: args{
+				resourceQuota: corev1.ResourceQuota{
+					ObjectMeta: metav1.ObjectMeta{Namespace: "test", Name: "foo"},
+					Status: corev1.ResourceQuotaStatus{
+						Hard: v1.ResourceList{
+							"pods": resource.MustParse("50"),
+						},
+						Used: v1.ResourceList{
+							"pods": resource.MustParse("2"),
+						},
+					},
+				},
+			},
+			wantH: NamespaceResource{
+				CPU:    0,
+				Memory: 0,
+				Pods:   50,
+			},
+			wantNamespace: "test",
+			wantErr:       false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -102,7 +183,19 @@ func Test_addResourceList(t *testing.T) {
 		name string
 		args args
 	}{
-		// TODO: Add test cases.
+		{
+			name: "add resourceList",
+			args: args{
+				list: corev1.ResourceList{
+					"cpu":    resource.MustParse("1"),
+					"memory": resource.MustParse("200Mi"),
+				},
+				new: corev1.ResourceList{
+					"cpu":    resource.MustParse("1"),
+					"memory": resource.MustParse("100Mi"),
+				},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
