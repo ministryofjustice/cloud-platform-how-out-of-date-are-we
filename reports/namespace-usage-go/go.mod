@@ -3,8 +3,8 @@ module github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/report
 go 1.17
 
 require (
-	github.com/ministryofjustice/cloud-platform-environments v1.1.4-0.20220120140104-0811e00369db
-	github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/reports/pkg/hoodaw v0.0.0-20211102114020-9ce4671b775b
+	github.com/ministryofjustice/cloud-platform-environments v1.1.4-0.20220203124601-5370c388698b
+	github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/reports/pkg/hoodaw v0.0.0-20220203130017-4456e66c089f
 	k8s.io/api v0.23.3
 	k8s.io/apimachinery v0.23.3
 	k8s.io/metrics v0.23.3
@@ -24,6 +24,7 @@ require (
 	github.com/imdario/mergo v0.3.12 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
+	github.com/ministryofjustice/cloud-platform-environments v1.1.4-0.20220203124601-5370c388698b // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
@@ -46,7 +47,3 @@ require (
 	sigs.k8s.io/structured-merge-diff/v4 v4.2.1 // indirect
 	sigs.k8s.io/yaml v1.3.0 // indirect
 )
-
-replace github.com/ministryofjustice/cloud-platform-environments => /Users/pkrishnasamy/go/src/github.com/ministryofjustice/cloud-platform-environments
-
-replace github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/reports/pkg/hoodaw => /Users/pkrishnasamy/go/src/github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/reports/pkg/hoodaw
