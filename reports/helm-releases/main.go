@@ -92,7 +92,7 @@ func main() {
 
 // executeHelmList execute helm list all namespaces amd return output as string
 func executeHelmList() (string, error) {
-	cmd := exec.Command("helm", "list", "--all-namespaces", "-o", "json")
+	cmd := exec.Command("helm", "list", "--all-namespaces", "-m", "1000", "-o", "json")
 
 	var out bytes.Buffer
 	var stderr bytes.Buffer
