@@ -48,31 +48,31 @@ func main() {
 	// Get the kubeconfig file stored in an S3 bucket.
 	err := authenticate.KubeConfigFromS3Bucket(*bucket, *kubeconfig, *region, *kubeCfgPath)
 	if err != nil {
-		log.Fatalln(err.Error())
+		log.Fatalln("error in getting the kubeconfig from s3 bucket", err.Error())
 	}
 
 	// Get the clientset to access the k8s cluster
 	kclientset, err := authenticate.CreateClientFromConfigFile(*kubeCfgPath, *ctx)
 	if err != nil {
-		log.Fatalln(err.Error())
+		log.Fatalln("error in creating clientset", err.Error())
 	}
 
 	// Get the clientset object to access cluster metrics
 	mclientset, err := authenticate.CreateMetricsClientFromConfigFile(*kubeCfgPath, *ctx)
 	if err != nil {
-		log.Fatalln(err.Error())
+		log.Fatalln("error in creating metrics clientset", err.Error())
 	}
 
 	// Get the list of namespaces from the cluster which is set in the kclientset
 	nsList, err := namespace.GetAllNamespacesFromCluster(kclientset)
 	if err != nil {
-		log.Fatalln(err.Error())
+		log.Fatalln("error in getting all namespaces from cluster", err.Error())
 	}
 
 	// Get the list of pods from the cluster which is set in the kclientset
 	podsList, err := namespace.GetAllPodsFromCluster(kclientset)
 	if err != nil {
-		log.Fatalln(err.Error())
+		log.Fatalln("error in getting all pods from cluster", err.Error())
 	}
 
 	nsReqMap := make(map[string]NamespaceResource, 0)
@@ -96,7 +96,7 @@ func main() {
 	// Get top pods(resource used) of all namespaces from the cluster which is set in the mclientset
 	podMetricsList, err := namespace.GetAllPodMetricsesFromCluster(mclientset)
 	if err != nil {
-		log.Fatalln(err.Error())
+		log.Fatalln("error in getting all pod metrics from cluster", err.Error())
 	}
 
 	nsUsedMap := make(map[string]NamespaceResource, 0)
@@ -115,7 +115,7 @@ func main() {
 	// get namespace quota of namespaces to find hard limits of pods from the cluster
 	rsQuotasList, err := namespace.GetAllResourceQuotasFromCluster(kclientset)
 	if err != nil {
-		log.Fatalln(err.Error())
+		log.Fatalln("error in getting all resourcequota from cluster", err.Error())
 	}
 
 	nsQuotaMap := make(map[string]NamespaceResource, 0)
