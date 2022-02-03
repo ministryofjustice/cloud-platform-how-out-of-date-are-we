@@ -1,23 +1,25 @@
-FROM python:alpine3.12
+FROM golang:1.17-stretch AS namespace_usage_builder
 
-ENV \
-  KUBECTL_VERSION=1.17.12
-
-RUN pip install awscli \
-  && apk add curl ruby
-RUN gem install json_pure
-
-# kubectl
-RUN curl -sLo /usr/local/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v${KUBECTL_VERSION}/bin/linux/amd64/kubectl \
-  && chmod 755 /usr/local/bin/kubectl
-
-
-RUN addgroup -g 1000 -S appgroup && \
-    adduser -u 1000 -S appuser -G appgroup
+ENV CGO_ENABLED=0 \
+    GOOS=linux
 
 WORKDIR /app
 
-COPY bin ./bin
+COPY go.mod ./
+COPY go.sum ./
+RUN go mod download
+COPY *.go ./
+RUN go build .
 
-RUN chown 1000:1000 /app
+FROM alpine:3.11.0
+
+WORKDIR /app
+
+COPY --from=namespace_usage_builder /app/namespace-usage ./
+
+RUN addgroup -g 1000 -S appgroup \
+  && adduser -u 1000 -S appuser -G appgroup
+
+RUN chown -R appuser:appgroup /app
+
 USER 1000
