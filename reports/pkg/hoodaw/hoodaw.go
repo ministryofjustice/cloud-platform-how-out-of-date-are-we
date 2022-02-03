@@ -9,6 +9,13 @@ import (
 
 const host = "https://reports.cloud-platform.service.justice.gov.uk/"
 
+// resourceMap is used to store both string:string and string:map[string]string key
+// value pairs. The HOODAW API requires the first entry of map to contain a string:string,
+// the rest of the map consists of a primary key (string) with a value containing a
+// map (string:string) or any other type.
+// All reports posting to the HOOWDAW API uses this variable when posting the report data
+type ResourceMap map[string]interface{}
+
 // QueryApi takes the name of an endpoint and uses the http package to
 // return a slice of bytes.
 func QueryApi(endPoint string) ([]byte, error) {
