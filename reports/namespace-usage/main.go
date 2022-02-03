@@ -8,8 +8,8 @@ import (
 	"strconv"
 	"time"
 
-	authenticate "github.com/ministryofjustice/cloud-platform-environments/pkg/authenticate"
-	namespace "github.com/ministryofjustice/cloud-platform-environments/pkg/namespace"
+	"github.com/ministryofjustice/cloud-platform-environments/pkg/authenticate"
+	"github.com/ministryofjustice/cloud-platform-environments/pkg/namespace"
 	"github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/reports/pkg/hoodaw"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/metrics/pkg/apis/metrics/v1beta1"
