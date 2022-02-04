@@ -3,12 +3,12 @@
 Ouputs a JSON report showing 
 - the CPU requested vs. used, for all namespaces
 - the Memory requested vs. used for all namespaces
-- the number of Pods Hard limits vs. current for all namespaces
+- the number of Hard limits set for pods vs current number of running pods for all namespaces
 - number of containers for all namespaces
 
 The main package in this report will perform the following steps:
 
-- Fetch the kubeconfig from the s3 bucket 
+- fetch the kubeconfig from the s3 bucket 
 - authenticate to the kubernetes cluster and set the current context to `ctx` env variable
 - get all namespaces 
 - get all pods and create a resource requests Map of NamespaceResource type
@@ -27,7 +27,7 @@ You can see from the codebase, a number of environment variables are required to
 
 - hoodawAPIKey: The API key of the "How out of date are we application" (HOODAW)
 
-- hoodawEndpoint: The endpoint of the HOODAW Application "hosted_services"
+- hoodawEndpoint: The endpoint of the HOODAW Application "namespace_usage"
 
 - hoodawHost: The hostname of the HOODAW hostname i.e. https://reports.cloud-platform.service.justice.gov.uk
 
