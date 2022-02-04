@@ -207,7 +207,7 @@ func getAllResourceQuotaDetails(kclientset kubernetes.Interface) (
 // getPodResourceDetails takes a Pod of type v1.Pod and collect
 // all resources summed up for all containers of the pod and return the result
 func getPodResourceDetails(pod v1.Pod) (r NamespaceResource, namespace string, containerCount int) {
-	reqs, _ := v1.ResourceList{}, v1.ResourceList{}
+	reqs := v1.ResourceList{}
 	for _, container := range pod.Spec.Containers {
 		addResourceList(reqs, container.Resources.Requests)
 		containerCount++
