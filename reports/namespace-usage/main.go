@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"flag"
+	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -12,7 +13,9 @@ import (
 	"github.com/ministryofjustice/cloud-platform-environments/pkg/namespace"
 	"github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/reports/pkg/hoodaw"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/client-go/kubernetes"
 	"k8s.io/metrics/pkg/apis/metrics/v1beta1"
+	"k8s.io/metrics/pkg/client/clientset/versioned"
 )
 
 var (
@@ -28,11 +31,17 @@ var (
 	endPoint = *hoodawHost + *hoodawEndpoint
 )
 
+// NamespaceResource has the type of resource info
+// being collected per namespace by this report
 type NamespaceResource struct {
 	CPU    float64
 	Memory float64
 	Pods   int
 }
+
+// UsageReport is used to store details of requested resources, used resources,
+// hardlimits of pods and number of containers per namespace. This is the set of
+// data output from this package.
 type UsageReport struct {
 	Requested      NamespaceResource
 	Used           NamespaceResource
@@ -69,78 +78,38 @@ func main() {
 		log.Fatalln("error in getting all namespaces from cluster", err.Error())
 	}
 
-	// Get the list of pods from the cluster which is set in the kclientset
-	podsList, err := namespace.GetAllPodsFromCluster(kclientset)
+	// Get pod requests requests and container count of all namespaces of a given cluster
+	nsReqMap, containerMap, err := getAllPodResourceDetails(kclientset)
 	if err != nil {
-		log.Fatalln("error in getting all pods from cluster", err.Error())
+		log.Fatalln("error in getting all pod resources details", err.Error())
 	}
 
-	nsReqMap := make(map[string]NamespaceResource, 0)
-
-	containerMap := make(map[string]int, 0)
-
-	// get resource request of each pod and container count
-	// and store it in namespaceResource map
-	for _, pod := range podsList {
-		req, namespace, newCount := GetPodResourceDetails(pod)
-		list := nsReqMap[namespace]
-		if _, exist := nsReqMap[namespace]; exist {
-			list.addNamespaceResource(req)
-			nsReqMap[namespace] = list
-		} else {
-			nsReqMap[namespace] = req
-		}
-		containerMap[namespace] += newCount
-	}
-
-	// Get top pods(resource used) of all namespaces from the cluster which is set in the mclientset
-	podMetricsList, err := namespace.GetAllPodMetricsesFromCluster(mclientset)
+	// Get pod usage resources of all namespaces of a given cluster
+	nsUsedMap, err := getAllPodMetricsesDetails(mclientset)
 	if err != nil {
-		log.Fatalln("error in getting all pod metrics from cluster", err.Error())
+		log.Fatalln("error in getting all pod metrics details", err.Error())
 	}
 
-	nsUsedMap := make(map[string]NamespaceResource, 0)
-
-	for _, podMetrics := range podMetricsList {
-		used, namespace := GetPodUsageDetails(podMetrics)
-		list := nsUsedMap[namespace]
-		if _, exist := nsUsedMap[namespace]; exist {
-			list.addNamespaceResource(used)
-			nsUsedMap[namespace] = list
-		} else {
-			nsUsedMap[namespace] = used
-		}
-	}
-
-	// get namespace quota of namespaces to find hard limits of pods from the cluster
-	rsQuotasList, err := namespace.GetAllResourceQuotasFromCluster(kclientset)
+	// Get hard limit of pods of all namespaces of a given cluster
+	nsQuotaMap, err := getAllResourceQuotaDetails(kclientset)
 	if err != nil {
-		log.Fatalln("error in getting all resourcequota from cluster", err.Error())
-	}
-
-	nsQuotaMap := make(map[string]NamespaceResource, 0)
-
-	for _, rsQuota := range rsQuotasList {
-		hardLimits, namespace, err := GetPodHardLimits(rsQuota)
-		if err != nil {
-			log.Fatalln(err.Error())
-		}
-		nsQuotaMap[namespace] = hardLimits
+		log.Fatalln("error in getting all resourcequota details", err.Error())
 	}
 
 	var usageReports []UsageReport
 	// Build the total usageReport
 	for _, ns := range nsList {
-		var usageReport UsageReport
-		usageReport.Name = ns.Name
-		usageReport.Requested = nsReqMap[ns.Name]
-		usageReport.Used = nsUsedMap[ns.Name]
-		usageReport.Hardlimits = nsQuotaMap[ns.Name]
-		usageReport.ContainerCount = containerMap[ns.Name]
+		usageReport := UsageReport{
+			Name:           ns.Name,
+			Requested:      nsReqMap[ns.Name],
+			Used:           nsUsedMap[ns.Name],
+			Hardlimits:     nsQuotaMap[ns.Name],
+			ContainerCount: containerMap[ns.Name],
+		}
 		usageReports = append(usageReports, usageReport)
 	}
 
-	jsonToPost, err := BuildJsonMap(usageReports)
+	jsonToPost, err := buildJsonMap(usageReports)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
@@ -152,9 +121,92 @@ func main() {
 	}
 }
 
-// GetPodResourceDetails takes a Pod of type v1.Pod and collect
+// getAllPodResourceDetails takes a clientset and return Pod resource details
+// of all namespaces in a map and map of container count of all namespaces
+func getAllPodResourceDetails(kclientset kubernetes.Interface) (
+	map[string]NamespaceResource, map[string]int, error) {
+
+	// Get the list of pods from the cluster which is set in the kclientset
+	podsList, err := namespace.GetAllPodsFromCluster(kclientset)
+	if err != nil {
+		return nil, nil, fmt.Errorf("error in getting all pods from cluster %s", err.Error())
+	}
+
+	nsReqMap := make(map[string]NamespaceResource, 0)
+
+	containerMap := make(map[string]int, 0)
+
+	// get resource request of each pod and container count
+	// and store it in namespaceResource map
+
+	for _, pod := range podsList {
+		req, namespace, newCount := getPodResourceDetails(pod)
+		list := nsReqMap[namespace]
+		if _, exist := nsReqMap[namespace]; exist {
+			list.addNamespaceResource(req)
+			nsReqMap[namespace] = list
+		} else {
+			nsReqMap[namespace] = req
+		}
+		containerMap[namespace] += newCount
+	}
+
+	return nsReqMap, containerMap, nil
+}
+
+// getAllPodMetricsesDetails takes a clientset and return Pod usage details from the
+// pod metrics of all namespaces
+func getAllPodMetricsesDetails(mclientset versioned.Interface) (
+	map[string]NamespaceResource, error) {
+
+	// Get top pods(resource used) of all namespaces from the cluster which is set in the mclientset
+	podMetricsList, err := namespace.GetAllPodMetricsesFromCluster(mclientset)
+	if err != nil {
+		return nil, fmt.Errorf("error in getting all pods metrics from cluster %s", err.Error())
+	}
+
+	nsUsedMap := make(map[string]NamespaceResource, 0)
+
+	for _, podMetrics := range podMetricsList {
+		used, namespace := getPodUsageDetails(podMetrics)
+		list := nsUsedMap[namespace]
+		if _, exist := nsUsedMap[namespace]; exist {
+			list.addNamespaceResource(used)
+			nsUsedMap[namespace] = list
+		} else {
+			nsUsedMap[namespace] = used
+		}
+	}
+	return nsUsedMap, nil
+
+}
+
+// getAllPodMetricsesDetails takes a clientset, get resourcequotas of all namespaces from the cluster
+// and return the hard limits set for the pods of all namespaces
+func getAllResourceQuotaDetails(kclientset kubernetes.Interface) (
+	map[string]NamespaceResource, error) {
+
+	// get namespace quota of namespaces to find hard limits of pods from the cluster
+	rsQuotasList, err := namespace.GetAllResourceQuotasFromCluster(kclientset)
+	if err != nil {
+		return nil, fmt.Errorf("error in getting all resourcequota from cluster %s", err.Error())
+	}
+
+	nsQuotaMap := make(map[string]NamespaceResource, 0)
+
+	for _, rsQuota := range rsQuotasList {
+		hardLimits, namespace, err := getPodHardLimits(rsQuota)
+		if err != nil {
+			log.Fatalln(err.Error())
+		}
+		nsQuotaMap[namespace] = hardLimits
+	}
+	return nsQuotaMap, nil
+}
+
+// getPodResourceDetails takes a Pod of type v1.Pod and collect
 // all resources summed up for all containers of the pod and return the result
-func GetPodResourceDetails(pod v1.Pod) (r NamespaceResource, namespace string, containerCount int) {
+func getPodResourceDetails(pod v1.Pod) (r NamespaceResource, namespace string, containerCount int) {
 	reqs, _ := v1.ResourceList{}, v1.ResourceList{}
 	for _, container := range pod.Spec.Containers {
 		addResourceList(reqs, container.Resources.Requests)
@@ -168,9 +220,9 @@ func GetPodResourceDetails(pod v1.Pod) (r NamespaceResource, namespace string, c
 	return
 }
 
-// GetPodResourceDetails takes a Pod of type v1.Pod and collect
+// getPodResourceDetails takes a Pod of type v1.Pod and collect
 // all resources summed up for all containers of the pod and return the result
-func GetPodUsageDetails(podMetrics v1beta1.PodMetrics) (u NamespaceResource, namespace string) {
+func getPodUsageDetails(podMetrics v1beta1.PodMetrics) (u NamespaceResource, namespace string) {
 	usage := v1.ResourceList{}
 	for _, container := range podMetrics.Containers {
 		addResourceList(usage, container.Usage)
@@ -182,9 +234,9 @@ func GetPodUsageDetails(podMetrics v1beta1.PodMetrics) (u NamespaceResource, nam
 	return
 }
 
-// GetPodResourceDetails takes a Pod of type v1.Pod and collect
+// getPodResourceDetails takes a Pod of type v1.Pod and collect
 // all resources summed up for all containers of the pod and return the result
-func GetPodHardLimits(resourceQuota v1.ResourceQuota) (h NamespaceResource, namespace string, err error) {
+func getPodHardLimits(resourceQuota v1.ResourceQuota) (h NamespaceResource, namespace string, err error) {
 	hardLimits := resourceQuota.Status.Hard["pods"].DeepCopy()
 	h.Pods, err = strconv.Atoi(hardLimits.String())
 	namespace = resourceQuota.Namespace
@@ -212,8 +264,8 @@ func addResourceList(list, new v1.ResourceList) {
 	}
 }
 
-// BuildJsonMap takes a array of usageReport struct and return a json encoded map
-func BuildJsonMap(usageReports []UsageReport) ([]byte, error) {
+// buildJsonMap takes a array of usageReport struct and return a json encoded map
+func buildJsonMap(usageReports []UsageReport) ([]byte, error) {
 	// To handle generics in the data type, we need to create a new map,
 	// add the first key string:string and then the second key/value string:map[string]string.
 	// As per the requirements of the HOODAW API.
