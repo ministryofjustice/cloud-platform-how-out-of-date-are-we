@@ -281,7 +281,7 @@ get "/namespace_usage" do
 end
 
 get "/namespace_usage_cpu" do
-  locals = namespaces_data("cpu").merge(
+  locals = namespaces_data("CPU").merge(
     column_titles: ["Namespaces", "Total pod requests (millicores)", "CPU used (millicores)"],
     title: "Namespaces by CPU (requested vs. used)",
   )
@@ -289,7 +289,7 @@ get "/namespace_usage_cpu" do
 end
 
 get "/namespace_usage_memory" do
-  locals = namespaces_data("memory").merge(
+  locals = namespaces_data("Memory").merge(
     column_titles: ["Namespaces", "Total pods requests (mebibytes)", "Memory used (mebibytes)"],
     title: "Namespaces by Memory (requested vs. used)",
   )
