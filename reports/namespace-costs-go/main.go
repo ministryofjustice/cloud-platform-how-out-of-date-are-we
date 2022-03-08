@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -34,8 +35,10 @@ const SHARED_COSTS string = "SHARED_COSTS"
 func main() {
 	flag.Parse()
 
-	GetAwsCostAndUsageData()
-
+	awsCostUsageData, err := GetAwsCostAndUsageData()
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
 	// Get all namespaces from cluster
 
 	// Gain access to a Kubernetes cluster using a config file stored in an S3 bucket.
@@ -50,6 +53,14 @@ func main() {
 		log.Fatalln(err.Error())
 	}
 
+	_ = costsByNamespace(awsCostUsageData)
+
+	// get the value of shared costs from the aws data and
+	// delete the shared costs from each of namespace.
+	// divide the shared costs by number of namespace and assign the cost back to per namespace
+	// add shared team costs
+	//
+
 }
 
 func GetAwsCostAndUsageData() ([][]string, error) {
@@ -59,7 +70,7 @@ func GetAwsCostAndUsageData() ([][]string, error) {
 		// handle error
 	}
 	svc := costexplorer.NewFromConfig(cfg)
-	now, monthBefore := timeNow(30)
+	now, monthBefore := timeNow(31)
 
 	param := &costexplorer.GetCostAndUsageInput{
 		Granularity: ceTypes.GranularityMonthly,
@@ -101,9 +112,6 @@ func GetAwsCostAndUsageData() ([][]string, error) {
 			}
 		}
 	}
-
-	fmt.Println(resultsCosts)
-
 	return resultsCosts, nil
 }
 
@@ -114,21 +122,33 @@ func timeNow(x int) (string, string) {
 	return now, month
 }
 
-// func perNamespaceUsageData(resultsCosts [][]string) map[string] {
+// Use repository interface isntead https://blog.canopas.com/approach-to-avoid-accessing-variables-globally-in-golang-2019b234762
+var costsPerNamespaceMap = map[string]map[string]float64{}
 
-// 	nsCountPerDate := make(map[string]int)
+func costsByNamespace(awsCostUsageData [][]string) map[string]map[string]float64 {
+	service := make(map[string]float64, 0)
+	for _, col := range awsCostUsageData {
 
-// 	for _, date := range migratedDates {
-// 		// check if the item/element exist in the duplicate_frequency map
-// 		_, exist := nsCountPerDate[date]
+		// just test with example namespace
+		if col[2] == "prisoner-content-hub-production" {
+			cost, err := strconv.ParseFloat(col[3], 64)
+			if err != nil {
+				fmt.Println(err)
+				return nil
+			}
+			if existing, ok := costsPerNamespaceMap[col[2]][col[1]]; ok {
+				fmt.Println("existing", col[2], "resource", col[1], "cost", costsPerNamespaceMap[col[2]][col[1]])
+				service[col[1]] = cost + existing
+			} else {
+				service[col[1]] = cost
+			}
+			costsPerNamespaceMap[col[2]] = service
+		}
 
-// 		if exist {
-// 			nsCountPerDate[date] += 1 // increase counter by 1 if already in the map
-// 		} else {
-// 			nsCountPerDate[date] = 1 // else start counting from 1
-// 		}
-// 	}
+	}
 
-// 	return nsCountPerDate
-
-// }
+	for k, v := range costsPerNamespaceMap {
+		fmt.Println("key[%s] value[%s]\n", k, v)
+	}
+	return costsPerNamespaceMap
+}
