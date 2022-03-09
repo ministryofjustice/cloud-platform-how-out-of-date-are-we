@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"math"
 	"os"
 	"strconv"
 	"strings"
@@ -53,8 +54,12 @@ func main() {
 		log.Fatalln(err.Error())
 	}
 
-	_ = costsByNamespace(awsCostUsageData)
+	err = costsByNamespace(awsCostUsageData)
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
 
+	err = updateSharedCostsByNs()
 	// get the value of shared costs from the aws data and
 	// delete the shared costs from each of namespace.
 	// divide the shared costs by number of namespace and assign the cost back to per namespace
@@ -123,32 +128,59 @@ func timeNow(x int) (string, string) {
 }
 
 // Use repository interface isntead https://blog.canopas.com/approach-to-avoid-accessing-variables-globally-in-golang-2019b234762
-var costsPerNamespaceMap = map[string]map[string]float64{}
 
-func costsByNamespace(awsCostUsageData [][]string) map[string]map[string]float64 {
-	service := make(map[string]float64, 0)
+var costsPerNamespaceMap = make(map[string]map[string]float64)
+
+func costsByNamespace(awsCostUsageData [][]string) error {
+
 	for _, col := range awsCostUsageData {
 
 		// just test with example namespace
-		if col[2] == "prisoner-content-hub-production" {
-			cost, err := strconv.ParseFloat(col[3], 64)
-			if err != nil {
-				fmt.Println(err)
-				return nil
-			}
-			if existing, ok := costsPerNamespaceMap[col[2]][col[1]]; ok {
-				fmt.Println("existing", col[2], "resource", col[1], "cost", costsPerNamespaceMap[col[2]][col[1]])
-				service[col[1]] = cost + existing
-			} else {
-				service[col[1]] = cost
-			}
-			costsPerNamespaceMap[col[2]] = service
+
+		cost, err := strconv.ParseFloat(col[3], 64)
+		if err != nil {
+			fmt.Println(err)
+			return err
 		}
 
+		addResource(col[2], col[1], cost)
+
 	}
 
-	for k, v := range costsPerNamespaceMap {
-		fmt.Println("key[%s] value[%s]\n", k, v)
+	// for k, v := range costsPerNamespaceMap {
+	// 	fmt.Println("key[%s] value[%s]\n", k, v)
+	// }
+	return nil
+}
+
+func geterNsSharedCosts() float64 {
+	sharedCostsSize := len(costsPerNamespaceMap[SHARED_COSTS])
+	sharedCosts := costsPerNamespaceMap[SHARED_COSTS]
+	var totalCost float64
+	for _, v := range sharedCosts {
+		totalCost += v
 	}
-	return costsPerNamespaceMap
+	perNsSharedCosts := totalCost / float64(sharedCostsSize)
+	return perNsSharedCosts
+}
+func addResource(ns, resource string, cost float64) {
+	resources := costsPerNamespaceMap[ns]
+
+	if resources == nil {
+		resources = make(map[string]float64)
+		costsPerNamespaceMap[ns] = resources
+		resources[resource] = cost
+	} else {
+		curCost := hasResource(ns, resource)
+		if curCost == 0 {
+			resources[resource] = curCost
+		}
+		curCost = cost + curCost
+		resources[resource] = math.Round(curCost*100) / 100
+	}
+
+}
+
+func hasResource(ns, resource string) float64 {
+	return costsPerNamespaceMap[ns][resource]
 }
