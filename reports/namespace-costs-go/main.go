@@ -33,8 +33,21 @@ var (
 
 const SHARED_COSTS string = "SHARED_COSTS"
 
+// Annual cost of the Cloud Platform team is £1,260,000
+// This is the monthly cost in USD
+const MONTHLY_TEAM_COST = 136_000
+const SHARED_CP_COSTS string = "Shared CP Team Costs"
+
+type costs struct {
+	costPerNamespace map[string]map[string]float64
+}
+
 func main() {
 	flag.Parse()
+
+	c := &costs{
+		costPerNamespace: map[string]map[string]float64{},
+	}
 
 	awsCostUsageData, err := GetAwsCostAndUsageData()
 	if err != nil {
@@ -54,19 +67,23 @@ func main() {
 		log.Fatalln(err.Error())
 	}
 
-	err = costsByNamespace(awsCostUsageData)
+	err = c.updatecostsByNamespace(awsCostUsageData)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
 
-	err = updateSharedCostsByNs()
-	// get the value of shared costs from the aws data and
-	// delete the shared costs from each of namespace.
-	// divide the shared costs by number of namespace and assign the cost back to per namespace
+	c.addSharedCosts()
+
 	// add shared team costs
+	c.addSharedTeamCosts()
+
+	c.addTotals()
+
 	//
 
 }
+
+//func (c *costs) costPerNamespace() map[string]map[string]float64 { return c.costPerNamespace }
 
 func GetAwsCostAndUsageData() ([][]string, error) {
 
@@ -127,23 +144,16 @@ func timeNow(x int) (string, string) {
 	return now, month
 }
 
-// Use repository interface isntead https://blog.canopas.com/approach-to-avoid-accessing-variables-globally-in-golang-2019b234762
-
-var costsPerNamespaceMap = make(map[string]map[string]float64)
-
-func costsByNamespace(awsCostUsageData [][]string) error {
+func (c *costs) updatecostsByNamespace(awsCostUsageData [][]string) error {
 
 	for _, col := range awsCostUsageData {
-
-		// just test with example namespace
-
 		cost, err := strconv.ParseFloat(col[3], 64)
 		if err != nil {
 			fmt.Println(err)
 			return err
 		}
 
-		addResource(col[2], col[1], cost)
+		c.addResource(col[2], col[1], cost)
 
 	}
 
@@ -153,25 +163,62 @@ func costsByNamespace(awsCostUsageData [][]string) error {
 	return nil
 }
 
-func geterNsSharedCosts() float64 {
-	sharedCostsSize := len(costsPerNamespaceMap[SHARED_COSTS])
-	sharedCosts := costsPerNamespaceMap[SHARED_COSTS]
+// get the value of shared costs for each namespace, delete the shared_costs key and
+// and assign the shared_costs per namespace
+func (c *costs) addSharedCosts() error {
+
+	costsPerNs := c.getSharedCosts()
+	delete(c.costPerNamespace, SHARED_COSTS)
+	c.addSharedPerNamespace(costsPerNs)
+	return nil
+
+}
+
+func (c *costs) getSharedCosts() float64 {
+	nKeys := len(c.costPerNamespace)
+
+	sharedCosts := c.costPerNamespace[SHARED_COSTS]
 	var totalCost float64
 	for _, v := range sharedCosts {
 		totalCost += v
 	}
-	perNsSharedCosts := totalCost / float64(sharedCostsSize)
-	return perNsSharedCosts
+	// calculate per namespace cost taking away the shared_costs key
+	perNsSharedCosts := totalCost / float64(nKeys-1)
+	return math.Round(perNsSharedCosts*100) / 100
 }
-func addResource(ns, resource string, cost float64) {
-	resources := costsPerNamespaceMap[ns]
+
+func (c *costs) addSharedPerNamespace(costsPerNs float64) {
+
+	for _, v := range c.costPerNamespace {
+		v[SHARED_COSTS] = costsPerNs
+	}
+
+}
+
+// add shared team costs per namespace
+func (c *costs) addSharedTeamCosts() error {
+
+	nKeys := len(c.costPerNamespace)
+	perNsSharedCPCosts := MONTHLY_TEAM_COST / float64(nKeys)
+	roundedCPCost := math.Round(perNsSharedCPCosts*100) / 100
+
+	for _, v := range c.costPerNamespace {
+		v[SHARED_CP_COSTS] = roundedCPCost
+	}
+
+	return nil
+
+}
+
+func (c *costs) addResource(ns, resource string, cost float64) {
+	resources := c.costPerNamespace[ns]
 
 	if resources == nil {
 		resources = make(map[string]float64)
-		costsPerNamespaceMap[ns] = resources
+		c.costPerNamespace[ns] = resources
 		resources[resource] = cost
 	} else {
-		curCost := hasResource(ns, resource)
+		curCost := c.hasResource(ns, resource)
 		if curCost == 0 {
 			resources[resource] = curCost
 		}
@@ -181,6 +228,6 @@ func addResource(ns, resource string, cost float64) {
 
 }
 
-func hasResource(ns, resource string) float64 {
-	return costsPerNamespaceMap[ns][resource]
+func (c *costs) hasResource(ns, resource string) float64 {
+	return c.costPerNamespace[ns][resource]
 }
