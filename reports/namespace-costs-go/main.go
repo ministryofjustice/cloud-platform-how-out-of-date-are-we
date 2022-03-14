@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
@@ -17,13 +18,15 @@ import (
 	ceTypes "github.com/aws/aws-sdk-go-v2/service/costexplorer/types"
 	"github.com/ministryofjustice/cloud-platform-environments/pkg/authenticate"
 	"github.com/ministryofjustice/cloud-platform-environments/pkg/namespace"
+	"github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/reports/pkg/hoodaw"
+	v1 "k8s.io/api/core/v1"
 )
 
 var (
 	bucket         = flag.String("bucket", os.Getenv("KUBECONFIG_S3_BUCKET"), "AWS S3 bucket for kubeconfig")
 	ctx            = flag.String("context", "live.cloud-platform.service.justice.gov.uk", "Kubernetes context specified in kubeconfig")
 	hoodawApiKey   = flag.String("hoodawAPIKey", os.Getenv("HOODAW_API_KEY"), "API key to post data to the 'How out of date are we' API")
-	hoodawEndpoint = flag.String("hoodawEndpoint", "/namespace_costs", "Endpoint to send the data to")
+	hoodawEndpoint = flag.String("hoodawEndpoint", "/costs_by_namespace", "Endpoint to send the data to")
 	hoodawHost     = flag.String("hoodawHost", os.Getenv("HOODAW_HOST"), "Hostname of the 'How out of date are we' API")
 	kubeconfig     = flag.String("kubeconfig", "kubeconfig", "Name of kubeconfig file in S3 bucket")
 	region         = flag.String("region", os.Getenv("AWS_REGION"), "AWS Region")
@@ -62,9 +65,14 @@ func main() {
 	}
 
 	// Get the list of namespaces from the cluster which is set in the clientset
-	_, err = namespace.GetAllNamespacesFromCluster(clientset)
+	namespaces, err := namespace.GetAllNamespacesFromCluster(clientset)
 	if err != nil {
 		log.Fatalln(err.Error())
+	}
+
+	for _, ns := range namespaces {
+		resources := make(map[string]float64)
+		c.costPerNamespace[ns.Name] = resources
 	}
 
 	err = c.updatecostsByNamespace(awsCostUsageData)
@@ -77,7 +85,19 @@ func main() {
 	// add shared team costs
 	c.addSharedTeamCosts()
 
-	c.addTotals()
+	namespacesMap := c.buildCostsResourceMap(namespaces)
+
+	jsonToPost, err := BuildJsonMap(namespacesMap)
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	//fmt.Println(namespacesMap)
+	// // Post json to hoowdaw api
+	err = hoodaw.PostToApi(jsonToPost, hoodawApiKey, &endPoint)
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
 
 	//
 
@@ -210,6 +230,51 @@ func (c *costs) addSharedTeamCosts() error {
 
 }
 
+type resourceMap map[string]interface{}
+
+// add shared team costs per namespace
+func (c *costs) buildCostsResourceMap(nsList []v1.Namespace) resourceMap {
+
+	namespaces := make(map[string]interface{}, 0)
+
+	for _, ns := range nsList {
+		breakdown := c.costPerNamespace[ns.Name]
+
+		var total float64 = 0
+		m := breakdown
+		for _, val := range m {
+			total += val
+		}
+
+		namespaces[ns.Name] = resourceMap{
+			"breakdown": breakdown,
+			"total":     total,
+		}
+
+	}
+
+	return namespaces
+
+}
+
+// BuildJsonMap takes a slice of maps and return a json encoded map
+func BuildJsonMap(namespaceMap resourceMap) ([]byte, error) {
+	// To handle generics in the data type, we need to create a new map,
+	// add the first key string:string and then the second key/value string:map[string]interface{}.
+	// As per the requirements of the HOODAW API.
+	jsonMap := resourceMap{
+		"updated_at": time.Now().Format("2006-01-2 15:4:5 UTC"),
+		"namespace":  namespaceMap,
+	}
+
+	jsonStr, err := json.Marshal(jsonMap)
+	if err != nil {
+		return nil, err
+	}
+
+	return jsonStr, nil
+}
+
 func (c *costs) addResource(ns, resource string, cost float64) {
 	resources := c.costPerNamespace[ns]
 
@@ -218,6 +283,7 @@ func (c *costs) addResource(ns, resource string, cost float64) {
 		c.costPerNamespace[ns] = resources
 		resources[resource] = cost
 	} else {
+
 		curCost := c.hasResource(ns, resource)
 		if curCost == 0 {
 			resources[resource] = curCost
