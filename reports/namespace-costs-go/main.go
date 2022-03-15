@@ -39,24 +39,23 @@ const SHARED_COSTS string = "SHARED_COSTS"
 // Annual cost of the Cloud Platform team is £1,260,000
 // This is the monthly cost in USD
 const MONTHLY_TEAM_COST = 136_000
-const SHARED_CP_COSTS string = "Shared CP Team Costs"
 
+const DAYS_TOGET_DATA int = 30
+
+// resourceMap is used to store both string:string and string:map[string]interface{} key
+// value pairs. The HOODAW API requires the first entry of map to contain a string:string,
+// the rest of the map consists of a primary key (string) with a value containing a interface of key value
+// pairs with key namespace name and values as another map with keys 'breakdown' and 'total'.
+type resourceMap map[string]interface{}
+
+// costs is a map which has the namespace name as key and the value a map
+// of resource names as key and costs as value
 type costs struct {
 	costPerNamespace map[string]map[string]float64
 }
 
 func main() {
 	flag.Parse()
-
-	c := &costs{
-		costPerNamespace: map[string]map[string]float64{},
-	}
-
-	awsCostUsageData, err := GetAwsCostAndUsageData()
-	if err != nil {
-		log.Fatalln(err.Error())
-	}
-	// Get all namespaces from cluster
 
 	// Gain access to a Kubernetes cluster using a config file stored in an S3 bucket.
 	clientset, err := authenticate.CreateClientFromS3Bucket(*bucket, *kubeconfig, *region, *ctx)
@@ -70,49 +69,62 @@ func main() {
 		log.Fatalln(err.Error())
 	}
 
+	//create a new costs object
+	c := &costs{
+		costPerNamespace: map[string]map[string]float64{},
+	}
+
+	// get Cost and Usage data from aws cost explorer api
+	awsCostUsageData, err := getAwsCostAndUsageData()
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	// create the resources map for namespaces which are listed in the cluster
+	// This is needed later to update shared costs for namespaces which doesnot have any aws resources
 	for _, ns := range namespaces {
 		resources := make(map[string]float64)
 		c.costPerNamespace[ns.Name] = resources
 	}
 
+	// update the costs per namespace in a map for all aws resources from CostUsage data
 	err = c.updatecostsByNamespace(awsCostUsageData)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
 
+	// add shared aws resources costs i.e resources which doesnot have namespace tags but global
+	// resources to the CP account e.g ec2 instances, elasticsearch
 	c.addSharedCosts()
 
-	// add shared team costs
+	// add shared CP team costs
 	c.addSharedTeamCosts()
 
+	// build the resources Map for all namespaces with the format required by HOODAW frontend
 	namespacesMap := c.buildCostsResourceMap(namespaces)
 
+	// build the final jsonMap
 	jsonToPost, err := BuildJsonMap(namespacesMap)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
 
-	//fmt.Println(namespacesMap)
-	// // Post json to hoowdaw api
+	// Post json to hoowdaw api
 	err = hoodaw.PostToApi(jsonToPost, hoodawApiKey, &endPoint)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
-
-	//
-
 }
 
-//func (c *costs) costPerNamespace() map[string]map[string]float64 { return c.costPerNamespace }
-
-func GetAwsCostAndUsageData() ([][]string, error) {
+// getAwsCostAndUsageData get the data from aws cost explorer api and build a slice of [date,resourcename,namespacename,cost]
+func getAwsCostAndUsageData() ([][]string, error) {
 
 	cfg, err := config.LoadDefaultConfig(context.TODO())
 	if err != nil {
-		// handle error
+		return nil, err
 	}
 	svc := costexplorer.NewFromConfig(cfg)
-	now, monthBefore := timeNow(31)
+	now, monthBefore := timeNow(DAYS_TOGET_DATA)
 
 	param := &costexplorer.GetCostAndUsageInput{
 		Granularity: ceTypes.GranularityMonthly,
@@ -135,7 +147,7 @@ func GetAwsCostAndUsageData() ([][]string, error) {
 
 	GetCostAndUsageOutput, err := svc.GetCostAndUsage(context.TODO(), param)
 	if err != nil {
-		fmt.Println(err)
+		return nil, err
 	}
 
 	var resultsCosts [][]string
@@ -157,6 +169,7 @@ func GetAwsCostAndUsageData() ([][]string, error) {
 	return resultsCosts, nil
 }
 
+// timeNow will take the number of days as input and return the current month and the month past 30 days
 func timeNow(x int) (string, string) {
 	dt := time.Now()
 	now := dt.Format("2006-01-02")
@@ -164,6 +177,8 @@ func timeNow(x int) (string, string) {
 	return now, month
 }
 
+// updatecostsByNamespace get the aws CostUsageData and update the costPerNamespace
+// with resources and map per namespace
 func (c *costs) updatecostsByNamespace(awsCostUsageData [][]string) error {
 
 	for _, col := range awsCostUsageData {
@@ -176,14 +191,10 @@ func (c *costs) updatecostsByNamespace(awsCostUsageData [][]string) error {
 		c.addResource(col[2], col[1], cost)
 
 	}
-
-	// for k, v := range costsPerNamespaceMap {
-	// 	fmt.Println("key[%s] value[%s]\n", k, v)
-	// }
 	return nil
 }
 
-// get the value of shared costs for each namespace, delete the shared_costs key and
+// addSharedCosts get the value of shared costs for each namespace, delete the shared_costs key and
 // and assign the shared_costs per namespace
 func (c *costs) addSharedCosts() error {
 
@@ -194,6 +205,9 @@ func (c *costs) addSharedCosts() error {
 
 }
 
+// getSharedCosts calculates the shared costs by adding
+// all the costs of global resources needed for the Platform and
+// divide it by number of namespaces in the cluster
 func (c *costs) getSharedCosts() float64 {
 	nKeys := len(c.costPerNamespace)
 
@@ -207,10 +221,11 @@ func (c *costs) getSharedCosts() float64 {
 	return math.Round(perNsSharedCosts*100) / 100
 }
 
+// addSharedPerNamespace get the shared cost and assign the shared_costs per namespace
 func (c *costs) addSharedPerNamespace(costsPerNs float64) {
 
 	for _, v := range c.costPerNamespace {
-		v[SHARED_COSTS] = costsPerNs
+		v["Shared AWS Costs"] = costsPerNs
 	}
 
 }
@@ -223,16 +238,15 @@ func (c *costs) addSharedTeamCosts() error {
 	roundedCPCost := math.Round(perNsSharedCPCosts*100) / 100
 
 	for _, v := range c.costPerNamespace {
-		v[SHARED_CP_COSTS] = roundedCPCost
+		v["Shared CP Team Costs"] = roundedCPCost
 	}
 
 	return nil
 
 }
 
-type resourceMap map[string]interface{}
-
-// add shared team costs per namespace
+// buildCostsResourceMap build the resources Map for all namespaces
+// with the format required by HOODAW frontend
 func (c *costs) buildCostsResourceMap(nsList []v1.Namespace) resourceMap {
 
 	namespaces := make(map[string]interface{}, 0)
@@ -246,6 +260,7 @@ func (c *costs) buildCostsResourceMap(nsList []v1.Namespace) resourceMap {
 			total += val
 		}
 
+		total = math.Round(total*100) / 100
 		namespaces[ns.Name] = resourceMap{
 			"breakdown": breakdown,
 			"total":     total,
@@ -294,6 +309,7 @@ func (c *costs) addResource(ns, resource string, cost float64) {
 
 }
 
+// hasResource get the namespace name and resource name and checks if it has value in costPerNamespace
 func (c *costs) hasResource(ns, resource string) float64 {
 	return c.costPerNamespace[ns][resource]
 }
