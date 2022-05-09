@@ -20,7 +20,6 @@ var (
 	kubecfgBucketKey = flag.String("kubecfgBucketKey", os.Getenv("KUBECONFIG_S3_KEY"), "Name of kubeconfig file in S3 bucket")
 	ctxLive          = flag.String("contextLive", "live.cloud-platform.service.justice.gov.uk", "Kubernetes context specified in kubeconfig")
 	ctxManager       = flag.String("contextManager", "manager.cloud-platform.service.justice.gov.uk", "Kubernetes context specified in kubeconfig")
-	ctxLive_1        = flag.String("contextLive_1", "live-1.cloud-platform.service.justice.gov.uk", "Kubernetes context specified in kubeconfig")
 	hoodawApiKey     = flag.String("hoodawAPIKey", os.Getenv("HOODAW_API_KEY"), "API key to post data to the 'How out of date are we' API")
 	hoodawEndpoint   = flag.String("hoodawEndpoint", "/helm_whatup", "Endpoint to send the data to")
 	hoodawHost       = flag.String("hoodawHost", os.Getenv("HOODAW_HOST"), "Hostname of the 'How out of date are we' API")
@@ -46,7 +45,7 @@ type resourceMap map[string]interface{}
 
 func main() {
 
-	contexts := []string{*ctxLive, *ctxManager, *ctxLive_1}
+	contexts := []string{*ctxLive, *ctxManager}
 
 	var clusters []resourceMap
 	// Output the results of `helm whatup` as JSON, for each production cluster
