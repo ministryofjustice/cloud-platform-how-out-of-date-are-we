@@ -22,7 +22,7 @@ You can see from the codebase, a number of environment variables are required to
 
 - bucket - The bucket name that hosts a kubeconfig file, commonly used in cloud-platform.
 
-- ctxLive/ctxManager/ctxLive_1 - Context used to switch clusters
+- ctxLive/ctxManager - Context used to switch clusters
 
 ## How to test locally
 
