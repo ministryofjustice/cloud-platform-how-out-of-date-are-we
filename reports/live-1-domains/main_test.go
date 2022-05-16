@@ -9,7 +9,7 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/oidc"
 )
 
-func TestLive1IngressSearch(t *testing.T) {
+func TestLive1DomainSearch(t *testing.T) {
 	type args struct {
 		ingressList *v1beta1.IngressList
 	}
@@ -20,7 +20,7 @@ func TestLive1IngressSearch(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "TestLive1IngressSearch-Success",
+			name: "TestLive1DomainSearch-Live-1-Domain",
 			args: args{
 				ingressList: &v1beta1.IngressList{
 					Items: []v1beta1.Ingress{
@@ -52,13 +52,13 @@ func TestLive1IngressSearch(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := Live1IngressSearch(tt.args.ingressList)
+			got, err := Live1DomainSearch(tt.args.ingressList)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("Live1IngressSearch() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("Live1DomainSearch() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Live1IngressSearch() = %v, want %v", got, tt.want)
+				t.Errorf("Live1DomainSearch() = %v, want %v", got, tt.want)
 			}
 		})
 	}
