@@ -51,6 +51,7 @@ def dashboard_data
     orphaned_resources: get_data_from_json_file("orphaned_resources", "orphaned_aws_resources", OrphanedResources),
     orphaned_statefiles: get_data_from_json_file("orphaned_statefiles", "data", ItemList),
     hosted_services: get_data_from_json_file("hosted_services", "namespace_details", ItemList),
+    ingress_weighting: get_data_from_json_file("live_1_domains", "live_1_domains", ItemList),
   }
 
   updated_at = info.values.map(&:updated_at).min
@@ -241,6 +242,14 @@ get "/hosted_services" do
     }
     erb :hosted_services, locals: locals
 
+  end
+end
+
+get "/live_1_domains" do
+  if accept_json?(request)
+    serve_json_data(:live_1_domains)
+  else
+    render_item_list(title: "Services which live-1 domains ingresses", docpath: "live_1_domains", key: "live_1_domains")
   end
 end
 
