@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"flag"
-	"fmt"
 	"log"
 	"os"
 	"strings"
@@ -28,7 +27,7 @@ var (
 	bucket         = flag.String("bucket", os.Getenv("KUBECONFIG_S3_BUCKET"), "AWS S3 bucket for kubeconfig")
 	ctx            = flag.String("context", "live.cloud-platform.service.justice.gov.uk", "Kubernetes context specified in kubeconfig")
 	hoodawApiKey   = flag.String("hoodawAPIKey", os.Getenv("HOODAW_API_KEY"), "API key to post data to the 'How out of date are we' API")
-	hoodawEndpoint = flag.String("hoodawEndpoint", "/live_1_ingress", "Endpoint to send the data to")
+	hoodawEndpoint = flag.String("hoodawEndpoint", "/live_1_domains", "Endpoint to send the data to")
 	hoodawHost     = flag.String("hoodawHost", os.Getenv("HOODAW_HOST"), "Hostname of the 'How out of date are we' API")
 	kubeconfig     = flag.String("kubeconfig", "kubeconfig", "Name of kubeconfig file in S3 bucket")
 	region         = flag.String("region", os.Getenv("AWS_REGION"), "AWS Region")
@@ -53,12 +52,12 @@ func main() {
 	}
 
 	// Find all ingress resources without the required external-dns annotations
-	ingressesLive1Search, err := Live1IngressSearch(ingressList)
+	ingressesLive1DoaminSearch, err := Live1DomainSearch(ingressList)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
 
-	jsonToPost, err := BuildJsonMap(ingressesLive1Search)
+	jsonToPost, err := BuildJsonMap(ingressesLive1DoaminSearch)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
@@ -79,16 +78,14 @@ func GetAllIngresses(clientset *kubernetes.Clientset) (*v1beta1.IngressList, err
 	return ingressList, nil
 }
 
-// Live1DoaminSearch searches all ingress resources and returns a list of namespace, ingress resources and the hosts that are still using the live1-domain name.
+// Live1DomainSearch searches all ingress resources and returns a list of namespace, ingress resources and the hosts that are still using the live1-domain name.
 // if there is one. Due to the requirement of the API, we have to sculpt the []byte data a very specific way.
-func Live1IngressSearch(ingressList *v1beta1.IngressList) ([]map[string]string, error) {
+func Live1DomainSearch(ingressList *v1beta1.IngressList) ([]map[string]string, error) {
 	// s contains a slice of maps, each map will be iterated over when placed in a dashboard.
 	s := make([]map[string]string, 0)
 	for _, i := range ingressList.Items {
 
 		for _, v := range i.Spec.TLS {
-			fmt.Println("TLS Loop")
-			fmt.Println(v.Hosts[0])
 			if strings.Contains(v.Hosts[0], liveOneDomain) {
 				m := make(map[string]string)
 				m["namespace"] = i.Namespace
@@ -102,13 +99,13 @@ func Live1IngressSearch(ingressList *v1beta1.IngressList) ([]map[string]string, 
 }
 
 // BuildJsonMap takes a slice of maps and return a json encoded map
-func BuildJsonMap(ingressesLive1Search []map[string]string) ([]byte, error) {
+func BuildJsonMap(ingressesLive1DoaminSearch []map[string]string) ([]byte, error) {
 	// To handle generics in the data type, we need to create a new map,
 	// add the first key string:string and then the second key/value string:map[string]string.
 	// As per the requirements of the HOODAW API.
 	jsonMap := resourceMap{
 		"updated_at":     time.Now().Format("2006-01-2 15:4:5 UTC"),
-		"live_1_ingress": ingressesLive1Search,
+		"live_1_ingress": ingressesLive1DoaminSearch,
 	}
 
 	jsonStr, err := json.Marshal(jsonMap)
