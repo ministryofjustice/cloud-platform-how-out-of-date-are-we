@@ -105,7 +105,7 @@ func BuildJsonMap(ingressesLive1DoaminSearch []map[string]string) ([]byte, error
 	// As per the requirements of the HOODAW API.
 	jsonMap := resourceMap{
 		"updated_at":     time.Now().Format("2006-01-2 15:4:5 UTC"),
-		"live_1_ingress": ingressesLive1DoaminSearch,
+		"live_1_domains": ingressesLive1DoaminSearch,
 	}
 
 	jsonStr, err := json.Marshal(jsonMap)
