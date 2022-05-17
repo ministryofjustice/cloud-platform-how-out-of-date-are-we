@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -14,8 +13,6 @@ import (
 	"github.com/ministryofjustice/cloud-platform-environments/pkg/ingress"
 	"github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/reports/pkg/hoodaw"
 	"k8s.io/api/networking/v1beta1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
 )
 
 // resourceMap is used to store both string:string and string:map[string]string key
@@ -55,12 +52,12 @@ func main() {
 	}
 
 	// Find all ingress resources without the required external-dns annotations
-	ingressesLive1DoaminSearch, err := Live1DomainSearch(domainSearch)
+	ingress, err := live1DomainSearch(domainSearch)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
 
-	jsonToPost, err := BuildJsonMap(ingressesLive1DoaminSearch)
+	jsonToPost, err := buildJsonMap(ingress)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
@@ -72,18 +69,9 @@ func main() {
 	}
 }
 
-// GetAllIngresses takes a Kubernetes clientset and returns all ingress with type *v1beta1.IngressList and an error.
-func GetAllIngresses(clientset *kubernetes.Clientset) (*v1beta1.IngressList, error) {
-	domainSearch, err := clientset.NetworkingV1beta1().Ingresses("").List(context.TODO(), metav1.ListOptions{})
-	if err != nil {
-		return nil, err
-	}
-	return domainSearch, nil
-}
-
 // Live1DomainSearch searches list created by GetAllIngresses for all ingress resources and returns a
 // list of namespace, ingress resources and the hosts that are still using the live1-domain name
-func Live1DomainSearch(domainSearch *v1beta1.IngressList) ([]map[string]string, error) {
+func live1DomainSearch(domainSearch *v1beta1.IngressList) ([]map[string]string, error) {
 	// s contains a slice of maps, each map will be iterated over when placed in a dashboard.
 	s := make([]map[string]string, 0)
 	for _, i := range domainSearch.Items {
@@ -101,13 +89,13 @@ func Live1DomainSearch(domainSearch *v1beta1.IngressList) ([]map[string]string, 
 }
 
 // BuildJsonMap takes a slice of maps and return a json encoded map
-func BuildJsonMap(ingressesLive1DoaminSearch []map[string]string) ([]byte, error) {
+func buildJsonMap(ingress []map[string]string) ([]byte, error) {
 	// To handle generics in the data type, we need to create a new map,
 	// add the first key string:string and then the second key/value string:map[string]string.
 	// As per the requirements of the HOODAW API.
 	jsonMap := resourceMap{
 		"updated_at":     time.Now().Format("2006-01-2 15:4:5 UTC"),
-		"live_1_domains": ingressesLive1DoaminSearch,
+		"live_1_domains": ingress,
 	}
 
 	jsonStr, err := json.MarshalIndent(jsonMap, "", "  ")
