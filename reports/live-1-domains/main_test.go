@@ -9,9 +9,9 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/oidc"
 )
 
-func TestLive1DomainSearch(t *testing.T) {
+func Test_live1DomainSearch(t *testing.T) {
 	type args struct {
-		ingressList *v1beta1.IngressList
+		domainSearch *v1beta1.IngressList
 	}
 	tests := []struct {
 		name    string
@@ -20,9 +20,9 @@ func TestLive1DomainSearch(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "TestLive1DomainSearch-Live-1-Domain",
+			name: "live1DomainSearch-Success",
 			args: args{
-				ingressList: &v1beta1.IngressList{
+				domainSearch: &v1beta1.IngressList{
 					Items: []v1beta1.Ingress{
 						{
 							ObjectMeta: metav1.ObjectMeta{
@@ -52,13 +52,13 @@ func TestLive1DomainSearch(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := Live1DomainSearch(tt.args.ingressList)
+			got, err := live1DomainSearch(tt.args.domainSearch)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("Live1DomainSearch() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("live1DomainSearch() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Live1DomainSearch() = %v, want %v", got, tt.want)
+				t.Errorf("live1DomainSearch() = %v, want %v", got, tt.want)
 			}
 		})
 	}
