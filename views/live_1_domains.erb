@@ -1,19 +1,31 @@
-<% if list.any? %>
+<h2>Summary</h2>
+<div class="row mb-3">
+  <div class="col-sm-4">
+    <div class="card">
+      <div class="card-body">
+              <b>Total Ingresses: </b>
+              <%= total_ingress %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<% if details.any? %>
   <div class="table-responsive">
     <table class="table">
   <thead class="thead-dark">
     <tr>
       <th scope="col">Namespace</th>
       <th scope="col">Ingress Name</th>
-      <th scope="col">Domain url</th>
+      <th scope="col">Domain URL</th>
     </tr>
   </thead>
   <tbody>
-  <% list.each do |service| %>
+  <% details.each do |ingress| %>
     <tr>
-      <td><%= service["namespace"] %></td>
-      <td><%= service["ingress"] %></td>
-      <td><%= service["hostname"] %></td>
+      <td><%= ingress["namespace"] %></td>
+      <td><%= ingress["ingress"] %></td>
+      <td><%= ingress["hostname"] %></td>
     </tr>
   <% end %>
   </tbody>

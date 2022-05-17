@@ -3,14 +3,21 @@
 Ouputs a JSON report showing
 - A list of remaining live1 domains within the cloud platform live cluster, listing Namespace, Ingress Name and the Host which is still using live-1 DNS.
 
+Output service information for all namespaces in the cluster.
+
+This information includes:
+
+* Namespace
+* Ingress Name
+* Domain URL
+
 The main package in this report will perform the following steps:
 
 - fetch the kubeconfig from the s3 bucket
 - authenticate to the kubernetes cluster and set the current context to `ctx` env variable
-- get all namespaces
-- get all ingresses and create a resource requests Map of NamespaceResource type
+- get all ingresses and build a map of ingresses
 - search the ingress map for the remaining live1 domains within the cluster
-- post them as json to the `live_1_ingress` endpoint
+- post them as json to the `live_1_domains` endpoint
 
 ## Environment variables
 
