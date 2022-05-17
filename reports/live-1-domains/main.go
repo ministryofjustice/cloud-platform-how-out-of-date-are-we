@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"log"
 	"os"
 	"strings"
 	"time"
@@ -42,6 +41,7 @@ func main() {
 	if err != nil {
 		err := fmt.Errorf("unable to authenticate to the cluster")
 		fmt.Println(err.Error())
+		return
 	}
 
 	// Get all ingress resources
@@ -49,23 +49,31 @@ func main() {
 	if err != nil {
 		err := fmt.Errorf("unable to return Ingress List from the cluster")
 		fmt.Println(err.Error())
+		return
 	}
 
-	// Find all ingress resources without the required external-dns annotations
+	// Find all ingress resources with the live-1-domain name
 	ingress, err := live1DomainSearch(domainSearch)
 	if err != nil {
-		log.Fatalln(err.Error())
+		err := fmt.Errorf("unable to return list of live-1 domains from domainSearch")
+		fmt.Println(err.Error())
+		return
 	}
 
+	// Build the json map
 	jsonToPost, err := buildJsonMap(ingress)
 	if err != nil {
-		log.Fatalln(err.Error())
+		err := fmt.Errorf("unable to build json map")
+		fmt.Println(err.Error())
+		return
 	}
 
 	// Post json to hoowdaw api
 	err = hoodaw.PostToApi(jsonToPost, hoodawApiKey, &endPoint)
 	if err != nil {
-		log.Fatalln(err.Error())
+		err := fmt.Errorf("unable to post data to the 'How out of date are we' API")
+		fmt.Println(err.Error())
+		return
 	}
 }
 

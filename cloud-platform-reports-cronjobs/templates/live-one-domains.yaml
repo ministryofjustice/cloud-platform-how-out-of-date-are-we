@@ -34,5 +34,5 @@ spec:
             command:
             - /bin/sh
             - -c
-            - ./live-one-domains
+            - ./live-1-domains
           restartPolicy: OnFailure
