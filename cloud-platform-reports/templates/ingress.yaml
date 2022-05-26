@@ -1,18 +1,19 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ .Values.ingress.name }}
+  name: {{ .Values.ingress.name }}-new
 {{- with .Values.ingress.annotations }}
   annotations:
 {{ toYaml . | indent 4 }}
 {{- end }}
 spec:
+  ingressClassName: default
   tls:
   - hosts:
     - {{ .Values.ingress.hostname }}
   rules:
     - host: {{ .Values.ingress.hostname }}
-      http:
+      http:  
         paths:
         - path: /
           pathType: ImplementationSpecific

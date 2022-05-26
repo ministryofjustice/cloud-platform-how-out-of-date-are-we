@@ -2,7 +2,7 @@ ingress:
   hostname: reports.cloud-platform.service.justice.gov.uk
   name: cloud-platform-reports-app-ingress
   annotations:
-    external-dns.alpha.kubernetes.io/set-identifier: "cloud-platform-reports-app-ingress-cloud-platform-reports-prod-green"
+    external-dns.alpha.kubernetes.io/set-identifier: "cloud-platform-reports-app-ingress-new-cloud-platform-reports-prod-green"
     external-dns.alpha.kubernetes.io/aws-weight: "100"
 
 service:
