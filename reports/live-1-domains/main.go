@@ -47,7 +47,7 @@ func main() {
 	// Get all ingress resources
 	domainSearch, err := ingress.GetAllIngressesFromCluster(clientset)
 	if err != nil {
-		err := fmt.Errorf("unable to return Ingress List from the cluster")
+		err := fmt.Errorf("unable to return Ingress List from the cluster: %s", err)
 		fmt.Println(err.Error())
 		return
 	}
@@ -55,7 +55,7 @@ func main() {
 	// Find all ingress resources with the live-1-domain name
 	ingress, err := live1DomainSearch(domainSearch)
 	if err != nil {
-		err := fmt.Errorf("unable to return list of live-1 domains from domainSearch")
+		err := fmt.Errorf("unable to return list of live-1 domains from domainSearch: %s", err)
 		fmt.Println(err.Error())
 		return
 	}
@@ -63,7 +63,7 @@ func main() {
 	// Build the json map
 	jsonToPost, err := buildJsonMap(ingress)
 	if err != nil {
-		err := fmt.Errorf("unable to build json map")
+		err := fmt.Errorf("unable to build json map: %s", err)
 		fmt.Println(err.Error())
 		return
 	}
@@ -71,7 +71,7 @@ func main() {
 	// Post json to hoowdaw api
 	err = hoodaw.PostToApi(jsonToPost, hoodawApiKey, &endPoint)
 	if err != nil {
-		err := fmt.Errorf("unable to post data to the 'How out of date are we' API")
+		err := fmt.Errorf("unable to post data to the 'How out of date are we' API: %s", err)
 		fmt.Println(err.Error())
 		return
 	}
