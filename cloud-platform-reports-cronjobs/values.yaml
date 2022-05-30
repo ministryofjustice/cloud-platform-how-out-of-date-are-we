@@ -32,3 +32,6 @@ cronjobs:
   githubRepositories:
     name: github-repositories
     schedule: "12 5 * * *"
+  liveOneDomains:
+    name: live-one-domains
+    schedule: "59 23 * * 0"
