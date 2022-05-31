@@ -53,12 +53,7 @@ func main() {
 	}
 
 	// Find all ingress resources with the live-1-domain name
-	ingress, err := live1DomainSearch(domainSearch)
-	if err != nil {
-		err := fmt.Errorf("unable to return list of live-1 domains from domainSearch: %s", err)
-		fmt.Println(err.Error())
-		return
-	}
+	ingress := live1DomainSearch(domainSearch)
 
 	// Build the json map
 	jsonToPost, err := buildJsonMap(ingress)
@@ -79,7 +74,7 @@ func main() {
 
 // Live1DomainSearch searches list created by GetAllIngresses for all ingress resources and returns a
 // list of namespace, ingress resources and the hosts that are still using the live1-domain name
-func live1DomainSearch(domainSearch *v1beta1.IngressList) ([]map[string]string, error) {
+func live1DomainSearch(domainSearch *v1beta1.IngressList) []map[string]string {
 	// s contains a slice of maps, each map will be iterated over when placed in a dashboard.
 	s := make([]map[string]string, 0)
 	for _, i := range domainSearch.Items {
@@ -93,7 +88,7 @@ func live1DomainSearch(domainSearch *v1beta1.IngressList) ([]map[string]string, 
 			}
 		}
 	}
-	return s, nil
+	return s
 }
 
 // BuildJsonMap takes a slice of maps and return a json encoded map
