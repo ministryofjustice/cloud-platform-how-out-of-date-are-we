@@ -35,7 +35,7 @@ GEM
       faraday (~> 1.0)
     gli (2.19.2)
     hashie (4.1.0)
-    jmespath (1.4.0)
+    jmespath (1.6.1)
     json (2.3.1)
     multipart-post (2.1.1)
     slack-notifier (2.3.2)
