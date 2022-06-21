@@ -34,4 +34,4 @@ cronjobs:
     schedule: "12 5 * * *"
   liveOneDomains:
     name: live-one-domains
-    schedule: "59 23 * * 0"
+    schedule: "30 6 * * *"

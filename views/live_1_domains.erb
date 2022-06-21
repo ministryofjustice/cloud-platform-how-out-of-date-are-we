@@ -18,6 +18,7 @@
       <th scope="col">Namespace</th>
       <th scope="col">Ingress Name</th>
       <th scope="col">Domain URL</th>
+      <th scope="col">Creation Timestamp</th>
     </tr>
   </thead>
   <tbody>
@@ -26,6 +27,7 @@
       <td><%= ingress["namespace"] %></td>
       <td><%= ingress["ingress"] %></td>
       <td><%= ingress["hostname"] %></td>
+      <td><%= ingress["CreatedAt"] %></td>
     </tr>
   <% end %>
   </tbody>

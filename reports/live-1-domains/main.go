@@ -84,6 +84,7 @@ func live1DomainSearch(domainSearch *v1beta1.IngressList) []map[string]string {
 				m["namespace"] = i.Namespace
 				m["ingress"] = i.Name
 				m["hostname"] = v.Hosts[0]
+				m["CreatedAt"] = i.CreationTimestamp.Format("2006-01-2 15:4:5 UTC")
 				s = append(s, m)
 			}
 		}
