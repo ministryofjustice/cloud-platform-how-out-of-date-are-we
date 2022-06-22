@@ -10,6 +10,7 @@ This information includes:
 * Namespace
 * Ingress Name
 * Domain URL
+* Created Date
 
 The main package in this report will perform the following steps:
 
