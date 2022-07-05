@@ -1,11 +1,15 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"log"
+	"net/http"
+	"net/url"
 	"os"
 	"sort"
 	"strconv"
@@ -40,6 +44,24 @@ var (
 
 func main() {
 	flag.Parse()
+
+	n := 0
+	for n < 12 {
+		Time := time.Now()
+		t1 := Time.AddDate(0, -n, 0)
+		y, m, _ := t1.Date()
+		first, last := monthInterval(y, m)
+
+		prsInMonth, err := fetchPrsPerMonth(first, last)
+		if err != nil {
+			log.Fatalln(err.Error())
+		}
+
+		n++
+
+		fmt.Println(prsInMonth)
+
+	}
 
 	// Authenticate to github using auth token
 	client, err := authenticate.GitHubClient(*token)
@@ -76,12 +98,78 @@ func main() {
 	str := string(jsonToPost)
 	fmt.Print(str)
 
-	// Post json to hoowdaw api
-	// err = hoodaw.PostToApi(jsonToPost, hoodawApiKey, &endPoint)
-	// if err != nil {
-	// 	log.Fatalln(err.Error())
-	// }
+	Post json to hoowdaw api
+	err = hoodaw.PostToApi(jsonToPost, hoodawApiKey, &endPoint)
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
 
+}
+
+func fetchPrsPerMonth(first, last time.Time) ([]string, error) {
+	query := fmt.Sprintf(`{ search(first: 100, query: "repo:ministryofjustice/cloud-platform-infrastructure is:pr is:closed merged:%s..%s", type: ISSUE )
+			 { nodes { ... on PullRequest { url }}}}`, first.Format("2006-01-02"), last.Format("2006-01-02"))
+
+	b, err := json.Marshal(struct {
+		Query    string                 `json:"query"`
+		Variable map[string]interface{} `json:"variables"`
+	}{
+		Query: query,
+		Variable: map[string]interface{}{
+			"login": "github",
+		},
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	endpointURL, err := url.Parse("https://api.github.com/graphql")
+	if err != nil {
+		return nil, err
+	}
+	buf := bytes.NewBuffer(b)
+	resp, err := http.DefaultClient.Do(&http.Request{
+		URL:    endpointURL,
+		Method: "POST",
+		Header: http.Header{
+			"Content-Type":  {"application/json"},
+			"Authorization": {"bearer " + *token},
+		},
+		Body: ioutil.NopCloser(buf),
+	})
+	if err != nil {
+		return nil, err
+	}
+	b, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	type search struct {
+		Nodes []map[string]string `json:"nodes"`
+	}
+	type data struct {
+		Search search `json:"search"`
+	}
+	type response struct {
+		Data data `json:"data"`
+	}
+
+	var respJson response
+
+	json.Unmarshal([]byte(b), &respJson)
+	nodes := respJson.Data.Search.Nodes
+
+	prNumbers := make([]string, 0)
+
+	for _, urlMap := range nodes {
+		for _, url := range urlMap {
+			prNumber := url[strings.LastIndex(url, "/")+1:]
+
+			prNumbers = append(prNumbers, prNumber)
+
+		}
+	}
 }
 
 // fetchMigratedDates paginate through the PRs, filter down the ones that are merged
@@ -201,4 +289,10 @@ func BuildJsonMap(nsCountChanged []map[string]string) ([]byte, error) {
 	}
 
 	return jsonStr, nil
+}
+
+func monthInterval(y int, m time.Month) (firstDay, lastDay time.Time) {
+	firstDay = time.Date(y, m, 1, 0, 0, 0, 0, time.UTC)
+	lastDay = time.Date(y, m+1, 0, 0, 0, 0, 0, time.UTC)
+	return firstDay, lastDay
 }
