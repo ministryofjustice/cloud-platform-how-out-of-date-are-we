@@ -169,6 +169,12 @@ def live_1_domains_from_json
   json = store.retrieve_file("data/live_1_domains.json")
   LiveOneDomains.new(json: json)
 end
+
+def infra_deployments_from_json
+  json = store.retrieve_file("data/infrastructure_deployments.json")
+  InfraDeployments.new(json: json)
+end
+
 ############################################################
 
 get "/" do
@@ -261,6 +267,20 @@ get "/live_1_domains" do
       details: lod.ingress,
     }
     erb :live_1_domains, locals: locals
+  end
+end
+
+get "/infrastructure_deployments" do
+  if accept_json?(request)
+    serve_json_data(:infrastructure_deployments)
+  else
+    infra = infra_deployments_from_json
+    locals = {
+      title: "Deployments report",
+      deployments: infra.deployments,
+      updated_at: infra.updated_at,
+    }
+    erb :infrastructure_deployments, locals: locals
   end
 end
 

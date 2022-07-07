@@ -1,0 +1,27 @@
+<% if deployments.any? %>
+  <div class="table-responsive">
+    <table class="table">
+  <thead class="thead-dark">
+    <tr>
+      <th scope="col">Year/Month</th>
+      <th scope="col">Successful deployments</th>
+      <th scope="col">Failed deployments</th>
+    </tr>
+  </thead>
+  <tbody>
+  <% deployments.each do |d| %>
+    <tr>
+      <td><%= d["date"] %></td>
+      <td><%= d["deployed"] %></td>
+      <td><%= d["failed"] %></td>
+    </tr>
+  <% end %>
+  </tbody>
+  </table>
+  </div>
+<% else %>
+<h1>
+  Awaiting data
+</h1>
+
+<% end %>
