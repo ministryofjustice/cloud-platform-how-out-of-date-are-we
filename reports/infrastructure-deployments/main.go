@@ -26,18 +26,17 @@ type resourceMap map[string]interface{}
 
 var (
 	hoodawApiKey   = flag.String("hoodawAPIKey", os.Getenv("HOODAW_API_KEY"), "API key to post data to the 'How out of date are we' API")
-	hoodawEndpoint = flag.String("hoodawEndpoint", "/migrated_services", "Endpoint to send the data to")
+	hoodawEndpoint = flag.String("hoodawEndpoint", "/infrastructure_deployments", "Endpoint to send the data to")
 	hoodawHost     = flag.String("hoodawHost", os.Getenv("HOODAW_HOST"), "Hostname of the 'How out of date are we' API")
 	org            = flag.String("org", "ministryofjustice", "GitHub user or organisation.")
 	repository     = flag.String("repository", "cloud-platform-infrastructure", "Repository to check the PR of.")
 	token          = flag.String("token", os.Getenv("GITHUB_OAUTH_TOKEN"), "Personal access token for GitHub API.")
 
-	endPoint    = *hoodawHost + *hoodawEndpoint
-	infraPath   = "terraform/aws-accounts/cloud-platform-aws"
-	githubv4Url = "https://api.github.com/graphql"
+	endPoint  = *hoodawHost + *hoodawEndpoint
+	infraPath = "terraform/aws-accounts/cloud-platform-aws"
 
 	// Number of months to generate report
-	numMonths = 3
+	numMonths = 12
 	// number of PRs to fetch per month. set to 100 with assumption
 	// that there are no more than 100 prs in the infrastructure repo
 	prCount = 100
@@ -57,71 +56,68 @@ type date struct {
 }
 
 type infraPRs struct {
-	infraDeployed, infraFailed int
+	deployed, failed int
 }
 
 func main() {
 	flag.Parse()
-
 	// Set nthMonth to count 0 which is the current month.
 	// This report generated data for past 12 months based on current month
 	nthMonth := 0
+	infraReport := make([]map[string]string, 0)
 
-	infraMonthMap := make(map[string]infraPRs, 0)
 	for nthMonth < numMonths {
+		infraPRMap := make(map[string]string)
 
 		date := getFirstLastDayofMonth(nthMonth)
-
 		nodes, err := getPrsPerMonth(date, prCount)
 		if err != nil {
 			log.Fatalln(err.Error())
 		}
-
 		// query PRs that have changes under the infraPath
 		infraPRs, err := getInfraPrsCount(nodes)
 		if err != nil {
 			log.Fatalln(err.Error())
-
 		}
-		infraMonthMap[date.monthIndex] = *infraPRs
-		fmt.Println("Deployed", infraPRs.infraDeployed, "Failed:", infraPRs.infraFailed, "Date:", date.monthIndex)
+		infraPRMap["date"] = date.monthIndex
+		infraPRMap["deployed"] = strconv.Itoa(infraPRs.deployed)
+		infraPRMap["failed"] = strconv.Itoa(infraPRs.failed)
+		infraReport = append(infraReport, infraPRMap)
 		nthMonth++
 	}
-
-	jsonToPost, err := BuildJsonMap(infraMonthMap)
+	jsonToPost, err := BuildJsonMap(infraReport)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
-
-	str := string(jsonToPost)
 
 	//Post json to hoowdaw api
 	err = hoodaw.PostToApi(jsonToPost, hoodawApiKey, &endPoint)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
-
 }
 
+// getFirstLastDayofMonth takes the month as input and return first day, last day and the index formatted
+// for using in report
 func getFirstLastDayofMonth(nthMonth int) date {
 	var d date
 	Time := time.Now()
 	t1 := Time.AddDate(0, -nthMonth, 0)
 	year, month, _ := t1.Date()
-	d.monthIndex = string(year) + "/" + string(month)
-
+	d.monthIndex = strconv.Itoa(year) + "/" + month.String()
 	d.first = time.Date(year, month, 1, 0, 0, 0, 0, time.UTC)
 	d.last = time.Date(year, month+1, 0, 0, 0, 0, 0, time.UTC)
 
 	return d
 }
 
+// getPrsPerMonth takes date and number of PRs count as input, search the github using Graphql api for
+//  list of PRs (title,url) between the first and last day provided
 func getPrsPerMonth(date date, count int) ([]nodes, error) {
 	src := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: *token},
 	)
 	httpClient := oauth2.NewClient(context.Background(), src)
-
 	client := githubv4.NewEnterpriseClient("https://api.github.com/graphql", httpClient)
 
 	var query struct {
@@ -143,6 +139,9 @@ func getPrsPerMonth(date date, count int) ([]nodes, error) {
 	return query.Search.Nodes, nil
 }
 
+// getInfraPrsCount get the list of github PullRequests and calls github REST API and get the list of changed files
+// of each PR. Check if the changed file is under the terraform path and increment the deployed counter.
+// It also checks if the PR title has word "revert" then increment the failed counter.
 func getInfraPrsCount(nodes []nodes) (*infraPRs, error) {
 	infra := new(infraPRs)
 
@@ -159,20 +158,19 @@ func getInfraPrsCount(nodes []nodes) (*infraPRs, error) {
 			return nil, nil
 		}
 		title := string(pr.PullRequest.Title)
-
 		commitFiles, _, _ := client.PullRequests.ListFiles(context.Background(), *org, *repository, prNumber, nil)
-
 		for _, files := range commitFiles {
 			// consider only the changes under infraPath
 			if strings.Contains(*files.Filename, infraPath) {
 				// This is an assumption if PR titles have revert in it, it is
 				// a revert of a previous failed deployment
 				// Should the Success deployments count be decremented?????
-				if strings.Contains(title, "revert") {
-					infra.infraFailed++
+				if strings.Contains(strings.ToLower(title), "revert") {
+					infra.failed++
 				} else {
-					infra.infraDeployed++
+					infra.deployed++
 				}
+				break
 			}
 		}
 
@@ -181,13 +179,14 @@ func getInfraPrsCount(nodes []nodes) (*infraPRs, error) {
 	return infra, nil
 }
 
-func BuildJsonMap(infraPRs map[string]infraPRs) ([]byte, error) {
+// BuildJsonMap takes a map with date key and infraPRs struct as value, and return a json encoded map
+func BuildJsonMap(infraPRs []map[string]string) ([]byte, error) {
 	// To handle generics in the data type, we need to create a new map,
 	// add the first key string:string and then the second key/value string:map[string]string.
 	// As per the requirements of the HOODAW API.
 	jsonMap := resourceMap{
-		"updated_at":        time.Now().Format("2006-01-2 15:4:5 UTC"),
-		"infra_deployments": infraPRs,
+		"updated_at":  time.Now().Format("2006-01-2 15:4:5 UTC"),
+		"deployments": infraPRs,
 	}
 
 	jsonStr, err := json.Marshal(jsonMap)
