@@ -37,4 +37,4 @@ cronjobs:
     schedule: "30 6 * * *"
   infraDeployments:
     name: infrastructure-deployments
-    schedule: "0 0 1 * *"
+    schedule: "59 23 28-31 * *"
