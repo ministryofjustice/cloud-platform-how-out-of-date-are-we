@@ -276,7 +276,7 @@ get "/infrastructure_deployments" do
   else
     infra = infra_deployments_from_json
     locals = {
-      title: "Deployments report",
+      title: "Infrastucture deployments",
       deployments: infra.deployments,
       updated_at: infra.updated_at,
     }
