@@ -35,3 +35,6 @@ cronjobs:
   liveOneDomains:
     name: live-one-domains
     schedule: "30 6 * * *"
+  infraDeployments:
+    name: infrastructure-deployments
+    schedule: "59 23 28-31 * *"

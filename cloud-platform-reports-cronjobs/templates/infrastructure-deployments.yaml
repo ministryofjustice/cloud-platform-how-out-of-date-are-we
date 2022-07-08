@@ -1,0 +1,30 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ .Values.cronjobs.infraDeployments.name }}
+spec:
+  schedule: "{{ .Values.cronjobs.infraDeployments.schedule }}"
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 100
+      template:
+        spec:
+          {{- include "cloud-platform-reports-cronjobs.imagePullSecrets" . | indent 10 }}
+          containers:
+          - name: live-one-domains-image
+            image: ministryofjustice/cloud-platform-infrastructure-deployments:{{ .Chart.AppVersion }}
+            imagePullPolicy: Always
+            env:
+            - name: GITHUB_OAUTH_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: how-out-of-date-are-we-github-token
+                  key: token
+            {{- include "cloud-platform-reports-cronjobs.hoodaw-credentials" . | indent 12 }}
+            command:
+            - /bin/sh
+            - -c
+            - ./infrastructure-deployments
+          restartPolicy: OnFailure
