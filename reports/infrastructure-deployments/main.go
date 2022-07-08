@@ -31,8 +31,10 @@ var (
 	org            = flag.String("org", "ministryofjustice", "GitHub user or organisation.")
 	repository     = flag.String("repository", "cloud-platform-infrastructure", "Repository to check the PR of.")
 	token          = flag.String("token", os.Getenv("GITHUB_OAUTH_TOKEN"), "Personal access token for GitHub API.")
+	endPoint       = *hoodawHost + *hoodawEndpoint
+)
 
-	endPoint  = *hoodawHost + *hoodawEndpoint
+const (
 	infraPath = "terraform/aws-accounts/cloud-platform-aws"
 
 	// Number of months to generate report
@@ -61,15 +63,15 @@ type infraPRs struct {
 
 func main() {
 	flag.Parse()
-	// Set nthMonth to count 0 which is the current month.
-	// This report generated data for past 12 months based on current month
-	nthMonth := 0
+
 	infraReport := make([]map[string]string, 0)
 
-	for nthMonth < numMonths {
+	// Start from m = 0 which is the current month.
+	// This report generated data for past 12 months based on current month
+	for m := 0; m < numMonths; m++ {
 		infraPRMap := make(map[string]string)
 
-		date := getFirstLastDayofMonth(nthMonth)
+		date := getFirstLastDayofMonth(m)
 		nodes, err := getPrsPerMonth(date, prCount)
 		if err != nil {
 			log.Fatalln(err.Error())
@@ -83,7 +85,6 @@ func main() {
 		infraPRMap["deployed"] = strconv.Itoa(infraPRs.deployed)
 		infraPRMap["failed"] = strconv.Itoa(infraPRs.failed)
 		infraReport = append(infraReport, infraPRMap)
-		nthMonth++
 	}
 	jsonToPost, err := BuildJsonMap(infraReport)
 	if err != nil {
