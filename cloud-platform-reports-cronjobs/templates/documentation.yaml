@@ -18,7 +18,7 @@ spec:
             env:
             {{- include "cloud-platform-reports-cronjobs.hoodaw-credentials" . | indent 12 }}
             - name: DOCUMENTATION_SITES
-              value: "https://runbooks.cloud-platform.service.justice.gov.uk https://user-guide.cloud-platform.service.justice.gov.uk/"
+              value: "https://runbooks.cloud-platform.service.justice.gov.uk/ https://user-guide.cloud-platform.service.justice.gov.uk/"
             args:
               - /app/bin/post-data.sh
           restartPolicy: OnFailure
