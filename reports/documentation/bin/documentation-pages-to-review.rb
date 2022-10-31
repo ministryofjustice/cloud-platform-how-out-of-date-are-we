@@ -19,7 +19,7 @@ def urls_and_review_statuses(url, root_url, seen = {})
   doc = get_nokogiri_doc(url)
   seen[url] = needs_review?(doc)
   get_links(doc).map { |path| urls_and_review_statuses([root_url, path].join, root_url, seen) }
-
+  
   seen
 end
 
@@ -63,8 +63,8 @@ def normalise_href(href)
   # ignore links which are external, or to in-page anchors
   return nil if href[0] == "#" || ["/", "http", "mail", "/ima"].include?(href[0, 4])
 
-  # Remove any trailing anchors, or "/"
-  target = href.sub(/\#.*/, "").sub(/\/$/, "")
+  # Remove any trailing anchors, or "/" and leading "./" 
+  target = href.sub(/\#.*/, "").sub(/\/$/, "").sub(/\.*/, "").sub(/\/*/, "")
 
   # Ignore links which don't point to html files
   /html$/.match?(target) ? target : nil
