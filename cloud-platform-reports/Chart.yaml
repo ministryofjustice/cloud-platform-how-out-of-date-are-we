@@ -3,4 +3,4 @@ name: cloud-platform-reports
 description: Cloud Platform Reports web application and data providers
 type: application
 version: 0.1.2
-appVersion: "3.13.5"
+appVersion: "3.13.6"
