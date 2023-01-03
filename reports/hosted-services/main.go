@@ -8,12 +8,13 @@ import (
 	"sort"
 	"time"
 
+	v1 "k8s.io/api/core/v1"
+
 	"github.com/ministryofjustice/cloud-platform-environments/pkg/authenticate"
 	"github.com/ministryofjustice/cloud-platform-environments/pkg/ingress"
 	"github.com/ministryofjustice/cloud-platform-environments/pkg/namespace"
 	"github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/reports/pkg/hoodaw"
-	v1 "k8s.io/api/core/v1"
-	"k8s.io/api/networking/v1beta1"
+	networkingv1 "k8s.io/api/networking/v1"
 )
 
 // resourceMap is used to store both string:string and string:map[string]string key
@@ -106,7 +107,7 @@ func GetNamespaceDetails(ns v1.Namespace) namespace.Namespace {
 
 // BuildIngressesMap takes the Ingress list and return a map with key as namespace and value
 // with slices of string containing hosts urls
-func BuildIngressesMap(ingressItems []v1beta1.Ingress) map[string][]string {
+func BuildIngressesMap(ingressItems []networkingv1.Ingress) map[string][]string {
 
 	ingressMap := make(map[string][]string, 0)
 
