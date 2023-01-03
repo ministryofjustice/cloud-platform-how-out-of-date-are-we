@@ -1,9 +1,9 @@
 module github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/reports/live-1-domains
 
-go 1.18
+go 1.19
 
 require (
-	github.com/ministryofjustice/cloud-platform-environments v1.1.4-0.20220512134807-821430542130
+	github.com/ministryofjustice/cloud-platform-environments v1.2.0
 	github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/reports/pkg/hoodaw v0.0.0-20211102114020-9ce4671b775b
 	k8s.io/api v0.24.0
 	k8s.io/apimachinery v0.24.0

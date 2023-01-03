@@ -11,7 +11,7 @@ import (
 	"github.com/ministryofjustice/cloud-platform-environments/pkg/authenticate"
 	"github.com/ministryofjustice/cloud-platform-environments/pkg/ingress"
 	"github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/reports/pkg/hoodaw"
-	"k8s.io/api/networking/v1beta1"
+	networkingv1 "k8s.io/api/networking/v1"
 )
 
 // resourceMap is used to store both string:string and string:map[string]string key
@@ -74,7 +74,7 @@ func main() {
 
 // Live1DomainSearch searches list created by GetAllIngresses for all ingress resources and returns a
 // list of namespace, ingress resources and the hosts that are still using the live1-domain name
-func live1DomainSearch(domainSearch *v1beta1.IngressList) []map[string]string {
+func live1DomainSearch(domainSearch *networkingv1.IngressList) []map[string]string {
 	// s contains a slice of maps, each map will be iterated over when placed in a dashboard.
 	s := make([]map[string]string, 0)
 	for _, i := range domainSearch.Items {
