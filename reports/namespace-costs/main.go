@@ -36,9 +36,11 @@ var (
 
 const SHARED_COSTS string = "SHARED_COSTS"
 
-// Annual cost of the Cloud Platform team is £1,260,000
-// This is the monthly cost in USD
-const MONTHLY_TEAM_COST = 136_000
+// Annual cost of the Cloud Platform team is £866,100.
+// This is based on the FTE of the team, all at Senior WebOps Engineer level.
+// This is then converted to USD, divided by 12, to get a monthly cost, and rounded up to the nearest $1000.
+// This was last updated on 30/03/2023 using FX rate £1 = $1.24.
+const MONTHLY_TEAM_COST = 90_000
 
 const DAYS_TOGET_DATA int = 30
 
