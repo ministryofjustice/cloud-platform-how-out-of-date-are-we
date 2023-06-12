@@ -21,6 +21,3 @@ deployment:
 
 dynamodb:
   secretName: cloud-platform-reports-dynamodb-output
-
-cloudPlatformReports:
-  secretName: hoodaw-api-key

@@ -21,7 +21,7 @@ spec:
             - name: API_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.cloudPlatformReports.secretName }}
+                  name: hoodaw-api-key    # This k8s secret is created in the environments repository
                   key: token
             - name: DYNAMODB_REGION
               value: "eu-west-2"
