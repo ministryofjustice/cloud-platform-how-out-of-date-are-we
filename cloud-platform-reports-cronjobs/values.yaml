@@ -38,5 +38,3 @@ cronjobs:
   infraDeployments:
     name: infrastructure-deployments
     schedule: "59 23 28-31 * *"
-cloudPlatformReports:
-  secretName: hoodaw-api-key
