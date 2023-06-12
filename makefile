@@ -31,8 +31,7 @@ upgrade-webapp:
 		&& helm upgrade \
 			$$(helm ls --short --namespace $(PROD_NAMESPACE) | grep cloud-platform-reports) \
 			--namespace $(PROD_NAMESPACE) \
-			./cloud-platform-reports \
-			--values cloud-platform-reports/secrets.yaml
+			./cloud-platform-reports
 
 upgrade-cronjobs:
 	aws eks update-kubeconfig --name manager \
