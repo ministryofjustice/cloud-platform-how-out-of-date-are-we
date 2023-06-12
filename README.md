@@ -115,8 +115,12 @@ This section describes how to install and update the front-end app and scheduled
 The web application API key is required by both the web application and the
 cronjobs which post the report data. 
 
-When deploying the web application from `cloud-platform-reports`, the API key defined in the
-`cloud-platform-reports/secrets.yaml` file should be in encoded format. 
+## API Key Secret
+
+The web application deployment is now configured to pull the API key from AWS Secrets Manager; deployment/upgrade of the Helm chart in production namespace will fetch this value directly
+without additional manual steps. The kubernetes secret for this value is managed via the
+[Secrets Manager module](https://github.com/ministryofjustice/cloud-platform-environments/blob/main/namespaces/live.cloud-platform.service.justice.gov.uk/cloud-platform-reports-prod/resources/secret.tf), with the secret name [`hoodaw-api-key`](https://github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/blob/main/cloud-platform-reports/values.yaml#L26).
+
 
 When deploying the cronjob from `cloud-platform-reports-cronjobs`, the API key defined in the
 `cloud-platform-reports-cronjobs/secrets.yaml` should be encoded again(double encoded from real API key). That way when the kubernetes secret is decoded from the cronjob and the API key still remains in encoded format when sending the data via the POST which then matches the value of the secret in `cloud-platform-reports/secrets.yaml`.
