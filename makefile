@@ -16,8 +16,7 @@ deploy-webapp:
 	  && helm install \
 			--generate-name \
 			--namespace $(PROD_NAMESPACE) \
-			./cloud-platform-reports \
-			--values cloud-platform-reports/secrets.yaml
+			./cloud-platform-reports
 
 deploy-cronjobs:
 	aws eks update-kubeconfig --name manager \
