@@ -6,6 +6,12 @@ Various reports about the Cloud Platform, displayed in a web application: https:
 
 See the [about page](views/about.erb) for more details.
 
+# NOTE
+
+This repository is undergoing changes at this time in order to improve the deployment process for both `cloud-platform-reports` and `cloud-platform-reports-cronjobs`. API key secrets are being moved into AWS Secrets Manager to eliminate the need for manual management of these values. See [this ticket](https://app.zenhub.com/workspaces/cloud-platform-team-5ccb0b8a81f66118c983c189/issues/gh/ministryofjustice/cloud-platform/4570) for more details.
+
+#
+
 ## Tech overview
 
 This repo contains 3 things:
@@ -117,9 +123,7 @@ cronjobs which post the report data.
 
 ## API Key Secret
 
-The web application deployment is now configured to pull the API key from AWS Secrets Manager; deployment/upgrade of the Helm chart in production namespace will fetch this value directly
-without additional manual steps. The kubernetes secret for this value is managed via the
-[Secrets Manager module](https://github.com/ministryofjustice/cloud-platform-environments/blob/main/namespaces/live.cloud-platform.service.justice.gov.uk/cloud-platform-reports-prod/resources/secret.tf), with the secret name [`hoodaw-api-key`](https://github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/blob/main/cloud-platform-reports/values.yaml#L26).
+ The API key kubernetes secret for the web application production deployment is now managed via our [Secrets Manager module](https://github.com/ministryofjustice/cloud-platform-environments/blob/main/namespaces/live.cloud-platform.service.justice.gov.uk/cloud-platform-reports-prod/resources/secret.tf) in the `cloud-platform-environments` repository with the secret name [`hoodaw-api-key`](https://github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/blob/main/cloud-platform-reports/values.yaml#L26).
 
 
 When deploying the cronjob from `cloud-platform-reports-cronjobs`, the API key defined in the
