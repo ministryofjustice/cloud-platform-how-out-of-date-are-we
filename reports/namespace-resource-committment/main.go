@@ -2,24 +2,24 @@ package main
 
 import (
 	"context"
+	"encoding/csv"
 	"flag"
 	"fmt"
 	"log"
 	"os"
 
-	"pkg/mod/github.com/pkg/errors@v0.9.1"
-
 	authenticate "github.com/ministryofjustice/cloud-platform-environments/pkg/authenticate"
 	namespace "github.com/ministryofjustice/cloud-platform-environments/pkg/namespace"
 	v1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/metrics/pkg/client/clientset/versioned"
 )
 
 var (
-	bucket      = flag.String("bucket", os.Getenv("KUBECONFIG_S3_BUCKET"), "AWS S3 bucket for kubeconfig")
-	ctx         = flag.String("context", "live.cloud-platform.service.justice.gov.uk", "Kubernetes context specified in kubeconfig")
-	kubeconfig  = flag.String("kubeconfig", "kubeconfig", "Name of kubeconfig file in S3 bucket")
+	// bucket      = flag.String("bucket", os.Getenv("KUBECONFIG_S3_BUCKET"), "AWS S3 bucket for kubeconfig")
+	ctx = flag.String("context", "arn:aws:eks:eu-west-2:754256621582:cluster/live", "Kubernetes context specified in kubeconfig")
+	// kubeconfig  = flag.String("kubeconfig", "kubeconfig", "Name of kubeconfig file in S3 bucket")
 	region      = flag.String("region", os.Getenv("AWS_REGION"), "AWS Region")
 	kubeCfgPath = flag.String("kubeCfgPath", os.Getenv("KUBECONFIG"), "Path of the kube config file")
 )
@@ -48,16 +48,10 @@ func main() {
 
 	flag.Parse()
 
-	// Get the kubeconfig file stored in an S3 bucket.
-	err := authenticate.KubeConfigFromS3Bucket(*bucket, *kubeconfig, *region, *kubeCfgPath)
-	if err != nil {
-		log.Fatalln("error in getting the kubeconfig from s3 bucket", err.Error())
-	}
-
 	// Get the clientset to access the k8s cluster
 	kclientset, err := authenticate.CreateClientFromConfigFile(*kubeCfgPath, *ctx)
 	if err != nil {
-		log.Fatalln("error in creating clientset", err.Error()
+		log.Fatalln("error in creating clientset", err.Error())
 	}
 
 	// Get the clientset object to access cluster metrics
@@ -72,25 +66,59 @@ func main() {
 		log.Fatalln("error in getting all pod resources details", err.Error())
 	}
 
-	fmt.Println(nsReqMap)
-	fmt.Println(nsLimitMap)
-
 	// Get pod usage resources of all namespaces of a given cluster
 	nsUsedMap, err := getAllPodMetricsesDetails(mclientset)
 	if err != nil {
 		log.Fatalln("error in getting all pod metrics details", err.Error())
 	}
 
-	fmt.Println(nsUsedMap)
-
 	limitRangeReqMap, limitRangeLimitMap, err := GetAllLimitRangeDetails(kclientset)
 	if err != nil {
 		log.Fatalln("error in getting all limit range details", err.Error())
 	}
 
-	fmt.Println(limitRangeReqMap)
-	fmt.Println(limitRangeLimitMap)
+	// write to the csv file
+	csvFile, err := os.Create("limitRanges.csv")
+	if err != nil {
+		log.Fatalln("error in creating csv file", err.Error())
+	}
+	csvwriter := csv.NewWriter(csvFile)
 
+	csvwriter.Write([]string{"namespace", "pod",
+		"reqCPU>limitDefaultReqCPU", "reqMem>limitDefaultReqCPU", "limitCPU>DefaultLimitsCPU", "limitMem>DefaultLimitsMem",
+		"requested_cpu", "used_cpu", "limits_cpu",
+		"limitRangeReqMap_cpu", "limitRangeLimitMap_cpu",
+		"requested_memory", "used_memory", "limits_memory",
+		"limitRangeReqMap_memory", "limitRangeLimitMap_memory"})
+	for pod, req := range nsReqMap {
+		reqCPUGtlimitDefaultReqCPU, reqMemGtlimitDefaultReqCPU, limitCPUGtDefaultLimitsCPU, limitMemGtDefaultLimitsMem := "false", "false", "false", "false"
+		if req.CPU > limitRangeReqMap[req.Namespace].CPU {
+			reqCPUGtlimitDefaultReqCPU = "true"
+		}
+		if req.Memory > limitRangeReqMap[req.Namespace].Memory {
+			reqMemGtlimitDefaultReqCPU = "true"
+		}
+		if limitRangeLimitMap[req.Namespace].CPU > limitRangeReqMap[req.Namespace].CPU {
+			limitCPUGtDefaultLimitsCPU = "true"
+		}
+		if limitRangeLimitMap[req.Namespace].Memory > limitRangeReqMap[req.Namespace].Memory {
+			limitMemGtDefaultLimitsMem = "true"
+		}
+
+		csvwriter.Write([]string{req.Namespace, pod,
+			reqCPUGtlimitDefaultReqCPU, reqMemGtlimitDefaultReqCPU, limitCPUGtDefaultLimitsCPU, limitMemGtDefaultLimitsMem,
+			fmt.Sprintf("%f", req.CPU),
+			fmt.Sprintf("%f", nsUsedMap[pod].CPU),
+			fmt.Sprintf("%f", nsLimitMap[pod].CPU),
+			fmt.Sprintf("%f", limitRangeReqMap[req.Namespace].CPU),
+			fmt.Sprintf("%f", limitRangeLimitMap[req.Namespace].CPU),
+			fmt.Sprintf("%f", req.Memory),
+			fmt.Sprintf("%f", nsUsedMap[pod].Memory),
+			fmt.Sprintf("%f", nsLimitMap[pod].Memory),
+			fmt.Sprintf("%f", limitRangeReqMap[req.Namespace].Memory),
+			fmt.Sprintf("%f", limitRangeLimitMap[req.Namespace].Memory)})
+	}
+	csvFile.Close()
 }
 
 // getAllPodResourceDetails takes a clientset and return Pod resource details
@@ -108,24 +136,21 @@ func getAllContainerResourceDetails(kclientset kubernetes.Interface) (
 	for _, pod := range podsList {
 		r := ContainerResource{}
 
-		reqs := v1.ResourceList{}
-		limits := v1.ResourceList{}
 		for _, container := range pod.Spec.Containers {
-			addResourceList(reqs, container.Resources.Requests)
-			addResourceList(limits, container.Resources.Limits)
+			cpuReq, memoryReq := container.Resources.Requests[v1.ResourceCPU], container.Resources.Requests[v1.ResourceMemory]
+
+			r.CPU = float64(cpuReq.MilliValue())
+			r.Memory = float64(memoryReq.Value() / 1048576)
+			r.Namespace = pod.Namespace
+			containerName := pod.Name + "-" + container.Name
+			nsReqMap[containerName] = r
+			cpuLimits, memoryLimits := container.Resources.Limits[v1.ResourceCPU], container.Resources.Limits[v1.ResourceMemory]
+
+			r.CPU = float64(cpuLimits.MilliValue())
+			r.Memory = float64(memoryLimits.Value() / 1048576)
+			r.Namespace = pod.Namespace
+			nsLimitMap[containerName] = r
 		}
-		cpuReq, memoryReq := reqs[v1.ResourceCPU], reqs[v1.ResourceMemory]
-
-		r.CPU = float64(cpuReq.MilliValue())
-		r.Memory = float64(memoryReq.Value() / 1048576)
-		r.Namespace = pod.Namespace
-		nsReqMap[pod.Name] = r
-		cpuLimits, memoryLimits := limits[v1.ResourceCPU], limits[v1.ResourceMemory]
-
-		r.CPU = float64(cpuLimits.MilliValue())
-		r.Memory = float64(memoryLimits.Value() / 1048576)
-		r.Namespace = pod.Namespace
-		nsLimitMap[pod.Name] = r
 	}
 	return nsReqMap, nsLimitMap, nil
 }
@@ -144,16 +169,15 @@ func getAllPodMetricsesDetails(mclientset versioned.Interface) (
 	nsUsedMap := make(map[string]ContainerResource, 0)
 
 	for _, podMetrics := range podMetricsList {
-		usage := v1.ResourceList{}
 		r := ContainerResource{}
 		for _, container := range podMetrics.Containers {
-			addResourceList(usage, container.Usage)
+			cpuUsage, memoryUsage := container.Usage[v1.ResourceCPU], container.Usage[v1.ResourceMemory]
+			r.CPU = float64(cpuUsage.MilliValue())
+			r.Memory = float64(memoryUsage.Value() / 1048576)
+			r.Namespace = podMetrics.Namespace
+			containerName := podMetrics.Name + "-" + container.Name
+			nsUsedMap[containerName] = r
 		}
-		cpuUsage, memoryUsage := usage[v1.ResourceCPU], usage[v1.ResourceMemory]
-		r.CPU = float64(cpuUsage.MilliValue())
-		r.Memory = float64(memoryUsage.Value() / 1048576)
-		r.Namespace = podMetrics.Namespace
-		nsUsedMap[podMetrics.Name] = r
 
 	}
 	return nsUsedMap, nil
@@ -180,38 +204,39 @@ func GetAllLimitRangeDetails(kclientset *kubernetes.Clientset) (map[string]Conta
 	nsReqMap := make(map[string]ContainerResource, 0)
 	nsLimitMap := make(map[string]ContainerResource, 0)
 
-	for _, namespace := range namespaces {
-		limitrange, err := GetNamespaceLimitRanges(kclientset, namespace)
+	for _, ns := range namespaces {
+		fmt.Println("Getting limit ranges for namespace %s", ns.Name)
+
+		limitRanges, err := kclientset.CoreV1().LimitRanges(ns.Name).List(context.TODO(), metav1.ListOptions{})
 		if err != nil {
-			log.Fatalln("error in getting all limit ranges from cluster", err.Error())
+			return nil, nil, fmt.Errorf("can't list limitranges from cluster %s", err.Error())
 		}
-		for _, limit := range limitRange.Spec.Limits {
-			if limit.Type == v1.LimitTypeContainer {
-				r.CPU = float64(limit.DefaultRequest[v1.ResourceCPU].MilliValue())
-				r.Memory = float64(limit.DefaultRequest[v1.ResourceMemory].Value() / 1048576)
-				r.Namespace = limitRange.Namespace
-				nsReqMap[limitRange.Namespace] = r
+		if len(limitRanges.Items) > 0 {
 
-				r.CPU = float64(limit.DefaultLimit[v1.ResourceCPU].MilliValue())
-				r.Memory = float64(limit.DefaultLimit[v1.ResourceMemory].Value() / 1048576)
-				r.Namespace = limitRange.Namespace
-				nsLimitMap[limitRange.Namespace] = r
+			limitRange := limitRanges.Items[0]
 
-			}
+			// limit := v1.ResourceList{}
+			r := ContainerResource{}
+			limit := limitRange.Spec.Limits[0]
+
+			cpuLimitReq, memoryLimitReq := limit.DefaultRequest[v1.ResourceCPU], limit.DefaultRequest[v1.ResourceMemory]
+			r.CPU = float64(cpuLimitReq.MilliValue())
+			r.Memory = float64(memoryLimitReq.Value() / 1048576)
+			r.Namespace = ns.Name
+			nsReqMap[ns.Name] = r
+
+			cpuLimit, memoryLimit := limit.Default[v1.ResourceCPU], limit.Default[v1.ResourceMemory]
+
+			r.CPU = float64(cpuLimit.MilliValue())
+			r.Memory = float64(memoryLimit.Value() / 1048576)
+			r.Namespace = ns.Name
+			nsLimitMap[ns.Name] = r
+		} else {
+			fmt.Println("No limit ranges found for namespace %s", ns.Name)
+			continue
 		}
 	}
+
 	return nsReqMap, nsLimitMap, nil
-}
 
-func GetNamespaceLimitRanges(clientset *kubernetes.Clientset, namespace string) (*corev1.LimitRange, error) {
-	limitRanges, err := clientset.CoreV1().LimitRanges(namespace).List(context.TODO(), metav1.ListOptions{})
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to list limit ranges")
-	}
-
-	if len(limitRanges.Items) == 0 {
-		return nil, nil
-	}
-
-	return &limitRanges.Items[0], nil
 }
