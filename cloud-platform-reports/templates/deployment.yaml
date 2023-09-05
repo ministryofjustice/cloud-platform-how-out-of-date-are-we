@@ -12,6 +12,7 @@ spec:
       labels:
         app: {{ .Values.deployment.labels.app }}
     spec:
+      serviceAccountName: cloud-platform-reports-prod-irsa
       containers:
         - name: {{ .Values.deployment.containers.webapp.name }}
           image: {{ .Values.deployment.containers.webapp.image }}:{{ .Chart.AppVersion }}
@@ -25,16 +26,6 @@ spec:
                   key: token
             - name: DYNAMODB_REGION
               value: "eu-west-2"
-            - name: DYNAMODB_ACCESS_KEY_ID
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.dynamodb.secretName }}
-                  key: access_key_id
-            - name: DYNAMODB_SECRET_ACCESS_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.dynamodb.secretName }}
-                  key: secret_access_key
             - name: DYNAMODB_TABLE_NAME
               valueFrom:
                 secretKeyRef:

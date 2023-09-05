@@ -8,3 +8,7 @@ gem "sinatra"
 gem "sinatra-contrib"
 gem "aws-sdk-dynamodb"
 gem "rspec"
+gem "racc", "~> 1.4.0"
+gem "nokogiri"
+gem 'puma'
+
