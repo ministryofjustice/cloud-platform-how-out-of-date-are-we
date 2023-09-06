@@ -9,9 +9,7 @@ class Dynamodb
 
   def initialize(params = {})
     @db = params.fetch(:db, Aws::DynamoDB::Client.new(
-      region: ENV.fetch("DYNAMODB_REGION"),
-      access_key_id: ENV.fetch("DYNAMODB_ACCESS_KEY_ID"),
-      secret_access_key: ENV.fetch("DYNAMODB_SECRET_ACCESS_KEY"),
+      region: ENV.fetch("DYNAMODB_REGION")
     ))
     @table = params.fetch(:table, ENV.fetch("DYNAMODB_TABLE_NAME"))
   end
