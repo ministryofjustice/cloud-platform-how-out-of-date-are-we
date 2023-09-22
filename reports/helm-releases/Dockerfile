@@ -1,7 +1,7 @@
 FROM golang:1.17-stretch AS helm_release_builder
 
 ENV CGO_ENABLED=0 \
-    GOOS=linux
+  GOOS=linux
 
 WORKDIR /app
 
@@ -18,12 +18,12 @@ ENV \
 
 RUN \
   apk add \
-    --no-cache \
-    --no-progress \
-    --update \
-    bash \
-    curl \
-    git
+  --no-cache \
+  --no-progress \
+  --update \
+  bash \
+  curl \
+  git
 
 WORKDIR /app
 
@@ -31,8 +31,8 @@ COPY --from=helm_release_builder /app/helm-releases ./
 
 # Install helm
 RUN curl -sL https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz \
-    | tar -xzC /usr/local/bin --strip-components 1 linux-amd64/helm \
-    && chmod 755 /usr/local/bin/helm
+  | tar -xzC /usr/local/bin --strip-components 1 linux-amd64/helm \
+  && chmod 755 /usr/local/bin/helm
 
 RUN addgroup -g 1000 -S appgroup \
   && adduser -u 1000 -S appuser -G appgroup
@@ -60,4 +60,5 @@ RUN helm repo add jetstack https://charts.jetstack.io/; \
   helm repo add eks https://aws.github.io/eks-charts; \
   helm repo add hashicorp https://helm.releases.hashicorp.com; \
   helm repo add stable https://charts.helm.sh/stable; \
-  helm repo add oteemocharts https://oteemo.github.io/charts;
+  helm repo add oteemocharts https://oteemo.github.io/charts; \
+  helm repo add fluent https://fluent.github.io/helm-charts;
