@@ -14,7 +14,7 @@ RUN go build .
 FROM alpine:3.11.0
 
 ENV \
-  HELM_VERSION=3.4.0
+  HELM_VERSION=3.12.3
 
 RUN \
   apk add \
