@@ -44,7 +44,6 @@ type helmRelease struct {
 type resourceMap map[string]interface{}
 
 func main() {
-
 	contexts := []string{*ctxLive, *ctxManager}
 
 	var clusters []resourceMap
@@ -108,7 +107,6 @@ func executeHelmList() (string, error) {
 
 // getNamespaces takes json output and get list of namespaces
 func getNamespaces(helmListJson string) ([]string, error) {
-
 	var namespaces []helmNamespace
 	json.Unmarshal([]byte(helmListJson), &namespaces)
 
@@ -168,7 +166,6 @@ func helmReleasesInNamespace(namespace string) ([]helmRelease, error) {
 	}
 
 	return rel["releases"], nil
-
 }
 
 // BuildJsonMap takes a slice of maps and return a json encoded map
