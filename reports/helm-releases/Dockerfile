@@ -1,4 +1,4 @@
-FROM golang:1.17-stretch AS helm_release_builder
+FROM golang:1.21 AS helm_release_builder
 
 ENV CGO_ENABLED=0 \
   GOOS=linux
@@ -11,7 +11,7 @@ RUN go mod download
 COPY *.go ./
 RUN go build .
 
-FROM alpine:3.11.0
+FROM alpine:3.19.0
 
 ENV \
   HELM_VERSION=3.12.3
@@ -51,22 +51,24 @@ RUN helm repo add kube-state-metrics https://kubernetes.github.io/kube-state-met
   helm repo add hashicorp https://helm.releases.hashicorp.com; \
   helm repo add projectcalico https://projectcalico.docs.tigera.io/charts; \
   helm repo add jetstack https://charts.jetstack.io; \
-  helm repo add concourse https://concourse-charts.storage.googleapis.com/ \
-  helm repo add gatekeeper https://open-policy-agent.github.io/gatekeeper/charts \
-  helm repo add fluent https://fluent.github.io/helm-charts \
-  helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx \
-  helm repo add aws-efs-csi-driver https://kubernetes-sigs.github.io/aws-efs-csi-driver \
+  helm repo add concourse https://concourse-charts.storage.googleapis.com; \
+  helm repo add external-secrets https://charts.external-secrets.io; \
+  helm repo add gatekeeper https://open-policy-agent.github.io/gatekeeper/charts; \
+  helm repo add fluent https://fluent.github.io/helm-charts; \
+  helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx; \
+  helm repo add aws-efs-csi-driver https://kubernetes-sigs.github.io/aws-efs-csi-driver; \
   helm repo add bitnami https://charts.bitnami.com/bitnami; \
-  helm repo add aws-ebs-csi-driver https://kubernetes-sigs.github.io/aws-ebs-csi-driver \
-  helm repo add autoscaler https://kubernetes.github.io/autoscaler \
-  helm repo add descheduler https://kubernetes-sigs.github.io/descheduler \
-  helm repo add metrics-server https://kubernetes-sigs.github.io/metrics-server/ \
-  helm repo add kuberhealthy https://kuberhealthy.github.io/kuberhealthy/helm-repos \
+  helm repo add aws-ebs-csi-driver https://kubernetes-sigs.github.io/aws-ebs-csi-driver; \
+  helm repo add autoscaler https://kubernetes.github.io/autoscaler; \
+  helm repo add descheduler https://kubernetes-sigs.github.io/descheduler; \
+  helm repo add metrics-server https://kubernetes-sigs.github.io/metrics-server; \
+  helm repo add kuberhealthy https://kuberhealthy.github.io/kuberhealthy/helm-repos; \
   helm repo add cloud-platform https://ministryofjustice.github.io/cloud-platform-helm-charts; \
   helm repo add cloudwatch-exporter https://prometheus-community.github.io/helm-charts; \
   helm repo add oauth2-proxy https://oauth2-proxy.github.io/manifests; \
   helm repo add cluster-proportional-autoscaler https://kubernetes-sigs.github.io/cluster-proportional-autoscaler; \
-  helm repo add aqua https://aquasecurity.github.io/helm-charts/; \
+  helm repo add aqua https://aquasecurity.github.io/helm-charts; \
+  helm repo add vmware-tanzu https://vmware-tanzu.github.io/helm-charts;
 
 
 
