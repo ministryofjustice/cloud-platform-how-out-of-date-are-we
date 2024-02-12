@@ -45,20 +45,31 @@ USER 1000
 RUN helm plugin install https://github.com/fabmation-gmbh/helm-whatup
 
 # Add helm repos
-RUN helm repo add jetstack https://charts.jetstack.io/; \
-  helm repo add concourse https://concourse-charts.storage.googleapis.com/; \
-  helm repo add cloud-platform https://ministryofjustice.github.io/cloud-platform-helm-charts; \
-  helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx; \
-  helm repo add prometheus https://prometheus-community.github.io/helm-charts; \
-  helm repo add autoscaler https://kubernetes.github.io/autoscaler; \
-  helm repo add vmware-tanzu https://vmware-tanzu.github.io/helm-charts; \
-  helm repo add banzaicloud-stable https://kubernetes-charts.banzaicloud.com; \
-  helm repo add kiam https://uswitch.github.io/kiam-helm-charts/charts; \
-  helm repo add bitnami https://charts.bitnami.com/bitnami; \
-  helm repo add kube-state-metrics https://kubernetes.github.io/kube-state-metrics; \
+RUN helm repo add kube-state-metrics https://kubernetes.github.io/kube-state-metrics; \
   helm repo add grafana https://grafana.github.io/helm-charts; \
   helm repo add eks https://aws.github.io/eks-charts; \
   helm repo add hashicorp https://helm.releases.hashicorp.com; \
-  helm repo add stable https://charts.helm.sh/stable; \
-  helm repo add oteemocharts https://oteemo.github.io/charts; \
-  helm repo add fluent https://fluent.github.io/helm-charts;
+  helm repo add projectcalico https://projectcalico.docs.tigera.io/charts; \
+  helm repo add jetstack https://charts.jetstack.io; \
+  helm repo add concourse https://concourse-charts.storage.googleapis.com/ \
+  helm repo add gatekeeper https://open-policy-agent.github.io/gatekeeper/charts \
+  helm repo add fluent https://fluent.github.io/helm-charts \
+  helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx \
+  helm repo add aws-efs-csi-driver https://kubernetes-sigs.github.io/aws-efs-csi-driver \
+  helm repo add bitnami https://charts.bitnami.com/bitnami; \
+  helm repo add aws-ebs-csi-driver https://kubernetes-sigs.github.io/aws-ebs-csi-driver \
+  helm repo add autoscaler https://kubernetes.github.io/autoscaler \
+  helm repo add descheduler https://kubernetes-sigs.github.io/descheduler \
+  helm repo add metrics-server https://kubernetes-sigs.github.io/metrics-server/ \
+  helm repo add kuberhealthy https://kuberhealthy.github.io/kuberhealthy/helm-repos \
+  helm repo add cloud-platform https://ministryofjustice.github.io/cloud-platform-helm-charts; \
+  helm repo add cloudwatch-exporter https://prometheus-community.github.io/helm-charts; \
+  helm repo add oauth2-proxy https://oauth2-proxy.github.io/manifests; \
+  helm repo add cluster-proportional-autoscaler https://kubernetes-sigs.github.io/cluster-proportional-autoscaler; \
+  helm repo add aqua https://aquasecurity.github.io/helm-charts/; \
+
+
+
+
+
+
