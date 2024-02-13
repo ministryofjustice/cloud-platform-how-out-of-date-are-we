@@ -1,4 +1,4 @@
-FROM ruby:2.7-alpine
+FROM ruby:3.2.2-alpine3.18
 
 RUN apk update && apk add --no-cache build-base curl
 RUN gem install nokogiri json_pure
