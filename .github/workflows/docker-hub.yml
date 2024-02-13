@@ -10,6 +10,9 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       - name: Login to DockerHub
@@ -20,117 +23,78 @@ jobs:
       - name: Push webapp to docker hub
         uses: docker/build-push-action@v5
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-          repository: ministryofjustice/cloud-platform-how-out-of-date-are-we
-          tag_with_ref: true
+          tags: ministryofjustice/cloud-platform-how-out-of-date-are-we:${{ steps.meta.outputs.tags }}
       - name: Compile the dashboard-reporter script
         run: cd dashboard-reporter/; make
       - name: Push dashboard-reporter to docker hub
         uses: docker/build-push-action@v5
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
           context: ./dashboard-reporter
           file: ./dashboard-reporter/Dockerfile
-          repository: ministryofjustice/cloud-platform-how-out-of-date-are-we-reporter
-          tag_with_ref: true
+          tags: ministryofjustice/cloud-platform-how-out-of-date-are-we-reporter:${{ steps.meta.outputs.tags }}
       - name: Push namespace-usage-reporter to docker hub
         uses: docker/build-push-action@v5
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
           context: ./reports/namespace-usage
           file: ./reports/namespace-usage/Dockerfile
-          repository: ministryofjustice/cloud-platform-namespace-usage-reporter
-          tag_with_ref: true
+          tags: ministryofjustice/cloud-platform-namespace-usage-reporter:${{ steps.meta.outputs.tags }}
       - name: Push terraform-module-checker to docker hub
         uses: docker/build-push-action@v5
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
           context: ./reports/terraform-modules
           file: ./reports/terraform-modules/Dockerfile
-          repository: ministryofjustice/cloud-platform-terraform-modules-checker
-          tag_with_ref: true
+          tags: ministryofjustice/cloud-platform-terraform-modules-checker:${{ steps.meta.outputs.tags }}
       - name: Push overdue-documentation-checker to docker hub
         uses: docker/build-push-action@v5
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
           context: ./reports/documentation
           file: ./reports/documentation/Dockerfile
-          repository: ministryofjustice/cloud-platform-overdue-documentation-checker
-          tag_with_ref: true
+          tags: ministryofjustice/cloud-platform-overdue-documentation-checker:${{ steps.meta.outputs.tags }}
       - name: Push helm-release-checker to docker hub
         uses: docker/build-push-action@v5
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
           context: ./reports/helm-releases
           file: ./reports/helm-releases/Dockerfile
-          repository: ministryofjustice/cloud-platform-helm-release-checker
-          tag_with_ref: true
+          tags: ministryofjustice/cloud-platform-helm-release-checker:${{ steps.meta.outputs.tags }}
       - name: Push orphaned-aws-resources checker to docker hub
         uses: docker/build-push-action@v5
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
           context: ./reports/orphaned-aws-resources
           file: ./reports/orphaned-aws-resources/Dockerfile
-          repository: ministryofjustice/cloud-platform-report-orphaned-resources
-          tag_with_ref: true
+          tags: ministryofjustice/cloud-platform-report-orphaned-resources:${{ steps.meta.outputs.tags }}
       - name: Push orphaned-terraform-statefiles checker to docker hub
         uses: docker/build-push-action@v5
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
           context: ./reports/orphaned-terraform-statefiles
           file: ./reports/orphaned-terraform-statefiles/Dockerfile
-          repository: ministryofjustice/cloud-platform-orphaned-terraform-statefiles
-          tag_with_ref: true
+          tags: ministryofjustice/cloud-platform-orphaned-terraform-statefiles:${{ steps.meta.outputs.tags }}
       - name: Push namespace cost calculator to docker hub
         uses: docker/build-push-action@v5
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
           context: ./reports/namespace-costs
           file: ./reports/namespace-costs/Dockerfile
-          repository: ministryofjustice/cloud-platform-cost-calculator
-          tag_with_ref: true
+          tags: ministryofjustice/cloud-platform-cost-calculator:${{ steps.meta.outputs.tags }}
       - name: Push hosted-services image to docker hub
         uses: docker/build-push-action@v5
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
           context: ./reports/hosted-services
           file: ./reports/hosted-services/Dockerfile
-          repository: ministryofjustice/cloud-platform-hosted-services
-          tag_with_ref: true
+          tags: ministryofjustice/cloud-platform-hosted-services:${{ steps.meta.outputs.tags }}
       - name: Push live-one-domains image to docker hub
         uses: docker/build-push-action@v5
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
           context: ./reports/live-1-domains
           file: ./reports/live-1-domains/Dockerfile
-          repository: ministryofjustice/cloud-platform-live-one-domains
-          tag_with_ref: true
+          tags: ministryofjustice/cloud-platform-live-one-domains:${{ steps.meta.outputs.tags }}
       - name: Push repositories-checker image to docker hub
         uses: docker/build-push-action@v5
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
           context: ./reports/github-repositories
           file: ./reports/github-repositories/Dockerfile
-          repository: ministryofjustice/cloud-platform-github-repositories-checker
-          tag_with_ref: true
+          tags: ministryofjustice/cloud-platform-github-repositories-checker:${{ steps.meta.outputs.tags }}
       - name: Push infrastructure deployments image to docker hub
         uses: docker/build-push-action@v5
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
           context: ./reports/infrastructure-deployments
           file: ./reports/infrastructure-deployments/Dockerfile
-          repository: ministryofjustice/cloud-platform-infrastructure-deployments
-          tag_with_ref: true
+          tags: ministryofjustice/cloud-platform-infrastructure-deployments:${{ steps.meta.outputs.tags }}
