@@ -94,13 +94,6 @@ jobs:
           context: ./reports/live-1-domains
           file: ./reports/live-1-domains/Dockerfile
           tags: ministryofjustice/cloud-platform-live-one-domains:${{ github.event.release.tag_name }}
-      - name: Push repositories-checker image to docker hub
-        uses: docker/build-push-action@v5
-        with:
-          push: true
-          context: ./reports/github-repositories
-          file: ./reports/github-repositories/Dockerfile
-          tags: ministryofjustice/cloud-platform-github-repositories-checker:${{ github.event.release.tag_name }}
       - name: Push infrastructure deployments image to docker hub
         uses: docker/build-push-action@v5
         with:
