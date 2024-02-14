@@ -46,7 +46,6 @@ def dashboard_data
   info = {
     documentation: get_data_from_json_file("documentation", "pages", Documentation),
     helm_whatup: get_data_from_json_file("helm_whatup", "clusters", HelmWhatup),
-    repositories: get_data_from_json_file("repositories", "repositories", GithubRepositories),
     terraform_modules: get_data_from_json_file("terraform_modules", "out_of_date_modules", ItemList),
     orphaned_resources: get_data_from_json_file("orphaned_resources", "orphaned_aws_resources", OrphanedResources),
     orphaned_statefiles: get_data_from_json_file("orphaned_statefiles", "data", ItemList),
@@ -63,7 +62,6 @@ def dashboard_data
       action_items: {
         documentation: info[:documentation].todo_count,
         helm_whatup: info[:helm_whatup].todo_count,
-        repositories: info[:repositories].todo_count,
         terraform_modules: info[:terraform_modules].todo_count,
         orphaned_resources: info[:orphaned_resources].todo_count,
         orphaned_statefiles: info[:orphaned_statefiles].todo_count,
@@ -210,14 +208,6 @@ get "/terraform_modules" do
     serve_json_data(:terraform_modules)
   else
     render_item_list(title: "Terraform Modules", docpath: "terraform_modules", key: "out_of_date_modules")
-  end
-end
-
-get "/repositories" do
-  if accept_json?(request)
-    serve_json_data(:repositories)
-  else
-    render_item_list(title: "Github Repositories", docpath: "repositories", key: "repositories", klass: GithubRepositories)
   end
 end
 
