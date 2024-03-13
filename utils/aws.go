@@ -1,4 +1,4 @@
-package aws
+package utils
 
 import (
 	"bytes"
@@ -8,14 +8,12 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go-v2/internal/auth/smithy"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
+	"github.com/aws/smithy-go"
 )
 
-var (
-	ctx = context.TODO()
-)
+var ctx = context.TODO()
 
 func awsS3Client() (*s3.Client, error) {
 	sdkConfig, err := config.LoadDefaultConfig(ctx)
@@ -96,4 +94,24 @@ func ArchiveFile(bucketName, objectKey string) error {
 		}
 	}
 	return nil
+}
+
+func ImportS3File(bucketName, objectKey string) ([]byte, error) {
+	client, err := awsS3Client()
+	if err != nil {
+		return nil, err
+	}
+
+	output, err := client.GetObject(ctx, &s3.GetObjectInput{
+		Bucket: aws.String(bucketName),
+		Key:    aws.String(objectKey),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(output.Body)
+
+	return buf.Bytes(), nil
 }

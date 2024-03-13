@@ -13,7 +13,7 @@ import (
 	"github.com/ministryofjustice/cloud-platform-environments/pkg/authenticate"
 	"github.com/ministryofjustice/cloud-platform-environments/pkg/ingress"
 	"github.com/ministryofjustice/cloud-platform-environments/pkg/namespace"
-	"github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/reports/pkg/aws"
+	utils "github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/utils"
 	networkingv1 "k8s.io/api/networking/v1"
 )
 
@@ -84,7 +84,7 @@ func main() {
 	}
 
 	// Post json to S3
-	msg, err := aws.ExportToS3(*hoodawBucket, "hosted_services.json", jsonToPost)
+	msg, err := utils.ExportToS3(*hoodawBucket, "hosted_services.json", jsonToPost)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
