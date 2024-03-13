@@ -13,7 +13,7 @@ import (
 	"github.com/ministryofjustice/cloud-platform-environments/pkg/authenticate"
 	"github.com/ministryofjustice/cloud-platform-environments/pkg/ingress"
 	"github.com/ministryofjustice/cloud-platform-environments/pkg/namespace"
-	aws "github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/lib/aws"
+	"github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/reports/pkg/aws"
 	networkingv1 "k8s.io/api/networking/v1"
 )
 
@@ -25,6 +25,7 @@ import (
 type resourceMap map[string]interface{}
 
 var (
+	hoodawBucket   = flag.String("howdaw-bucket", os.Getenv("HOODAW_BUCKET"), "AWS S3 bucket for hoodaw json reports")
 	bucket         = flag.String("bucket", os.Getenv("KUBECONFIG_S3_BUCKET"), "AWS S3 bucket for kubeconfig")
 	ctx            = flag.String("context", "live.cloud-platform.service.justice.gov.uk", "Kubernetes context specified in kubeconfig")
 	hoodawApiKey   = flag.String("hoodawAPIKey", os.Getenv("HOODAW_API_KEY"), "API key to post data to the 'How out of date are we' API")
@@ -83,7 +84,7 @@ func main() {
 	}
 
 	// Post json to S3
-	aws.ExportToS3(jsonToPost, *bucket, "hosted_services.json")
+	aws.ExportToS3(jsonToPost, *hoodawBucket, "hosted_services.json")
 
 }
 
