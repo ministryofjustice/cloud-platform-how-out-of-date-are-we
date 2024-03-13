@@ -13,7 +13,6 @@ import (
 	"github.com/ministryofjustice/cloud-platform-environments/pkg/authenticate"
 	"github.com/ministryofjustice/cloud-platform-environments/pkg/ingress"
 	"github.com/ministryofjustice/cloud-platform-environments/pkg/namespace"
-	"github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/reports/pkg/hoodaw"
 	networkingv1 "k8s.io/api/networking/v1"
 )
 
@@ -82,11 +81,11 @@ func main() {
 		log.Fatalln(err.Error())
 	}
 
-	// Post json to hoowdaw api
-	err = hoodaw.PostToApi(jsonToPost, hoodawApiKey, &endPoint)
-	if err != nil {
-		log.Fatalln(err.Error())
-	}
+	// Post json to hoowdaw api REMOVE COMMENT WHEN READY
+	// err = hoodaw.PostToApi(jsonToPost, hoodawApiKey, &endPoint)
+	// if err != nil {
+	// 	log.Fatalln(err.Error())
+	// }
 
 }
 

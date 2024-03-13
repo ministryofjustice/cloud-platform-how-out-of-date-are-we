@@ -1,0 +1,7 @@
+- create s3 (readonly public, write only manager)
+- create s3 irsa role terraform
+- create function to post reports to s3 (https://stackoverflow.com/questions/30059723/saving-file-to-s3-using-aws-sdk-go)
+- create frontend
+- create deployment, service, ingress(for hosted_services report subpath)
+- delete hosted services from rb app
+- clean you unused reports
