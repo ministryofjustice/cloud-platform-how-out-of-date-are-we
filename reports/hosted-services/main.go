@@ -84,7 +84,7 @@ func main() {
 	}
 
 	// Post json to S3
-	msg, err := aws.ExportToS3(jsonToPost, *hoodawBucket, "hosted_services.json")
+	msg, err := aws.ExportToS3(*hoodawBucket, "hosted_services.json", jsonToPost)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
