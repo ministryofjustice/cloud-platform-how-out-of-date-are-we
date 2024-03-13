@@ -13,6 +13,7 @@ import (
 	"github.com/ministryofjustice/cloud-platform-environments/pkg/authenticate"
 	"github.com/ministryofjustice/cloud-platform-environments/pkg/ingress"
 	"github.com/ministryofjustice/cloud-platform-environments/pkg/namespace"
+	aws "github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/lib/aws"
 	networkingv1 "k8s.io/api/networking/v1"
 )
 
@@ -81,11 +82,8 @@ func main() {
 		log.Fatalln(err.Error())
 	}
 
-	// Post json to hoowdaw api REMOVE COMMENT WHEN READY
-	// err = hoodaw.PostToApi(jsonToPost, hoodawApiKey, &endPoint)
-	// if err != nil {
-	// 	log.Fatalln(err.Error())
-	// }
+	// Post json to S3
+	aws.ExportToS3(jsonToPost, *bucket, "hosted_services.json")
 
 }
 
