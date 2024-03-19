@@ -1,0 +1,23 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ .Values.cronjobs.hostedServices.name }}
+spec:
+  schedule: "{{ .Values.cronjobs.hostedServices.schedule }}"
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 100
+      template:
+        spec:
+          serviceAccountName: {{ .Values.webApplication.serviceAccountName }}
+          containers:
+          - name: hosted-services-image
+            image: ministryofjustice/cloud-platform-hosted-services:{{ .Chart.AppVersion }}
+            imagePullPolicy: Always
+            command:
+            - /bin/sh
+            - -c
+            - ./hostedservices
+          restartPolicy: OnFailure

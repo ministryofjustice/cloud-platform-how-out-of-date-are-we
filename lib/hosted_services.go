@@ -45,7 +45,7 @@ func HostedServices(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// render template
-	if err := t.ExecuteTemplate(w, "rides.html", services); err != nil {
+	if err := t.ExecuteTemplate(w, "hosted_services.html", services); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }

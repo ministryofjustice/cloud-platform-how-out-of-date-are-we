@@ -1,0 +1,25 @@
+FROM golang:1.22.1-alpine3.19
+
+ENV \
+  CGO_ENABLED=0 \
+  GOOS=linux
+
+RUN addgroup -g 1000 -S appgroup \
+  && adduser -u 1000 -S appuser -G appgroup
+
+WORKDIR /app
+
+COPY main.go go.mod go.sum ./
+COPY lib/hosted_services.go ./lib/hosted_services.go
+COPY lib/templates/ ./lib/templates
+COPY utils/ ./utils
+
+RUN chown -R appuser:appgroup /app
+RUN go mod download
+USER 1000
+
+RUN go build -ldflags="-s -w" -o /app/hoodaw -buildvcs=false
+
+EXPOSE 8080
+
+CMD ["hoodaw"]
