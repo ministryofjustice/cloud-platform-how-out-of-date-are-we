@@ -1,0 +1,7 @@
+- create s3(readonly public, write only manager) : done
+- create s3 irsa role terraform : done
+- create function to post reports to s3(https://docs.aws.amazon.com/code-library/latest/ug/go_2_s3_code_examples.html)
+- create frontend
+- create deployment, service, ingress(for hosted_services report subpath)
+- delete hosted services from rb app
+- clean you unused reports

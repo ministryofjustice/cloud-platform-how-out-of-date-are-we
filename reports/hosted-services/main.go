@@ -13,7 +13,7 @@ import (
 	"github.com/ministryofjustice/cloud-platform-environments/pkg/authenticate"
 	"github.com/ministryofjustice/cloud-platform-environments/pkg/ingress"
 	"github.com/ministryofjustice/cloud-platform-environments/pkg/namespace"
-	"github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/reports/pkg/hoodaw"
+	utils "github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/utils"
 	networkingv1 "k8s.io/api/networking/v1"
 )
 
@@ -25,6 +25,7 @@ import (
 type resourceMap map[string]interface{}
 
 var (
+	hoodawBucket   = flag.String("howdaw-bucket", os.Getenv("HOODAW_BUCKET"), "AWS S3 bucket for hoodaw json reports")
 	bucket         = flag.String("bucket", os.Getenv("KUBECONFIG_S3_BUCKET"), "AWS S3 bucket for kubeconfig")
 	ctx            = flag.String("context", "live.cloud-platform.service.justice.gov.uk", "Kubernetes context specified in kubeconfig")
 	hoodawApiKey   = flag.String("hoodawAPIKey", os.Getenv("HOODAW_API_KEY"), "API key to post data to the 'How out of date are we' API")
@@ -82,11 +83,13 @@ func main() {
 		log.Fatalln(err.Error())
 	}
 
-	// Post json to hoowdaw api
-	err = hoodaw.PostToApi(jsonToPost, hoodawApiKey, &endPoint)
+	// Post json to S3
+	msg, err := utils.ExportToS3(*hoodawBucket, "hosted_services.json", jsonToPost)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
+
+	log.Println(msg)
 
 }
 

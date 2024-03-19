@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<h2>Summary</h2>
+<div class="row mb-3">
+  <div class="col-sm-4">
+    <div class="card">
+      <div class="card-body">
+              <b>Total namespaces: </b>
+              {{.TotalNS}}
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-4">
+    <div class="card">
+      <div class="card-body">
+              <b>Unique Apps: </b>
+              {{.TotalApp}}
+      </div>
+    </div>
+  </div>
+
+</div>
+    
+<div class="row">
+  <div class="table-responsive">
+  <h2>Service details</h2>
+  <p>Type any business unit, application or any text to filter the list:</p>  
+  <input class="form-control" id="searchInput" type="text" placeholder="Search..">
+  <br>
+
+  <table class="table">
+  <thead class="thead">
+    <tr>
+      <th scope="col">Namespace</th>
+      <th scope="col">Application</th>
+      <th scope="col">Business unit</th>
+      <th scope="col">Team name</th>
+      <th scope="col">Slack channel</th>
+      <th scope="col">Source code</th>
+      <th scope="col">Domain names</th>
+    </tr>
+  </thead>
+  {{ range . }}
+  <tbody id="namespaceTable">
+    {{.Namespace}}
+    {{ range . }}
+    <tr>
+      <th scope="row">
+        <a href="/namespace/{{.Namespace}}">{{.Namespace}}</a>
+      </th>
+      <td>{{.Application}}</td>
+      <td>{{.BusinessUnit}}</td>
+      <td>{{.TeamName}}</td>
+      <td>{{.SlackChannel}}</td>
+      <td>{{.SourceCode}}</td>
+      <td>{{.DomainNames}}</td>
+    </tr>
+    {{ end }}
+  </tbody>
+  {{ end }}
+  </table>
+</div>
