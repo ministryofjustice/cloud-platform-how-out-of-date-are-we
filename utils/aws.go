@@ -8,31 +8,36 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/credentials/stscreds"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
+	"github.com/aws/aws-sdk-go-v2/service/sts"
 	"github.com/aws/smithy-go"
 )
 
 var ctx = context.TODO()
 
-func awsS3Client() (*s3.Client, error) {
-	sdkConfig, err := config.LoadDefaultConfig(ctx)
+func S3AssumeRole(ra, rsn string) (*s3.Client, error) {
+	cfg, err := config.LoadDefaultConfig(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	cfg := s3.NewFromConfig(sdkConfig)
+	stsClient := sts.NewFromConfig(cfg)
+	roleArn := ra
+	roleSessionName := rsn
+	creds := stscreds.NewAssumeRoleProvider(stsClient, roleArn, func(o *stscreds.AssumeRoleOptions) {
+		o.RoleSessionName = roleSessionName
+	})
 
-	return cfg, nil
+	cfg.Credentials = aws.NewCredentialsCache(creds)
+
+	return s3.NewFromConfig(cfg), nil
+
 }
 
-func CheckBucketExists(bucket string) (bool, error) {
-	client, err := awsS3Client()
-	if err != nil {
-		return false, err
-	}
-
-	_, err = client.HeadBucket(ctx, &s3.HeadBucketInput{
+func CheckBucketExists(client *s3.Client, bucket string) (bool, error) {
+	_, err := client.HeadBucket(ctx, &s3.HeadBucketInput{
 		Bucket: aws.String(bucket),
 	})
 	exists := true
@@ -55,13 +60,8 @@ func CheckBucketExists(bucket string) (bool, error) {
 	return exists, err
 }
 
-func ExportToS3(bucketName, objectKey string, file []byte) error {
-	client, err := awsS3Client()
-	if err != nil {
-		return err
-	}
-
-	client.PutObject(ctx, &s3.PutObjectInput{
+func ExportToS3(client *s3.Client, bucketName, objectKey string, file []byte) error {
+	_, err := client.PutObject(ctx, &s3.PutObjectInput{
 		Bucket: aws.String(bucketName),
 		Key:    aws.String(objectKey),
 		Body:   bytes.NewReader(file),
@@ -70,14 +70,9 @@ func ExportToS3(bucketName, objectKey string, file []byte) error {
 	return err
 }
 
-func ArchiveFile(bucketName, objectKey string) error {
-	client, err := awsS3Client()
-	if err != nil {
-		return err
-	}
-
+func ArchiveFile(client *s3.Client, bucketName, objectKey string) error {
 	// check if the object exists
-	_, err = client.HeadObject(ctx, &s3.HeadObjectInput{
+	_, err := client.HeadObject(ctx, &s3.HeadObjectInput{
 		Bucket: aws.String(bucketName),
 		Key:    aws.String(objectKey),
 	})
@@ -96,12 +91,7 @@ func ArchiveFile(bucketName, objectKey string) error {
 	return nil
 }
 
-func ImportS3File(bucketName, objectKey string) ([]byte, error) {
-	client, err := awsS3Client()
-	if err != nil {
-		return nil, err
-	}
-
+func ImportS3File(client *s3.Client, bucketName, objectKey string) ([]byte, error) {
 	output, err := client.GetObject(ctx, &s3.GetObjectInput{
 		Bucket: aws.String(bucketName),
 		Key:    aws.String(objectKey),

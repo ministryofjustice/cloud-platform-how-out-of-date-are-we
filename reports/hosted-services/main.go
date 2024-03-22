@@ -25,16 +25,12 @@ import (
 type resourceMap map[string]interface{}
 
 var (
-	hoodawBucket   = flag.String("howdaw-bucket", os.Getenv("HOODAW_BUCKET"), "AWS S3 bucket for hoodaw json reports")
-	bucket         = flag.String("bucket", os.Getenv("KUBECONFIG_S3_BUCKET"), "AWS S3 bucket for kubeconfig")
-	ctx            = flag.String("context", "live.cloud-platform.service.justice.gov.uk", "Kubernetes context specified in kubeconfig")
-	hoodawApiKey   = flag.String("hoodawAPIKey", os.Getenv("HOODAW_API_KEY"), "API key to post data to the 'How out of date are we' API")
-	hoodawEndpoint = flag.String("hoodawEndpoint", "/hosted_services", "Endpoint to send the data to")
-	hoodawHost     = flag.String("hoodawHost", os.Getenv("HOODAW_HOST"), "Hostname of the 'How out of date are we' API")
-	kubeconfig     = flag.String("kubeconfig", "kubeconfig", "Name of kubeconfig file in S3 bucket")
-	region         = flag.String("region", os.Getenv("AWS_REGION"), "AWS Region")
-
-	endPoint = *hoodawHost + *hoodawEndpoint
+	hoodawBucket 	 = flag.String("howdaw-bucket", os.Getenv("HOODAW_BUCKET"), "AWS S3 bucket for hoodaw json reports")
+	bucket       	 = flag.String("bucket", os.Getenv("KUBECONFIG_S3_BUCKET"), "AWS S3 bucket for kubeconfig")
+	ctx          	 = flag.String("context", "live.cloud-platform.service.justice.gov.uk", "Kubernetes context specified in kubeconfig")
+	kubeconfig   	 = flag.String("kubeconfig", "kubeconfig", "Name of kubeconfig file in S3 bucket")
+	region       	 = flag.String("region", os.Getenv("AWS_REGION"), "AWS Region")
+	write_arn_role = ""
 )
 
 func main() {
@@ -84,13 +80,15 @@ func main() {
 	}
 
 	// Post json to S3
-	msg, err := utils.ExportToS3(*hoodawBucket, "hosted_services.json", jsonToPost)
+	client, err := utils.S3AssumeRole(, "cloud-platform-hoodaw-write")
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
 
-	log.Println(msg)
-
+	utils.ExportToS3(client, *hoodawBucket, "hosted_services.json", jsonToPost)
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
 }
 
 // GetNamespaceDetails takes a Namespace of type v1.namespace and stores the required annotations
