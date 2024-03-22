@@ -24,7 +24,13 @@ func S3AssumeRole(ra, rsn string) (*s3.Client, error) {
 	}
 
 	stsClient := sts.NewFromConfig(cfg)
-	roleArn := ra
+	// get aws account id
+	identity, err := stsClient.GetCallerIdentity(ctx, &sts.GetCallerIdentityInput{})
+	if err != nil {
+		return nil, err
+	}
+
+	roleArn := "arn:aws:iam::" + *identity.Account + ":role/" + ra
 	roleSessionName := rsn
 	creds := stscreds.NewAssumeRoleProvider(stsClient, roleArn, func(o *stscreds.AssumeRoleOptions) {
 		o.RoleSessionName = roleSessionName

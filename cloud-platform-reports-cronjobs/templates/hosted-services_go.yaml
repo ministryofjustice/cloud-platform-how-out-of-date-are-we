@@ -18,6 +18,11 @@ spec:
             image: ministryofjustice/cloud-platform-hosted-services:{{ .Chart.AppVersion }}
             imagePullPolicy: Always
             env:
+            - name: WRITE_ROLE_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: hoodaw-write-irsa
+                  key: role
             - name: AWS_REGION
               value: eu-west-2
             - name: AWS_ACCESS_KEY_ID

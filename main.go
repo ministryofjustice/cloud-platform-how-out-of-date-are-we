@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"os"
 
 	lib "github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/lib"
 	utils "github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/utils"
@@ -10,7 +11,7 @@ import (
 
 var (
 	bucket        = "cloud-platform-hoodaw-reports"
-	read_arn_role = ""
+	read_arn_role = os.Getenv("READ_ROLE_NAME")
 )
 
 func main() {
