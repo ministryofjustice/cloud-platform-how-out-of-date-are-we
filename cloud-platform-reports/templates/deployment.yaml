@@ -7,25 +7,36 @@ spec:
   selector:
     matchLabels:
       app: {{ .Values.deployment.labels.app }}
+
   template:
     metadata:
       labels:
         app: {{ .Values.deployment.labels.app }}
+
     spec:
       serviceAccountName: cloud-platform-reports-prod-irsa
       containers:
         - name: {{ .Values.deployment.containers.webapp.name }}
           image: {{ .Values.deployment.containers.webapp.image }}:{{ .Chart.AppVersion }}
           env:
+            - name: READ_ROLE_NAME
+              valueFrom: 
+                secretKeyRef:
+                  name: hoodaw-readonly-irsa
+                  key: role
+
             - name: RACK_ENV
               value: "production"
+
             - name: API_KEY
               valueFrom:
                 secretKeyRef:
                   name: hoodaw-api-key    # This k8s secret is created in the environments repository
                   key: token
+
             - name: DYNAMODB_REGION
               value: "eu-west-2"
+              
             - name: DYNAMODB_TABLE_NAME
               valueFrom:
                 secretKeyRef:

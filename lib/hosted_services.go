@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"text/template"
 
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/utils"
 )
 
@@ -22,30 +23,35 @@ type HostedService struct {
 	TotalApps int
 }
 
-func HostedServices(w http.ResponseWriter, r *http.Request) {
+var (
+	totalNamespace,
+	totalApplication int
+)
+
+func HostedServices(w http.ResponseWriter, r *http.Request, bucket string, client *s3.Client) {
 	t := template.Must(template.ParseFiles("lib/templates/hosted_services.html"))
 
 	// import json data from s3
-	data, err := utils.ImportS3File("hosted-services", "hosted_services.json")
+	var services []HostedService
+	data, err := utils.ImportS3File(client, bucket, "hosted_services.json")
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	// parse json data
-	var services []HostedService
 	err = json.Unmarshal(data, &services)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	// count the number of namespaces and applications in the json data and add to the struct
-	for i, _ := range services {
-		services[i].TotalNS = len(services[i].Namespace)
-		services[i].TotalApps = len(services[i].Application)
+	// count total number of namespaces and applications in struct
+	for _, service := range services {
+		totalNamespace = len(service.Namespace)
+		totalApplication = len(service.Application)
 	}
+	services = append(services, HostedService{TotalNS: totalNamespace, TotalApps: totalApplication})
 
 	// render template
-	if err := t.ExecuteTemplate(w, "rides.html", services); err != nil {
+	if err := t.ExecuteTemplate(w, "hosted_services.html", services); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }

@@ -1,4 +1,5 @@
 webApplication:
+  serviceAccountName: "hoodaw-production"
   apiSecretName: cloud-platform-reports-api-key
   apiSecretKey: token
   hostname: https://reports.cloud-platform.service.justice.gov.uk
@@ -14,6 +15,9 @@ cronjobs:
   namespaceCostsReport:
     name: namespace-costs
     schedule: "41 5 * * *"
+  hostedServicesGo:
+    name: hosted-services-go
+    schedule: "37 4 * * *"
   hostedServices:
     name: hosted-services
     schedule: "37 4 * * *"

@@ -1,7 +1,11 @@
-- create s3(readonly public, write only manager) : done
-- create s3 irsa role terraform : done
+- create s3 bucket for reports
+- create s3 irsa read and write roles 
 - create function to post reports to s3(https://docs.aws.amazon.com/code-library/latest/ug/go_2_s3_code_examples.html)
 - create frontend
 - create deployment, service, ingress(for hosted_services report subpath)
 - delete hosted services from rb app
 - clean you unused reports
+- add s3 cred bucket to irsa role
+- move hoodaw into manager cluster
+- move hoodaw elements out of concoure-main namespace
+- from helm to terraform deployment
