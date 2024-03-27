@@ -19,6 +19,14 @@ spec:
           pathType: ImplementationSpecific
           backend:
             service:
-              name: {{ .Values.service.name }}
+              name: {{ .Values.ruby_service.name }}
               port:
-                number: {{ .Values.service.port }}
+                number: {{ .Values.ruby_service.port }}
+```     - path: /hosted_services
+          pathType: ImplementationSpecific
+          backend:
+            service:
+              name: {{ .Values.go_service.name }}
+              port:
+                number: {{ .Values.go_service.port }}
+

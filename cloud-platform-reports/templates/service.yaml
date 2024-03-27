@@ -1,13 +1,29 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Values.service.name }}
+  name: {{ .Values.ruby_service.name }}
   labels:
-    app: {{ .Values.service.name }}
+    app: {{ .Values.ruby_service.name }}
 spec:
   ports:
-  - port: {{ .Values.service.port }}
+  - port: {{ .Values.ruby_service.port }}
     name: https
-    targetPort: {{ .Values.service.port }}
+    targetPort: {{ .Values.ruby_service.port }}
   selector:
-    app: {{ .Values.deployment.labels.app }}
+    app: {{ .Values.ruby_deployment.labels.app }}
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.go_service.name }}
+  labels:
+    app: {{ .Values.go_service.name }}
+spec:
+  ports:
+  - port: {{ .Values.go_service.port }}
+    name: https
+    targetPort: {{ .Values.go_service.port }}
+  selector:
+    app: {{ .Values.go_deployment.labels.app }}
