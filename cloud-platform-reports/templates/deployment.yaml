@@ -1,30 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.deployment.name }}
+  name: {{ .Values.ruby_deployment.name }}
 spec:
-  replicas: {{ .Values.deployment.replicas }}
+  replicas: {{ .Values.ruby_deployment.replicas }}
   selector:
     matchLabels:
-      app: {{ .Values.deployment.labels.app }}
+      app: {{ .Values.ruby_deployment.labels.app }}
 
   template:
     metadata:
       labels:
-        app: {{ .Values.deployment.labels.app }}
+        app: {{ .Values.ruby_deployment.labels.app }}
 
     spec:
       serviceAccountName: cloud-platform-reports-prod-irsa
       containers:
-        - name: {{ .Values.deployment.containers.webapp.name }}
-          image: {{ .Values.deployment.containers.webapp.image }}:{{ .Chart.AppVersion }}
+        - name: {{ .Values.ruby_deployment.containers.webapp.name }}
+          image: {{ .Values.ruby_deployment.containers.webapp.image }}:{{ .Chart.AppVersion }}
           env:
-            - name: READ_ROLE_NAME
-              valueFrom: 
-                secretKeyRef:
-                  name: hoodaw-readonly-irsa
-                  key: role
-
             - name: RACK_ENV
               value: "production"
 
@@ -43,4 +37,40 @@ spec:
                   name: {{ .Values.dynamodb.secretName }}
                   key: table_name
           ports:
-          - containerPort: {{ .Values.service.port }}
+          - containerPort: {{ .Values.ruby_service.port }}
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.go_deployment.name }}
+spec:
+  replicas: {{ .Values.go_deployment.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.go_deployment.labels.app }}
+
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.go_deployment.labels.app }}
+
+    spec:
+      serviceAccountName: cloud-platform-reports-prod-irsa
+      containers:
+        - name: {{ .Values.go_deployment.containers.webapp.name }}
+          image: {{ .Values.go_deployment.containers.webapp.image }}:{{ .Chart.AppVersion }}
+          env:
+            - name: READ_ROLE_NAME
+              valueFrom: 
+                secretKeyRef:
+                  name: hoodaw-readonly-irsa
+                  key: role
+            - name: API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: hoodaw-api-key    # This k8s secret is created in the environments repository
+                  key: token
+          ports:
+          - containerPort: {{ .Values.go_deployment.port }}

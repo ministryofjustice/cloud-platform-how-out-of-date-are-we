@@ -1,5 +1,4 @@
-FROM golang:1.22
-
+FROM golang:1.22.1
 WORKDIR /app
 
 ENV XDG_CACHE_HOME=/tmp/.cache

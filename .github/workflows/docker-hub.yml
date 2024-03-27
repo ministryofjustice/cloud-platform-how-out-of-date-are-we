@@ -17,12 +17,18 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-      - name: Push webapp to docker hub
+      - name: Push ruby webapp to docker hub
         uses: docker/build-push-action@v5
         with:
           push: true
           tags: ministryofjustice/cloud-platform-how-out-of-date-are-we:${{ github.event.release.tag_name }}
-      - name: Compile the dashboard-reporter script
+      - name: Push go webapp to docker hub
+        uses: docker/build-push-action@v5
+        with:
+          push: true
+          file: Dockerfile_go
+          tags: ministryofjustice/cloud-platform-how-out-of-date-are-we-go:${{ github.event.release.tag_name }}
+      - name: Compile the dashboard-reporter go script
         run: cd dashboard-reporter/; make
       - name: Push dashboard-reporter to docker hub
         uses: docker/build-push-action@v5

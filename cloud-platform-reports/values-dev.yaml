@@ -4,11 +4,15 @@ ingress:
   annotations:
     external-dns.alpha.kubernetes.io/set-identifier: "cloud-platform-reports-app-ingress-new-cloud-platform-reports-dev-green"
     external-dns.alpha.kubernetes.io/aws-weight: "100"
-service:
+ruby_service:
   name: cloud-platform-reports-service
   port: 4567
 
-deployment:
+go_service:
+  name: cloud-platform-reports-service-go
+  port: 8080
+
+ruby_deployment:
   replicas: 1
   name: cloud-platform-reports
   labels:
@@ -17,6 +21,16 @@ deployment:
     webapp:
       name: cloud-platform-reports
       image: ministryofjustice/cloud-platform-how-out-of-date-are-we
+
+go_deployment:
+  replicas: 1
+  name: cloud-platform-reports-go
+  labels:
+    app: cloud-platform-reports-app-go
+  containers:
+    webapp:
+      name: cloud-platform-reports-go
+      image: ministryofjustice/cloud-platform-how-out-of-date-are-we-go
 
 dynamodb:
   secretName: cloud-platform-reports-dynamodb-output
