@@ -14,6 +14,7 @@ import (
 	"github.com/ministryofjustice/cloud-platform-environments/pkg/ingress"
 	"github.com/ministryofjustice/cloud-platform-environments/pkg/namespace"
 	utils "github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/utils"
+	networkingv1 "k8s.io/api/networking/v1"
 )
 
 // resourceMap is used to store both string:string and string:map[string]string key
