@@ -34,5 +34,3 @@ github.com/aws/aws-sdk-go-v2/service/sts v1.28.5 h1:J/PpTf/hllOjx8Xu9DMflff3Fajf
 github.com/aws/aws-sdk-go-v2/service/sts v1.28.5/go.mod h1:0ih0Z83YDH/QeQ6Ori2yGE2XvWYv/Xm+cZc01LC6oK0=
 github.com/aws/smithy-go v1.20.1 h1:4SZlSlMr36UEqC7XOyRVb27XMeZubNcBNN+9IgEPIQw=
 github.com/aws/smithy-go v1.20.1/go.mod h1:krry+ya/rV9RDcV/Q16kpu6ypI4K2czasz0NC3qS14E=
-github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/utils v0.0.0-20240327164907-81c38a5e39db h1:YC/V0EIF/1CJfMRUZnQR23YZSRyb7gdaNJPTlxDP6Vw=
-github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/utils v0.0.0-20240327164907-81c38a5e39db/go.mod h1:7a7MsCLQXFYujCsAbxMkngVZ/ZKF0bQq1HLfr9WGkjs=
