@@ -1,4 +1,4 @@
-module github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we
+module github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/utils
 
 go 1.22.1
 
