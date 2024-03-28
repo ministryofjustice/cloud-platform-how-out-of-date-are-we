@@ -25,11 +25,12 @@ import (
 type resourceMap map[string]interface{}
 
 var (
-	hoodawBucket = flag.String("howdaw-bucket", os.Getenv("HOODAW_BUCKET"), "AWS S3 bucket for hoodaw json reports")
-	bucket       = flag.String("bucket", os.Getenv("KUBECONFIG_S3_BUCKET"), "AWS S3 bucket for kubeconfig")
-	ctx          = flag.String("context", "live.cloud-platform.service.justice.gov.uk", "Kubernetes context specified in kubeconfig")
-	kubeconfig   = flag.String("kubeconfig", "kubeconfig", "Name of kubeconfig file in S3 bucket")
-	region       = flag.String("region", os.Getenv("AWS_REGION"), "AWS Region")
+	hoodawBucket   = flag.String("howdaw-bucket", os.Getenv("HOODAW_BUCKET"), "AWS S3 bucket for hoodaw json reports")
+	bucket         = flag.String("bucket", os.Getenv("KUBECONFIG_S3_BUCKET"), "AWS S3 bucket for kubeconfig")
+	ctx            = flag.String("context", "live.cloud-platform.service.justice.gov.uk", "Kubernetes context specified in kubeconfig")
+	kubeconfig     = flag.String("kubeconfig", "kubeconfig", "Name of kubeconfig file in S3 bucket")
+	region         = flag.String("region", os.Getenv("AWS_REGION"), "AWS Region")
+	write_role_arn = flag.String("write-role-arn", os.Getenv("AWS_ROLE_ARN"), "AWS Role ARN to assume for writing to S3 bucket")
 )
 
 func main() {
@@ -79,7 +80,7 @@ func main() {
 	}
 
 	// Post json to S3
-	client, err := utils.S3Client()
+	client, err := utils.S3AssumeRole(*write_role_arn, "cloud-platform-hoodaw-write")
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
