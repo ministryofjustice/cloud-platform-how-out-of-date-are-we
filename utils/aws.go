@@ -32,7 +32,15 @@ func S3AssumeRole(roleArn, roleSessionName string) (*s3.Client, error) {
 	cfg.Credentials = aws.NewCredentialsCache(creds)
 
 	return s3.NewFromConfig(cfg), nil
+}
 
+func S3Client() (*s3.Client, error) {
+	cfg, err := config.LoadDefaultConfig(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return s3.NewFromConfig(cfg), nil
 }
 
 func CheckBucketExists(client *s3.Client, bucket string) (bool, error) {
