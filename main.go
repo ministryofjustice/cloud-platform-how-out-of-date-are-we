@@ -3,17 +3,19 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"os"
 
 	lib "github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/lib"
 	utils "github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/utils"
 )
 
 var (
-	bucket = "cloud-platform-hoodaw-reports"
+	bucket        = "cloud-platform-hoodaw-reports"
+	read_arn_role = os.Getenv("AWS_ROLE_ARN")
 )
 
 func main() {
-	client, err := utils.S3Client()
+	client, err := utils.S3AssumeRole(read_arn_role, "cloud-platform-hoodaw-read-only")
 	if err != nil {
 		fmt.Println(err)
 	}
