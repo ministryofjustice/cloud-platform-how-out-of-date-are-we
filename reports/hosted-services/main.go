@@ -30,7 +30,7 @@ var (
 	ctx            = flag.String("context", "live.cloud-platform.service.justice.gov.uk", "Kubernetes context specified in kubeconfig")
 	kubeconfig     = flag.String("kubeconfig", "kubeconfig", "Name of kubeconfig file in S3 bucket")
 	region         = flag.String("region", os.Getenv("AWS_REGION"), "AWS Region")
-	write_role_arn = os.Getenv("WRITE_ROLE_NAME")
+	write_role_arn = flag.String("write-role-arn", os.Getenv("AWS_ROLE_ARN"), "AWS Role ARN to assume for writing to S3 bucket")
 )
 
 func main() {
@@ -80,9 +80,18 @@ func main() {
 	}
 
 	// Post json to S3
-	client, err := utils.S3AssumeRole(write_role_arn, "cloud-platform-hoodaw-write")
+	client, err := utils.S3AssumeRole(*write_role_arn, "cloud-platform-hoodaw-write")
 	if err != nil {
 		log.Fatalln(err.Error())
+	}
+
+	b, err := utils.CheckBucketExists(client, *hoodawBucket)
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	if !b {
+		log.Fatalf("Bucket %s does not exist\n", *hoodawBucket)
 	}
 
 	utils.ExportToS3(client, *hoodawBucket, "hosted_services.json", jsonToPost)

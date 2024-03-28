@@ -17,21 +17,14 @@ import (
 
 var ctx = context.TODO()
 
-func S3AssumeRole(ra, rsn string) (*s3.Client, error) {
+func S3AssumeRole(roleArn, roleSessionName string) (*s3.Client, error) {
 	cfg, err := config.LoadDefaultConfig(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	stsClient := sts.NewFromConfig(cfg)
-	// get aws account id
-	identity, err := stsClient.GetCallerIdentity(ctx, &sts.GetCallerIdentityInput{})
-	if err != nil {
-		return nil, err
-	}
 
-	roleArn := "arn:aws:iam::" + *identity.Account + ":role/" + ra
-	roleSessionName := rsn
 	creds := stscreds.NewAssumeRoleProvider(stsClient, roleArn, func(o *stscreds.AssumeRoleOptions) {
 		o.RoleSessionName = roleSessionName
 	})

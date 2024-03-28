@@ -11,7 +11,7 @@ import (
 
 var (
 	bucket        = "cloud-platform-hoodaw-reports"
-	read_arn_role = os.Getenv("READ_ROLE_NAME")
+	read_arn_role = os.Getenv("AWS_ROLE_ARN")
 )
 
 func main() {
