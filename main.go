@@ -29,7 +29,7 @@ func main() {
 	http.Handle("/static/",
 		http.StripPrefix("/static/",
 			http.FileServer(http.Dir("lib/static"))))
-	http.HandleFunc("/hosted-services", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/hosted_services", func(w http.ResponseWriter, r *http.Request) {
 		lib.HostedServices(w, r, bucket, client)
 	})
 	fmt.Println("Listening")
