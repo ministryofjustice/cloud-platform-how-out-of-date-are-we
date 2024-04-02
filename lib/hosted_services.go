@@ -11,13 +11,13 @@ import (
 )
 
 type HostedService struct {
-	Namespace    string `json:"namespace"`
-	Application  string `json:"application"`
-	BusinessUnit string `json:"business_unit"`
-	TeamName     string `json:"team_name"`
-	SlackChannel string `json:"slack_channel"`
-	SourcesCode  string `json:"source_code"`
-	DomainName   string `json:"domain_name"`
+	Namespace    string `json:"Name"`
+	Application  string `json:"Application"`
+	BusinessUnit string `json:"BusinessUnit"`
+	TeamName     string `json:"TeamName"`
+	SlackChannel string `json:"TeamSlackChannel"`
+	SourceCode   string `json:"GithubURL"`
+	DomainNames  string `json:"DomainNames"`
 
 	TotalNS,
 	TotalApps int
