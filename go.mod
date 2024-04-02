@@ -4,7 +4,7 @@ go 1.22.1
 
 require (
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.53.0
-	github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/utils v0.0.0-20240327164907-81c38a5e39db
+	github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/utils v0.0.0-20240328154428-45a30b27e918
 )
 
 require (

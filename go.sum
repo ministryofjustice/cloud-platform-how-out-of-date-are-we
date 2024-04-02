@@ -36,3 +36,5 @@ github.com/aws/smithy-go v1.20.1 h1:4SZlSlMr36UEqC7XOyRVb27XMeZubNcBNN+9IgEPIQw=
 github.com/aws/smithy-go v1.20.1/go.mod h1:krry+ya/rV9RDcV/Q16kpu6ypI4K2czasz0NC3qS14E=
 github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/utils v0.0.0-20240327164907-81c38a5e39db h1:YC/V0EIF/1CJfMRUZnQR23YZSRyb7gdaNJPTlxDP6Vw=
 github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/utils v0.0.0-20240327164907-81c38a5e39db/go.mod h1:7a7MsCLQXFYujCsAbxMkngVZ/ZKF0bQq1HLfr9WGkjs=
+github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/utils v0.0.0-20240328154428-45a30b27e918 h1:BtQQ42J3P0mO1JgEdzac1+bhzL2DwcCj7JjkBQGhSWU=
+github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/utils v0.0.0-20240328154428-45a30b27e918/go.mod h1:7a7MsCLQXFYujCsAbxMkngVZ/ZKF0bQq1HLfr9WGkjs=
