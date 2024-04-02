@@ -22,4 +22,4 @@ RUN go build -ldflags="-s -w" -o hoodaw -buildvcs=false
 
 EXPOSE 8080
 
-CMD ["hoodaw"]
+CMD ["./hoodaw"]
