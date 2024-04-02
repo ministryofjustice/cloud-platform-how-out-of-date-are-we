@@ -4,7 +4,7 @@ go 1.22.1
 
 require (
 	github.com/ministryofjustice/cloud-platform-environments v1.2.0
-	github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/utils v0.0.0-20240327164907-81c38a5e39db
+	github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/utils v0.0.0-20240328154428-45a30b27e918
 	k8s.io/api v0.23.2
 )
 

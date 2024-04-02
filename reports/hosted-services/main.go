@@ -80,7 +80,7 @@ func main() {
 	}
 
 	// Post json to S3
-	client, err := utils.S3AssumeRole(*write_role_arn, "cloud-platform-hoodaw-write")
+	client, err := utils.S3Client()
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
