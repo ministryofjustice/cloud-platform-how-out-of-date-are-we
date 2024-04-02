@@ -57,7 +57,7 @@ spec:
         app: {{ .Values.go_deployment.labels.app }}
 
     spec:
-      serviceAccountName: hoodaw-production
+      serviceAccountName: "hoodaw-production"
       containers:
         - name: {{ .Values.go_deployment.containers.webapp.name }}
           image: {{ .Values.go_deployment.containers.webapp.image }}:{{ .Chart.AppVersion }}
@@ -68,4 +68,4 @@ spec:
                   name: hoodaw-api-key    # This k8s secret is created in the environments repository
                   key: token
           ports:
-          - containerPort: {{ .Values.go_deployment.port }}
+          - containerPort: {{ .Values.go_service.port }}

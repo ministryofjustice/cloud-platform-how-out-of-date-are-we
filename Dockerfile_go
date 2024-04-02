@@ -18,7 +18,7 @@ RUN chown -R appuser:appgroup /app
 RUN go mod download
 USER 1000
 
-RUN go build -ldflags="-s -w" -o /app/hoodaw -buildvcs=false
+RUN go build -ldflags="-s -w" -o hoodaw -buildvcs=false
 
 EXPOSE 8080
 
