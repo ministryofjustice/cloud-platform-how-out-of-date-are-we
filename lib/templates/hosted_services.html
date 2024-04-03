@@ -1,61 +1,67 @@
-<!DOCTYPE html>
-<h2>Summary</h2>
-<div class="row mb-3">
-  <div class="col-sm-4">
-    <div class="card">
-      <div class="card-body">
-              <b>Total namespaces: </b>
-              {{.TotalNS}}
-      </div>
-    </div>
-  </div>
-  <div class="col-sm-4">
-    <div class="card">
-      <div class="card-body">
-              <b>Unique Apps: </b>
-              {{.TotalApp}}
-      </div>
-    </div>
-  </div>
+<style>
+  .table_component {
+      overflow: auto;
+      width: 100%;
+  }
+  
+  .table_component table {
+      border: 1px solid #dededf;
+      height: 100%;
+      width: 100%;
+      table-layout: fixed;
+      border-collapse: collapse;
+      border-spacing: 1px;
+      text-align: left;
+      word-wrap: break-word;
+  }
+  
+  .table_component caption {
+      caption-side: top;
+      text-align: left;
+  }
+  
+  .table_component th {
+      border: 1px solid #dededf;
+      background-color: #eceff1;
+      color: #000000;
+      padding: 5px;
+  }
+  
+  .table_component td {
+      border: 1px solid #dededf;
+      background-color: #ffffff;
+      color: #000000;
+      padding: 5px;
+  }
+</style>
 
-</div>
-    
-<div class="row">
-  <div class="table-responsive">
-  <h2>Service details</h2>
-  <p>Type any business unit, application or any text to filter the list:</p>  
-  <input class="form-control" id="searchInput" type="text" placeholder="Search..">
-  <br>
-
-  <table class="table">
-  <thead class="thead">
-    <tr>
-      <th scope="col">Namespace</th>
-      <th scope="col">Application</th>
-      <th scope="col">Business Unit</th>
-      <th scope="col">Team Name</th>
-      <th scope="col">Slack Channel</th>
-      <th scope="col">Source Code</th>
-      <th scope="col">Domain Names</th>
-    </tr>
-  </thead>
-  {{ range . }}
-  <tbody id="namespaceTable">
-    {{.Namespace}}
-    {{ range . }}
-    <tr>
-      <th scope="row">
-        <a href="/namespace/{{.Namespace}}">{{.Namespace}}</a>
-      </th>
-      <td>{{.Application}}</td>
-      <td>{{.BusinessUnit}}</td>
-      <td>{{.TeamName}}</td>
-      <td>{{.SlackChannel}}</td>
-      <td>{{.SourceCode}}</td>
-      <td>{{.DomainNames}}</td>
-    </tr>
-    {{ end }}
-  </tbody>
-  {{ end }}
+<div class="table_component" role="region" tabindex="0">
+  <h1>Hosted Services</h1>
+  <table>
+    <caption><h2>Cluster List</h2></caption>
+      <thead>
+        <tr>
+        <th>Namespace</th>
+        <th>Application</th>
+        <th>Business Unit</th>
+        <th>Team Name</th>
+        <th>Slack Channel</th>
+        <th>Source Code</th>
+        <th>Domain Names</th>
+        </tr>
+      </thead>
+    <tbody>
+      {{ range .HostedServices }}
+      <tr>
+        <td>{{.Namespace}}</td>
+        <td>{{.Application}}</td>
+        <td>{{.BusinessUnit}}</td>
+        <td>{{.TeamName}}</td>
+        <td>{{.SlackChannel}}</td>
+        <td>{{.SourceCode}}</td>
+        <td>{{.DomainNames}}</td>
+      </tr>
+      {{ end }}
+    </tbody>
   </table>
 </div>

@@ -30,7 +30,7 @@ func main() {
 		http.StripPrefix("/static/",
 			http.FileServer(http.Dir("lib/static"))))
 	http.HandleFunc("/hosted_services", func(w http.ResponseWriter, r *http.Request) {
-		lib.HostedServices(w, r, bucket, client)
+		lib.HostedServicesPage(w, bucket, client)
 	})
 	fmt.Println("Listening")
 	fmt.Println(http.ListenAndServe(":8080", nil))
