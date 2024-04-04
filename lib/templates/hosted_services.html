@@ -1,67 +1,119 @@
-<style>
-  .table_component {
-      overflow: auto;
-      width: 100%;
-  }
-  
-  .table_component table {
-      border: 1px solid #dededf;
-      height: 100%;
-      width: 100%;
-      table-layout: fixed;
-      border-collapse: collapse;
-      border-spacing: 1px;
-      text-align: left;
-      word-wrap: break-word;
-  }
-  
-  .table_component caption {
-      caption-side: top;
-      text-align: left;
-  }
-  
-  .table_component th {
-      border: 1px solid #dededf;
-      background-color: #eceff1;
-      color: #000000;
-      padding: 5px;
-  }
-  
-  .table_component td {
-      border: 1px solid #dededf;
-      background-color: #ffffff;
-      color: #000000;
-      padding: 5px;
-  }
-</style>
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Todo</a>
+            <div class="dropdown-menu">
+              <a class="dropdown-item" href="/dashboard">Dashboard</a>
+              <a class="dropdown-item" href="/helm_whatup">Helm Releases</a>
+              <a class="dropdown-item" href="/terraform_modules">Terraform Modules</a>
+              <a class="dropdown-item" href="/documentation">Documentation</a>
+              <a class="dropdown-item" href="/orphaned_resources">Orphaned AWS Resources</a>
+              <a class="dropdown-item" href="/orphaned_statefiles">Orphaned Terraform Statefiles</a>
+            </div>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Reports</a>
+            <div class="dropdown-menu">
+              <a class="dropdown-item" href="/costs_by_namespace">Costs by Namespace</a>
+              <a class="dropdown-item" href="/hosted_services">Hosted Services</a>
+              <a class="dropdown-item" href="/namespace_usage">Namespace Resource Usage</a>
+              <a class="dropdown-item" href="/live_1_domains">Services with live-1 Domains</a>
+               <a class="dropdown-item" href="/infrastructure_deployments">Infrastructure Deployments</a>
+            </div>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/about">About</a>
+          </li>
+        </ul>
+        <ul class="navbar-nav justify-content-end">
+          <li class="nav-item">
+            <a class="nav-link" href="https://github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we">GitHub</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
 
-<div class="table_component" role="region" tabindex="0">
-  <h1>Hosted Services</h1>
-  <table>
-    <caption><h2>Cluster List</h2></caption>
-      <thead>
+    <h2>Summary</h2>
+    <div class="row mb-3">
+      <div class="col-sm-4">
+        <div class="card">
+          <div class="card-body">
+            <b>Total namespaces: </b>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-4">
+        <div class="card">
+          <div class="card-body">
+            <b>Unique Apps: </b>
+          </div>
+        </div>
+      </div>
+    </div>
+        
+    <div class="row">
+      <div class="table-responsive">
+      <h2>Service details</h2>
+      <p>Type any business unit, application or any text to filter the list:</p>  
+      <input class="form-control" id="searchInput" type="text" placeholder="Search..">
+      <br>
+
+      <table class="table">
+      <thead class="thead">
         <tr>
-        <th>Namespace</th>
-        <th>Application</th>
-        <th>Business Unit</th>
-        <th>Team Name</th>
-        <th>Slack Channel</th>
-        <th>Source Code</th>
-        <th>Domain Names</th>
+          <th scope="col">Namespace</th>
+          <th scope="col">Application</th>
+          <th scope="col">Business unit</th>
+          <th scope="col">Team name</th>
+          <th scope="col">Slack channel</th>
+          <th scope="col">Source code</th>
+          <th scope="col">Domain names</th>
         </tr>
       </thead>
-    <tbody>
-      {{ range .HostedServices }}
-      <tr>
-        <td>{{.Namespace}}</td>
-        <td>{{.Application}}</td>
-        <td>{{.BusinessUnit}}</td>
-        <td>{{.TeamName}}</td>
-        <td>{{.SlackChannel}}</td>
-        <td>{{.SourceCode}}</td>
-        <td>{{.DomainNames}}</td>
-      </tr>
-      {{ end }}
-    </tbody>
-  </table>
-</div>
+      <tbody id="namespaceTable">
+        <tr>
+          <th scope="row">
+          {{ range .HostedServices }}
+          </th>
+            <td>{{.Namespace}}</td>
+            <td>{{.Application}}</td>
+            <td>{{.BusinessUnit}}</td>
+            <td>{{.TeamName}}</td>
+            <td>{{.SlackChannel}}</td>
+            <td>{{.SourceCode}}</td>
+            <td>{{.DomainNames}}</td>
+        </tr>
+        {{ end }}
+      </tbody>
+      </table>
+    </div>
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+
+  <script>
+    $(document).ready(function(){
+      $("#searchInput").on("keyup", function() {
+        var value = $(this).val();
+        $("#namespaceTable tr").filter(function() {
+          $(this).toggle($(this).text().indexOf(value) > -1)
+        });
+      });
+    });
+    </script>
+  </body>
+</html>
