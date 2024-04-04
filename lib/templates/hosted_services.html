@@ -85,9 +85,10 @@
         </tr>
       </thead>
       <tbody id="namespaceTable">
+        {{ range .HostedServices }}
         <tr>
           <th scope="row">
-          {{ range .HostedServices }}
+            <a href="/namespace/{{.Namespace}}">{{.Namespace}}</a>
           </th>
             <td>{{.Namespace}}</td>
             <td>{{.Application}}</td>
