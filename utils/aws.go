@@ -98,17 +98,19 @@ func ArchiveFile(client *s3.Client, bucketName, objectKey string) error {
 	return nil
 }
 
-func ImportS3File(client *s3.Client, bucketName, objectKey string) ([]byte, error) {
+func ImportS3File(client *s3.Client, bucketName, objectKey string) ([]byte, string, error) {
 	output, err := client.GetObject(ctx, &s3.GetObjectInput{
 		Bucket: aws.String(bucketName),
 		Key:    aws.String(objectKey),
 	})
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(output.Body)
 
-	return buf.Bytes(), nil
+	fileTimeStamp := output.Metadata["last-modified"]
+
+	return buf.Bytes(), fileTimeStamp, nil
 }
