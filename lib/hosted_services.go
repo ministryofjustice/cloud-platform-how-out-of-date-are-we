@@ -31,13 +31,15 @@ func HostedServicesPage(w http.ResponseWriter, bucket string, client *s3.Client)
 	t := template.Must(template.ParseFiles("lib/templates/hosted_services.html"))
 
 	// import json data from s3
-	byteValue, err := utils.ImportS3File(client, bucket, "hosted_services.json")
+	byteValue, filestamp, err := utils.ImportS3File(client, bucket, "hosted_services.json")
 	if err != nil {
 		fmt.Println(err)
 	}
 
 	var hostedServices HostedServices
 	json.Unmarshal(byteValue, &hostedServices)
+
+	hostedServices.LastUpdated = filestamp
 
 	countNS := make(map[string]int)
 	countApp := make(map[string]int)
