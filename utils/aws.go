@@ -118,7 +118,7 @@ func ImportS3File(client *s3.Client, bucketName, objectKey string) ([]byte, stri
 	buf.ReadFrom(output.Body)
 
 	// get the last modified timestamp
-	fileTimeStamp := output.Metadata["last-modified"]
+	fileTimeStamp := output.LastModified.String()
 
 	return buf.Bytes(), fileTimeStamp, nil
 }
