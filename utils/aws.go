@@ -17,6 +17,7 @@ import (
 
 var ctx = context.TODO()
 
+// S3AssumeRole returns an S3 client with assumed role
 func S3AssumeRole(roleArn, roleSessionName string) (*s3.Client, error) {
 	cfg, err := config.LoadDefaultConfig(ctx)
 	if err != nil {
@@ -34,6 +35,7 @@ func S3AssumeRole(roleArn, roleSessionName string) (*s3.Client, error) {
 	return s3.NewFromConfig(cfg), nil
 }
 
+// S3Client returns an S3 client
 func S3Client() (*s3.Client, error) {
 	cfg, err := config.LoadDefaultConfig(ctx)
 	if err != nil {
@@ -43,6 +45,7 @@ func S3Client() (*s3.Client, error) {
 	return s3.NewFromConfig(cfg), nil
 }
 
+// CheckBucketExists checks if a bucket exists
 func CheckBucketExists(client *s3.Client, bucket string) (bool, error) {
 	_, err := client.HeadBucket(ctx, &s3.HeadBucketInput{
 		Bucket: aws.String(bucket),
@@ -67,6 +70,7 @@ func CheckBucketExists(client *s3.Client, bucket string) (bool, error) {
 	return exists, err
 }
 
+// ExportToS3 uploads a file to S3
 func ExportToS3(client *s3.Client, bucketName, objectKey string, file []byte) error {
 	_, err := client.PutObject(ctx, &s3.PutObjectInput{
 		Bucket: aws.String(bucketName),
@@ -77,6 +81,7 @@ func ExportToS3(client *s3.Client, bucketName, objectKey string, file []byte) er
 	return err
 }
 
+// ArchiveFile copies the object to the archive folder in the same bucket
 func ArchiveFile(client *s3.Client, bucketName, objectKey string) error {
 	// check if the object exists
 	_, err := client.HeadObject(ctx, &s3.HeadObjectInput{
@@ -98,6 +103,7 @@ func ArchiveFile(client *s3.Client, bucketName, objectKey string) error {
 	return nil
 }
 
+// ImportS3File downloads a file from S3 and returns the file content and the last modified timestamp
 func ImportS3File(client *s3.Client, bucketName, objectKey string) ([]byte, string, error) {
 	output, err := client.GetObject(ctx, &s3.GetObjectInput{
 		Bucket: aws.String(bucketName),
@@ -107,9 +113,11 @@ func ImportS3File(client *s3.Client, bucketName, objectKey string) ([]byte, stri
 		return nil, "", err
 	}
 
+	// read the file content
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(output.Body)
 
+	// get the last modified timestamp
 	fileTimeStamp := output.Metadata["last-modified"]
 
 	return buf.Bytes(), fileTimeStamp, nil
