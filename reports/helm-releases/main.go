@@ -20,9 +20,11 @@ import (
 
 	cluster "github.com/ministryofjustice/cloud-platform-cli/pkg/cluster"
 	"github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/reports/pkg/hoodaw"
+	"github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/utils"
 )
 
 var (
+	hoodawBucket   = flag.String("howdaw-bucket", os.Getenv("HOODAW_BUCKET"), "AWS S3 bucket for hoodaw json reports")
 	hoodawApiKey   = flag.String("hoodawAPIKey", os.Getenv("HOODAW_API_KEY"), "API key to post data to the 'How out of date are we' API")
 	hoodawEndpoint = flag.String("hoodawEndpoint", "/helm_whatup", "Endpoint to send the data to")
 	hoodawHost     = flag.String("hoodawHost", os.Getenv("HOODAW_HOST"), "Hostname of the 'How out of date are we' API")
@@ -83,6 +85,26 @@ func main() {
 	}
 
 	jsonToPost, err := BuildJsonMap(clusters)
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	// Post json to S3
+	client, err := utils.S3Client()
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	b, err := utils.CheckBucketExists(client, *hoodawBucket)
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	if !b {
+		log.Fatalf("Bucket %s does not exist\n", *hoodawBucket)
+	}
+
+	utils.ExportToS3(client, *hoodawBucket, "hosted_services.json", jsonToPost)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}

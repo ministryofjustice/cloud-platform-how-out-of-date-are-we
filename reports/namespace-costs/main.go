@@ -19,10 +19,12 @@ import (
 	"github.com/ministryofjustice/cloud-platform-environments/pkg/authenticate"
 	"github.com/ministryofjustice/cloud-platform-environments/pkg/namespace"
 	"github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/reports/pkg/hoodaw"
+	"github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/utils"
 	v1 "k8s.io/api/core/v1"
 )
 
 var (
+	hoodawBucket   = flag.String("howdaw-bucket", os.Getenv("HOODAW_BUCKET"), "AWS S3 bucket for hoodaw json reports")
 	bucket         = flag.String("bucket", os.Getenv("KUBECONFIG_S3_BUCKET"), "AWS S3 bucket for kubeconfig")
 	ctx            = flag.String("context", "live.cloud-platform.service.justice.gov.uk", "Kubernetes context specified in kubeconfig")
 	hoodawApiKey   = flag.String("hoodawAPIKey", os.Getenv("HOODAW_API_KEY"), "API key to post data to the 'How out of date are we' API")
@@ -107,6 +109,26 @@ func main() {
 
 	// build the final jsonMap
 	jsonToPost, err := BuildJsonMap(namespacesMap)
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	// Post json to S3
+	client, err := utils.S3Client()
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	b, err := utils.CheckBucketExists(client, *hoodawBucket)
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	if !b {
+		log.Fatalf("Bucket %s does not exist\n", *hoodawBucket)
+	}
+
+	utils.ExportToS3(client, *hoodawBucket, "hosted_services.json", jsonToPost)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}

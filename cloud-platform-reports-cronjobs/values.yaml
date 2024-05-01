@@ -15,12 +15,6 @@ cronjobs:
   namespaceCostsReport:
     name: namespace-costs
     schedule: "41 5 * * *"
-  hostedServicesGo:
-    name: hosted-services-go
-    schedule: "37 4 * * *"
-  hostedServices:
-    name: hosted-services
-    schedule: "37 4 * * *"
   namespaceUsageReport:
     name: namespace-usage-report
     schedule: "11 */6 * * *"
@@ -30,9 +24,6 @@ cronjobs:
   overdueDocumentation:
     name: overdue-documentation
     schedule: "37 */6 * * *"
-  helmWhatup:
-    name: helm-whatup
-    schedule: "23 4 * * *"
   githubRepositories:
     name: github-repositories
     schedule: "12 5 * * *"
@@ -42,3 +33,23 @@ cronjobs:
   infraDeployments:
     name: infrastructure-deployments
     schedule: "59 23 28-31 * *"
+  helmWhatup:
+    name: helm-whatup
+    schedule: "23 4 * * *"
+    
+# Go service cronjobs are defined here to separate them from the Ruby service cronjobs
+  helmReleasesGo:
+    name: helm-releases-go
+    schedule: "23 4 * * *"
+  hostedServicesGo:
+    name: hosted-services-go
+    schedule: "37 4 * * *"
+  infraDeploymentsGo:
+    name: infrastructure-deployments
+    schedule: "59 23 28-31 * *"
+  namespaceCostsReportGo:
+    name: namespace-costs-go
+    schedule: "41 5 * * *"
+  namespaceUsageReportGo:
+    name: namespace-usage-report-go
+    schedule: "11 */6 * * *"
