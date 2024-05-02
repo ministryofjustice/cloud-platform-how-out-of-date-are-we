@@ -1,9 +1,9 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: {{ .Values.cronjobs.hostedServicesGo.name }}
+  name: {{ .Values.cronjobs.namespaceUsageReportGo.name }}
 spec:
-  schedule: "{{ .Values.cronjobs.hostedServicesGo.schedule }}"
+  schedule: "{{ .Values.cronjobs.namespaceUsageReportGo.schedule }}"
   successfulJobsHistoryLimit: 1
   failedJobsHistoryLimit: 1
   jobTemplate:
@@ -14,9 +14,8 @@ spec:
           {{- include "cloud-platform-reports-cronjobs.imagePullSecrets" . | indent 10 }}
           serviceAccountName: {{ .Values.webApplication.serviceAccountName }}
           containers:
-          - name: hosted-services-image
-            image: ministryofjustice/cloud-platform-hosted-services:{{ .Chart.AppVersion }}
-            imagePullPolicy: Always
+          - name: namespace-usage-reporter
+            image: ministryofjustice/cloud-platform-namespace-usage-reporter:{{ .Chart.AppVersion }}
             securityContext:
               runAsUser: 1000
               allowPrivilegeEscalation: false
@@ -45,5 +44,5 @@ spec:
             command:
             - /bin/sh
             - -c
-            - ./hostedservices
+            - ./namespace-usage
           restartPolicy: OnFailure

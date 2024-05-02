@@ -29,7 +29,7 @@
         </div>
         <div class="govuk-header__content">
           <h1 href="#" class="govuk-header__link govuk-header__service-name">
-            Cloud Platform Reports: Hosted Services
+            Cloud Platform Reports: Helm Releases
           </h1>
           <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -77,78 +77,28 @@
       <div class="col-sm-4">
         <div class="card">
           <div class="card-body">
-            <b>Total Namespaces: </b>
-            {{.TotalNamespaces}}
-          </div>
-        </div>
-      </div>
-      <div class="col-sm-4">
-        <div class="card">
-          <div class="card-body">
-            <b>Unique Applications: </b>
-            {{.UniqueApplications}}
-          </div>
-        </div>
-      </div>
-      <div class="col-sm-4">
-        <div class="card">
-          <div class="card-body">
             <b>Last Updated: </b>
             {{.LastUpdated}}
           </div>
         </div>
       </div>
     </div>
-        
     <div class="row">
-      <div class="table-responsive">
-      <h2 class="page_heading">Service details</h2>
-      <p class="text">Type any business unit, application or any text to filter the list:</p>  
-      <input class="form-control" id="searchInput" type="text" placeholder="Search..">
-      <br>
-
-      <table class="table">
-      <thead class="thead">
-        <tr>
-          <th scope="col">Namespace</th>
-          <th scope="col">Application</th>
-          <th scope="col">Business unit</th>
-          <th scope="col">Team name</th>
-          <th scope="col">Slack channel</th>
-          <th scope="col">Source code</th>
-          <th scope="col">Domain names</th>
-        </tr>
-      </thead>
-      <tbody id="namespaceTable">
-        {{ range .HostedServices }}
-        <tr>
-          <th scope="row">
-            <a href="/namespace/{{.Namespace}}">{{.Namespace}}</a>
-          </th>
-            <td>{{.Application}}</td>
-            <td>{{.BusinessUnit}}</td>
-            <td>{{.TeamName}}</td>
-            <td>{{.SlackChannel}}</td>
-            <td>{{.SourceCode}}</td>
-            <td>{{.DomainNames}}</td>
-        </tr>
-        {{ end }}
-      </tbody>
-      </table>
+      {{ range .HelmReleases }}
+        <div class="card text-white bg-{{ .State }} mb-3 mr-3" style="max-width: 18rem;">
+          <div class="card-header">
+            <h5 class="card-title">{{ .Name }}</h5>
+          </div>
+          <div class="card-body">
+            <ul>
+              <li>chart: {{ .Chart }}</li>
+              <li>namespace: {{ .Namespace }} </li>
+              <li>installed: {{ .InstalledVersion }}</li>
+              <li>latest: {{ .LatestVersion }}</li>
+            </ul>
+          </div>
+        </div>
+      {{ end }}
     </div>
-  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
-
-  <script>
-    $(document).ready(function(){
-      $("#searchInput").on("keyup", function() {
-        var value = $(this).val();
-        $("#namespaceTable tr").filter(function() {
-          $(this).toggle($(this).text().indexOf(value) > -1)
-        });
-      });
-    });
-    </script>
   </body>
 </html>

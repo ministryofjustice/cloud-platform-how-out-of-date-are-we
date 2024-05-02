@@ -1,0 +1,61 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f8f8f8;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+.page_heading {
+  text-align: left;
+  background-color: aliceblue;
+  color: rgb(33,37,41);
+  padding: 20px;
+  font-size: 1.50em;
+}
+
+.text {
+  text-align: left;
+  margin-top: 5px;
+  padding: 20px;
+}
+
+.table {
+  background: white;
+  margin-top: 5px;
+  overflow-y:scroll;
+  display:block;
+  height: 500px;
+  width: 100%;
+}
+
+
+.thead tr th{
+  background: black;
+  color: white;
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  z-index: 6;
+}
+
+a {
+  color: rgb(33,37,41);
+  font-style: bold;
+}
+
+td {
+  font-size: smaller;
+}
+
+.govuk-header {
+    background-color: rgb(33,37,41);
+    color: white ;
+    padding: 5px 10px;
+  }
+
+.govuk-header__logo svg {
+  fill: white;
+}
+
+h1 {
+  font-size: 1.25em;
+}

@@ -1,9 +1,9 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: {{ .Values.cronjobs.helmWhatup.name }}
+  name: {{ .Values.cronjobs.helmReleasesGo.name }}
 spec:
-  schedule: "{{ .Values.cronjobs.helmWhatup.schedule }}"
+  schedule: "{{ .Values.cronjobs.helmReleasesGo.schedule }}"
   successfulJobsHistoryLimit: 1
   failedJobsHistoryLimit: 1
   jobTemplate:
@@ -12,8 +12,9 @@ spec:
       template:
         spec:
           {{- include "cloud-platform-reports-cronjobs.imagePullSecrets" . | indent 10 }}
+          serviceAccountName: {{ .Values.webApplication.serviceAccountName }}
           containers:
-          - name: helm-whatup
+          - name: helm-releases-image
             image: ministryofjustice/cloud-platform-helm-release-checker:{{ .Chart.AppVersion }}
             securityContext:
               runAsUser: 1000
@@ -24,7 +25,20 @@ spec:
               capabilities:
                 drop: [ "ALL" ]
             env:
-            {{- include "cloud-platform-reports-cronjobs.awsCredentials" . | indent 12 }}
+            - name: HOODAW_BUCKET
+              value: cloud-platform-hoodaw-reports
+            - name: AWS_REGION
+              value: eu-west-2
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: aws-creds
+                  key: access-key-id
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: aws-creds
+                  key: secret-access-key
             {{- include "cloud-platform-reports-cronjobs.hoodaw-credentials" . | indent 12 }}
             {{- include "cloud-platform-reports-cronjobs.kubeconfigLocation" . | indent 12 }}
             command:
@@ -38,5 +52,4 @@ spec:
               limits:
                 memory: "4000Mi"
                 cpu: "2"
-
           restartPolicy: OnFailure
