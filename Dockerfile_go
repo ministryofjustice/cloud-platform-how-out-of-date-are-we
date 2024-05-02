@@ -12,7 +12,7 @@ WORKDIR /app
 COPY main.go go.mod go.sum ./
 COPY lib/hosted_services.go ./lib/hosted_services.go
 COPY lib/templates/ ./lib/templates
-COPY lib/static/ ./lib/static
+COPY lib/static/stylesheet ./lib/static/stylesheet
 COPY utils/ ./utils
 
 RUN chown -R appuser:appgroup /app
