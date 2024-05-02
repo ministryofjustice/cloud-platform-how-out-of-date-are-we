@@ -69,9 +69,3 @@ RUN helm repo add kube-state-metrics https://kubernetes.github.io/kube-state-met
   helm repo add cluster-proportional-autoscaler https://kubernetes-sigs.github.io/cluster-proportional-autoscaler; \
   helm repo add aqua https://aquasecurity.github.io/helm-charts; \
   helm repo add vmware-tanzu https://vmware-tanzu.github.io/helm-charts;
-
-
-
-
-
-
