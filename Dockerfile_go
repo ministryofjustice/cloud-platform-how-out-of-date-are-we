@@ -10,7 +10,7 @@ RUN addgroup -g 1000 -S appgroup \
 WORKDIR /app
 
 COPY main.go go.mod go.sum ./
-COPY lib/hosted_services.go ./lib/hosted_services.go
+COPY lib/*.go ./lib/
 COPY lib/templates/ ./lib/templates
 COPY lib/static/stylesheet ./lib/static/stylesheet
 COPY utils/ ./utils
