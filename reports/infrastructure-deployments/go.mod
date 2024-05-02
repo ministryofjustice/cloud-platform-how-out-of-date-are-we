@@ -4,7 +4,6 @@ go 1.22.1
 
 require (
 	github.com/ministryofjustice/cloud-platform-environments v1.1.4-0.20220630132714-e33e36fba033
-	github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/reports/pkg/hoodaw v0.0.0-20211102114020-9ce4671b775b
 	github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/utils v0.0.0-20240404121232-8c189a349866
 	github.com/shurcooL/githubv4 v0.0.0-20220520033151-0b4e3294ff00
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8

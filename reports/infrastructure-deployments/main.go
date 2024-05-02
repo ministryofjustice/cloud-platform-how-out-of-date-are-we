@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/ministryofjustice/cloud-platform-environments/pkg/authenticate"
-	"github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/reports/pkg/hoodaw"
 	"github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/utils"
 	"github.com/shurcooL/githubv4"
 	"golang.org/x/oauth2"
@@ -26,14 +25,10 @@ import (
 type resourceMap map[string]interface{}
 
 var (
-	hoodawBucket   = flag.String("howdaw-bucket", os.Getenv("HOODAW_BUCKET"), "AWS S3 bucket for hoodaw json reports")
-	hoodawApiKey   = flag.String("hoodawAPIKey", os.Getenv("HOODAW_API_KEY"), "API key to post data to the 'How out of date are we' API")
-	hoodawEndpoint = flag.String("hoodawEndpoint", "/infrastructure_deployments", "Endpoint to send the data to")
-	hoodawHost     = flag.String("hoodawHost", os.Getenv("HOODAW_HOST"), "Hostname of the 'How out of date are we' API")
-	org            = flag.String("org", "ministryofjustice", "GitHub user or organisation.")
-	repository     = flag.String("repository", "cloud-platform-infrastructure", "Repository to check the PR of.")
-	token          = flag.String("token", os.Getenv("GITHUB_OAUTH_TOKEN"), "Personal access token for GitHub API.")
-	endPoint       = *hoodawHost + *hoodawEndpoint
+	hoodawBucket = flag.String("howdaw-bucket", os.Getenv("HOODAW_BUCKET"), "AWS S3 bucket for hoodaw json reports")
+	org          = flag.String("org", "ministryofjustice", "GitHub user or organisation.")
+	repository   = flag.String("repository", "cloud-platform-infrastructure", "Repository to check the PR of.")
+	token        = flag.String("token", os.Getenv("GITHUB_OAUTH_TOKEN"), "Personal access token for GitHub API.")
 )
 
 const (
@@ -108,13 +103,7 @@ func main() {
 		log.Fatalf("Bucket %s does not exist\n", *hoodawBucket)
 	}
 
-	utils.ExportToS3(client, *hoodawBucket, "hosted_services.json", jsonToPost)
-	if err != nil {
-		log.Fatalln(err.Error())
-	}
-
-	//Post json to hoowdaw api
-	err = hoodaw.PostToApi(jsonToPost, hoodawApiKey, &endPoint)
+	utils.ExportToS3(client, *hoodawBucket, "infra_deployment.json", jsonToPost)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}

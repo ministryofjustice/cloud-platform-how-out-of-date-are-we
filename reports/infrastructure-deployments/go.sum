@@ -242,8 +242,6 @@ github.com/mailru/easyjson v0.0.0-20190626092158-b2ccc519800e/go.mod h1:C1wdFJiN
 github.com/mailru/easyjson v0.7.6/go.mod h1:xzfreul335JAWq5oZzymOObrkdz5UnU4kGfJJLY9Nlc=
 github.com/ministryofjustice/cloud-platform-environments v1.1.4-0.20220630132714-e33e36fba033 h1:DeLlWyresbE1cT/PzbkO20k78roegBkRLCw/5DBquE4=
 github.com/ministryofjustice/cloud-platform-environments v1.1.4-0.20220630132714-e33e36fba033/go.mod h1:4YYB2kGC47T5WZQe6SzZCOiAzu/VkmK6sdD2wa3+pkw=
-github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/reports/pkg/hoodaw v0.0.0-20211102114020-9ce4671b775b h1:OeZXQFjFX+JA/kqT/w3jP/Bt2amk/SZVhEruFw+/LI0=
-github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/reports/pkg/hoodaw v0.0.0-20211102114020-9ce4671b775b/go.mod h1:MBNDOQ9eBV1V9rbtuQOiXYkhSyuytZwK2J2m44+rgMk=
 github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/utils v0.0.0-20240404121232-8c189a349866 h1:erpKL6lSojpmUWGEVQf7CpySZpj6kpSyqgjmyQrM0b8=
 github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/utils v0.0.0-20240404121232-8c189a349866/go.mod h1:7a7MsCLQXFYujCsAbxMkngVZ/ZKF0bQq1HLfr9WGkjs=
 github.com/mitchellh/mapstructure v1.1.2/go.mod h1:FVVH3fgwuzCH5S8UJGiWEs2h04kUh9fWfEaFds41c1Y=
