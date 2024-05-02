@@ -1,9 +1,9 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: {{ .Values.cronjobs.hostedServicesGo.name }}
+  name: {{ .Values.cronjobs.infraDeploymentsGo.name }}
 spec:
-  schedule: "{{ .Values.cronjobs.hostedServicesGo.schedule }}"
+  schedule: "{{ .Values.cronjobs.infraDeploymentsGo.schedule }}"
   successfulJobsHistoryLimit: 1
   failedJobsHistoryLimit: 1
   jobTemplate:
@@ -14,8 +14,8 @@ spec:
           {{- include "cloud-platform-reports-cronjobs.imagePullSecrets" . | indent 10 }}
           serviceAccountName: {{ .Values.webApplication.serviceAccountName }}
           containers:
-          - name: hosted-services-image
-            image: ministryofjustice/cloud-platform-hosted-services:{{ .Chart.AppVersion }}
+          - name: live-one-domains-image
+            image: ministryofjustice/cloud-platform-infrastructure-deployments:{{ .Chart.AppVersion }}
             imagePullPolicy: Always
             securityContext:
               runAsUser: 1000
@@ -26,6 +26,11 @@ spec:
               capabilities:
                 drop: [ "ALL" ]
             env:
+            - name: GITHUB_OAUTH_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: how-out-of-date-are-we-github-token
+                  key: token
             - name: HOODAW_BUCKET
               value: cloud-platform-hoodaw-reports
             - name: AWS_REGION
@@ -45,5 +50,5 @@ spec:
             command:
             - /bin/sh
             - -c
-            - ./hostedservices
+            - ./infrastructure-deployments
           restartPolicy: OnFailure

@@ -13,6 +13,7 @@ import (
 
 	"github.com/ministryofjustice/cloud-platform-environments/pkg/authenticate"
 	"github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/reports/pkg/hoodaw"
+	"github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/utils"
 	"github.com/shurcooL/githubv4"
 	"golang.org/x/oauth2"
 )
@@ -25,6 +26,7 @@ import (
 type resourceMap map[string]interface{}
 
 var (
+	hoodawBucket   = flag.String("howdaw-bucket", os.Getenv("HOODAW_BUCKET"), "AWS S3 bucket for hoodaw json reports")
 	hoodawApiKey   = flag.String("hoodawAPIKey", os.Getenv("HOODAW_API_KEY"), "API key to post data to the 'How out of date are we' API")
 	hoodawEndpoint = flag.String("hoodawEndpoint", "/infrastructure_deployments", "Endpoint to send the data to")
 	hoodawHost     = flag.String("hoodawHost", os.Getenv("HOODAW_HOST"), "Hostname of the 'How out of date are we' API")
@@ -91,6 +93,26 @@ func main() {
 		log.Fatalln(err.Error())
 	}
 
+	// Post json to S3
+	client, err := utils.S3Client()
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	b, err := utils.CheckBucketExists(client, *hoodawBucket)
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	if !b {
+		log.Fatalf("Bucket %s does not exist\n", *hoodawBucket)
+	}
+
+	utils.ExportToS3(client, *hoodawBucket, "hosted_services.json", jsonToPost)
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
 	//Post json to hoowdaw api
 	err = hoodaw.PostToApi(jsonToPost, hoodawApiKey, &endPoint)
 	if err != nil {
@@ -113,7 +135,8 @@ func getFirstLastDayofMonth(nthMonth int) date {
 }
 
 // getPrsPerMonth takes date and number of PRs count as input, search the github using Graphql api for
-//  list of PRs (title,url) between the first and last day provided
+//
+//	list of PRs (title,url) between the first and last day provided
 func getPrsPerMonth(date date, count int) ([]nodes, error) {
 	src := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: *token},
