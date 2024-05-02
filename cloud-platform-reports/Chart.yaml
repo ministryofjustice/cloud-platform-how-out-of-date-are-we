@@ -2,5 +2,5 @@ apiVersion: v2
 name: cloud-platform-reports
 description: Cloud Platform Reports web application and data providers
 type: application
-version: 1.1.2
-appVersion: "4.3.1"
+version: 1.1.3
+appVersion: "4.3.2"
