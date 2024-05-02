@@ -1,9 +1,9 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: {{ .Values.cronjobs.infraDeploymentsGo.name }}
+  name: {{ .Values.cronjobs.infraDeployments.name }}
 spec:
-  schedule: "{{ .Values.cronjobs.infraDeploymentsGo.schedule }}"
+  schedule: "{{ .Values.cronjobs.infraDeployments.schedule }}"
   successfulJobsHistoryLimit: 1
   failedJobsHistoryLimit: 1
   jobTemplate:
@@ -12,10 +12,9 @@ spec:
       template:
         spec:
           {{- include "cloud-platform-reports-cronjobs.imagePullSecrets" . | indent 10 }}
-          serviceAccountName: {{ .Values.webApplication.serviceAccountName }}
           containers:
           - name: infrastructure-deployments-image
-            image: ministryofjustice/cloud-platform-infrastructure-deployments:{{ .Chart.AppVersion }}
+            image: ministryofjustice/cloud-platform-infrastructure-deployments:4.3.1
             imagePullPolicy: Always
             securityContext:
               runAsUser: 1000

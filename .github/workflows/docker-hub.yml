@@ -58,13 +58,13 @@ jobs:
           context: ./reports/documentation
           file: ./reports/documentation/Dockerfile
           tags: ministryofjustice/cloud-platform-overdue-documentation-checker:${{ github.event.release.tag_name }}
-      - name: Push helm-release-checker to docker hub
-        uses: docker/build-push-action@v5
-        with:
-          push: true
-          context: ./reports/helm-releases
-          file: ./reports/helm-releases/Dockerfile
-          tags: ministryofjustice/cloud-platform-helm-release-checker:${{ github.event.release.tag_name }}
+      # - name: Push helm-release-checker to docker hub
+      #   uses: docker/build-push-action@v5
+      #   with:
+      #     push: true
+      #     context: ./reports/helm-releases
+      #     file: ./reports/helm-releases/Dockerfile
+      #     tags: ministryofjustice/cloud-platform-helm-release-checker:${{ github.event.release.tag_name }}
       - name: Push orphaned-aws-resources checker to docker hub
         uses: docker/build-push-action@v5
         with:

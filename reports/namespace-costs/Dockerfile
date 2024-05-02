@@ -1,4 +1,4 @@
-FROM golang:1.17-stretch AS namespace_costs_builder
+FROM golang:1.22.1 AS namespace_costs_builder
 
 ENV CGO_ENABLED=0 \
     GOOS=linux

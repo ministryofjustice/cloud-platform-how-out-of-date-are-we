@@ -1,9 +1,9 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: {{ .Values.cronjobs.infraDeploymentsGo.name }}
+  name: {{ .Values.cronjobs.helmWhatup.name }}
 spec:
-  schedule: "{{ .Values.cronjobs.infraDeploymentsGo.schedule }}"
+  schedule: "{{ .Values.cronjobs.helmWhatup.schedule }}"
   successfulJobsHistoryLimit: 1
   failedJobsHistoryLimit: 1
   jobTemplate:
@@ -12,11 +12,9 @@ spec:
       template:
         spec:
           {{- include "cloud-platform-reports-cronjobs.imagePullSecrets" . | indent 10 }}
-          serviceAccountName: {{ .Values.webApplication.serviceAccountName }}
           containers:
-          - name: infrastructure-deployments-image
-            image: ministryofjustice/cloud-platform-infrastructure-deployments:{{ .Chart.AppVersion }}
-            imagePullPolicy: Always
+          - name: helm-releases-image
+            image: ministryofjustice/cloud-platform-helm-release-checker:4.3.1
             securityContext:
               runAsUser: 1000
               allowPrivilegeEscalation: false
@@ -26,11 +24,6 @@ spec:
               capabilities:
                 drop: [ "ALL" ]
             env:
-            - name: GITHUB_OAUTH_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: how-out-of-date-are-we-github-token
-                  key: token
             - name: HOODAW_BUCKET
               value: cloud-platform-hoodaw-reports
             - name: AWS_REGION
@@ -45,10 +38,17 @@ spec:
                 secretKeyRef:
                   name: aws-creds
                   key: secret-access-key
-            {{- include "cloud-platform-reports-cronjobs.kubeconfigLocation" . | indent 12 }}
             {{- include "cloud-platform-reports-cronjobs.hoodaw-credentials" . | indent 12 }}
+            {{- include "cloud-platform-reports-cronjobs.kubeconfigLocation" . | indent 12 }}
             command:
             - /bin/sh
             - -c
-            - ./infrastructure-deployments
+            - ./helm-releases
+            resources:
+              requests:
+                memory: "2000Mi"
+                cpu: "1"
+              limits:
+                memory: "4000Mi"
+                cpu: "2"
           restartPolicy: OnFailure
