@@ -13,23 +13,19 @@ import (
 	"time"
 
 	client "github.com/ministryofjustice/cloud-platform-cli/pkg/client"
+	utils "github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/utils"
 
 	"k8s.io/client-go/kubernetes"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	cluster "github.com/ministryofjustice/cloud-platform-cli/pkg/cluster"
-	"github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/reports/pkg/hoodaw"
 )
 
 var (
-	hoodawApiKey   = flag.String("hoodawAPIKey", os.Getenv("HOODAW_API_KEY"), "API key to post data to the 'How out of date are we' API")
-	hoodawEndpoint = flag.String("hoodawEndpoint", "/helm_whatup", "Endpoint to send the data to")
-	hoodawHost     = flag.String("hoodawHost", os.Getenv("HOODAW_HOST"), "Hostname of the 'How out of date are we' API")
-	region         = flag.String("region", os.Getenv("AWS_REGION"), "AWS Region")
-	kubeCfgPath    = flag.String("kubeCfgPath", os.Getenv("KUBECONFIG"), "Path of the kube config file")
-
-	endPoint = *hoodawHost + *hoodawEndpoint
+	hoodawBucket = flag.String("howdaw-bucket", os.Getenv("HOODAW_BUCKET"), "AWS S3 bucket for hoodaw json reports")
+	region       = flag.String("region", os.Getenv("AWS_REGION"), "AWS Region")
+	kubeCfgPath  = flag.String("kubeCfgPath", os.Getenv("KUBECONFIG"), "Path of the kube config file")
 )
 
 type helmNamespace struct {
@@ -87,11 +83,26 @@ func main() {
 		log.Fatalln(err.Error())
 	}
 
-	// Post json to hoowdaw api
-	err = hoodaw.PostToApi(jsonToPost, hoodawApiKey, &endPoint)
+	// Post json to S3
+	client, err := utils.S3Client()
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
+
+	b, err := utils.CheckBucketExists(client, *hoodawBucket)
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	if !b {
+		log.Fatalf("Bucket %s does not exist\n", *hoodawBucket)
+	}
+
+	utils.ExportToS3(client, *hoodawBucket, "helm-releases.json", jsonToPost)
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
 }
 
 func getCredentials(awsRegion string) (*client.AwsCredentials, error) {
