@@ -12,7 +12,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	utils "github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/utils"
-	vpc "orphaned_resources/orphaned_resources/vpc"
+	vpc "orphaned_resources/vpc"
 )
 
 type OrphanedAwsResrouces struct {
@@ -66,7 +66,7 @@ func getAllTfState() []string {
 			strIdx := fmt.Sprint(idx)
 
 			// TODO: construct more meaningful tfstate file name
-			filename := "local_tfstate/" + strIdx + "-terraform.tfstate"
+			filename := "../local_tfstate/" + strIdx + "-terraform.tfstate"
 
 			err = os.WriteFile(filename, body, 0644)
 			if err != nil {

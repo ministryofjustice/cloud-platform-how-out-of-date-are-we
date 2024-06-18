@@ -3,6 +3,8 @@ package vpc
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"log"
 	"os"
 
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
@@ -67,6 +69,12 @@ func GetOrphaned(ec2Client *ec2.Client, tfStateFiles []string) ([]string, error)
 		if !utils.Contains(vpcIds, *vpc.VpcId) {
 			orphanedVpcs = append(orphanedVpcs, *vpc.VpcId)
 		}
+	}
+
+	fmt.Printf("There are %d Oprhaned VPCs.", len(orphanedVpcs))
+
+	if len(orphanedVpcs) > 0 {
+		log.Println("Oprhaned VPC Ids:", orphanedVpcs)
 	}
 
 	return orphanedVpcs, nil
