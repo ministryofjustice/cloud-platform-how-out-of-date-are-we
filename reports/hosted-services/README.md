@@ -29,15 +29,11 @@ You can see from the codebase, a number of environment variables are required to
 
 - context - The kubernetes cluster to which the report  
 
-- hoodawAPIKey: The API key of the "How out of date are we application" (HOODAW)
-
-- hoodawEndpoint: The endpoint of the HOODAW Application "hosted_services"
-
-- hoodawHost: The hostname of the HOODAW hostname i.e. https://reports.cloud-platform.service.justice.gov.uk
-
 - kubeconfig - The kubeconfig name in the variable bucket
 
 - region - AWS Region to get the s3 bucket
+
+- hoodawBucket - The bucket name that hosts the hoodaw reports
 
 ## How to test locally
 

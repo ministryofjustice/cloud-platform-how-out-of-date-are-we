@@ -49,7 +49,6 @@ def dashboard_data
     terraform_modules: get_data_from_json_file("terraform_modules", "out_of_date_modules", ItemList),
     orphaned_resources: get_data_from_json_file("orphaned_resources", "orphaned_aws_resources", OrphanedResources),
     orphaned_statefiles: get_data_from_json_file("orphaned_statefiles", "data", ItemList),
-    hosted_services: get_data_from_json_file("hosted_services", "namespace_details", ItemList),
     live_1_domains: get_data_from_json_file("live_1_domains", "live_1_domains", ItemList),
   }
 
@@ -151,11 +150,6 @@ def namespace_usage_from_json
   NamespaceUsage.new(json: json)
 end
 
-def hosted_services_from_json
-  json = store.retrieve_file("data/hosted_services.json")
-  HostedServices.new(json: json)
-end
-
 def hosted_services_for_namespace(namespace)
   json = store.retrieve_file("data/hosted_services.json")
   data = JSON.parse(json)
@@ -224,24 +218,6 @@ get "/orphaned_statefiles" do
     serve_json_data(:orphaned_statefiles)
   else
     render_item_list(title: "Orphaned Terraform Statefiles", docpath: "orphaned_statefiles", key: "data")
-  end
-end
-
-get "/hosted_services" do
-  if accept_json?(request)
-    serve_json_data(:hosted_services)
-  else
-    hs = hosted_services_from_json
-
-    locals = {
-      title: "Hosted Services",
-      total_ns: hs.total_ns,
-      total_apps: hs.unique_apps,
-      details: hs.namespaces,
-      updated_at: hs.updated_at,
-    }
-    erb :hosted_services, locals: locals
-
   end
 end
 
