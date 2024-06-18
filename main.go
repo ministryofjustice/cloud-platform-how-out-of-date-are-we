@@ -30,9 +30,9 @@ func main() {
 	http.HandleFunc("/hosted_services", func(w http.ResponseWriter, r *http.Request) {
 		lib.HostedServicesPage(w, bucket, client)
 	})
-	http.HandleFunc("/helm_releases", func(w http.ResponseWriter, r *http.Request) {
-		lib.HelmReleasesPage(w, bucket, client)
-	})
+	// http.HandleFunc("/helm_releases", func(w http.ResponseWriter, r *http.Request) {
+	// 	lib.HelmReleasesPage(w, bucket, client)
+	// })
 	fmt.Println("Listening")
 	fmt.Println(http.ListenAndServe(":8080", nil))
 }

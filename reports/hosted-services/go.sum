@@ -245,8 +245,6 @@ github.com/ministryofjustice/cloud-platform-environments v1.2.0 h1:GLzXDKXQUG+V/
 github.com/ministryofjustice/cloud-platform-environments v1.2.0/go.mod h1:iDV5jg/eQZb3fLx8RZYuCqEdIBNCRK8QGn72EMMC128=
 github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/reports/pkg/hoodaw v0.0.0-20211102114020-9ce4671b775b h1:OeZXQFjFX+JA/kqT/w3jP/Bt2amk/SZVhEruFw+/LI0=
 github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/reports/pkg/hoodaw v0.0.0-20211102114020-9ce4671b775b/go.mod h1:MBNDOQ9eBV1V9rbtuQOiXYkhSyuytZwK2J2m44+rgMk=
-github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/utils v0.0.0-20240327164907-81c38a5e39db h1:YC/V0EIF/1CJfMRUZnQR23YZSRyb7gdaNJPTlxDP6Vw=
-github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/utils v0.0.0-20240327164907-81c38a5e39db/go.mod h1:7a7MsCLQXFYujCsAbxMkngVZ/ZKF0bQq1HLfr9WGkjs=
 github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/utils v0.0.0-20240328154428-45a30b27e918 h1:BtQQ42J3P0mO1JgEdzac1+bhzL2DwcCj7JjkBQGhSWU=
 github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/utils v0.0.0-20240328154428-45a30b27e918/go.mod h1:7a7MsCLQXFYujCsAbxMkngVZ/ZKF0bQq1HLfr9WGkjs=
 github.com/mitchellh/mapstructure v1.1.2/go.mod h1:FVVH3fgwuzCH5S8UJGiWEs2h04kUh9fWfEaFds41c1Y=
