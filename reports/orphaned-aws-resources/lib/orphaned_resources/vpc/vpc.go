@@ -26,7 +26,6 @@ type VpcTfState struct {
 func getFromTf(tfStateFiles []string) ([]string, error) {
 	vpcIds := []string{}
 
-	// loop over the tf state files
 	for _, file := range tfStateFiles {
 		data, err := os.ReadFile(file)
 		if err != nil {

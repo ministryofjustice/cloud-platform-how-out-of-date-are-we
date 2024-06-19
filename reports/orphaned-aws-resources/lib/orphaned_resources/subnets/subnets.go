@@ -1,4 +1,4 @@
-package hosted_zones
+package subnets
 
 import (
 	"encoding/json"
@@ -39,6 +39,7 @@ type SubnetsTfState struct {
 
 func GetFromTf(tfStateFiles []string) ([]string, error) {
 	subnetIds := []string{}
+
 	for _, file := range tfStateFiles {
 		data, err := os.ReadFile(file)
 		if err != nil {
@@ -51,6 +52,8 @@ func GetFromTf(tfStateFiles []string) ([]string, error) {
 		if unmarshalErr != nil {
 			return nil, unmarshalErr
 		}
+
+		log.Println("looping....", subnetsTfState)
 
 		// outputs -> external_subnets_ids || outputs -> internal_subnets_ids
 		if subnetsTfState.Outputs.ExternalSubnetIds.Value != nil && subnetsTfState.Outputs.InternalSubnetIds.Value != nil {

@@ -9,10 +9,12 @@ import (
 	"strings"
 	"time"
 
+	subnets "orphaned_resources/subnets"
+	vpc "orphaned_resources/vpc"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	utils "github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/utils"
-	vpc "orphaned_resources/vpc"
 )
 
 type OrphanedAwsResrouces struct {
@@ -93,6 +95,8 @@ func main() {
 	if ec2Err != nil {
 		log.Fatal(ec2Err)
 	}
+
+	subnets.GetFromTf(tfStateFiles)
 
 	// construct the json from all the resource functions
 
