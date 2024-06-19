@@ -48,7 +48,7 @@ func main() {
 		log.Fatalln(err.Error())
 	}
 
-	//make namespace map
+	// make namespace map
 	nsDetailsMap := make(map[string]namespace.Namespace, 0)
 
 	// get required details of each namespace and store it in namespace map
@@ -80,7 +80,7 @@ func main() {
 	}
 
 	// Post json to S3
-	client, err := utils.S3Client()
+	client, err := utils.S3Client("eu-west-1")
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
@@ -118,11 +118,9 @@ func GetNamespaceDetails(ns v1.Namespace) namespace.Namespace {
 // BuildIngressesMap takes the Ingress list and return a map with key as namespace and value
 // with slices of string containing hosts urls
 func BuildIngressesMap(ingressItems []networkingv1.Ingress) map[string][]string {
-
 	ingressMap := make(map[string][]string, 0)
 
 	for _, i := range ingressItems {
-
 		for _, v := range i.Spec.TLS {
 			if len(v.Hosts) > 0 {
 				ingressMap[i.Namespace] = append(ingressMap[i.Namespace], v.Hosts[0])

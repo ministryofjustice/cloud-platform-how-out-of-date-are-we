@@ -9,6 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials/stscreds"
+	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
@@ -35,14 +36,24 @@ func S3AssumeRole(roleArn, roleSessionName string) (*s3.Client, error) {
 	return s3.NewFromConfig(cfg), nil
 }
 
-// S3Client returns an S3 client
-func S3Client() (*s3.Client, error) {
+func S3Client(region string) (*s3.Client, error) {
 	cfg, err := config.LoadDefaultConfig(ctx)
 	if err != nil {
 		return nil, err
 	}
 
+	cfg.Region = region
+
 	return s3.NewFromConfig(cfg), nil
+}
+
+func Ec2Client() (*ec2.Client, error) {
+	cfg, err := config.LoadDefaultConfig(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return ec2.NewFromConfig(cfg), nil
 }
 
 // CheckBucketExists checks if a bucket exists

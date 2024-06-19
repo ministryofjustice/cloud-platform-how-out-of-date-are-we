@@ -73,7 +73,7 @@ func main() {
 		log.Fatalln(err.Error())
 	}
 
-	//create a new costs object
+	// create a new costs object
 	c := &costs{
 		costPerNamespace: map[string]map[string]float64{},
 	}
@@ -114,7 +114,7 @@ func main() {
 	}
 
 	// Post json to S3
-	client, err := utils.S3Client()
+	client, err := utils.S3Client("eu-west-1")
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
@@ -142,7 +142,6 @@ func main() {
 
 // getAwsCostAndUsageData get the data from aws cost explorer api and build a slice of [date,resourcename,namespacename,cost]
 func getAwsCostAndUsageData() ([][]string, error) {
-
 	cfg, err := config.LoadDefaultConfig(context.TODO())
 	if err != nil {
 		return nil, err
@@ -204,7 +203,6 @@ func timeNow(x int) (string, string) {
 // updatecostsByNamespace get the aws CostUsageData and update the costPerNamespace
 // with resources and map per namespace
 func (c *costs) updatecostsByNamespace(awsCostUsageData [][]string) error {
-
 	for _, col := range awsCostUsageData {
 		cost, err := strconv.ParseFloat(col[3], 64)
 		if err != nil {
@@ -221,12 +219,10 @@ func (c *costs) updatecostsByNamespace(awsCostUsageData [][]string) error {
 // addSharedCosts get the value of shared costs for each namespace, delete the shared_costs key and
 // and assign the shared_costs per namespace
 func (c *costs) addSharedCosts() error {
-
 	costsPerNs := c.getSharedCosts()
 	delete(c.costPerNamespace, SHARED_COSTS)
 	c.addSharedPerNamespace(costsPerNs)
 	return nil
-
 }
 
 // getSharedCosts calculates the shared costs by adding
@@ -247,16 +243,13 @@ func (c *costs) getSharedCosts() float64 {
 
 // addSharedPerNamespace get the shared cost and assign the shared_costs per namespace
 func (c *costs) addSharedPerNamespace(costsPerNs float64) {
-
 	for _, v := range c.costPerNamespace {
 		v["Shared AWS Costs"] = costsPerNs
 	}
-
 }
 
 // add shared team costs per namespace
 func (c *costs) addSharedTeamCosts() error {
-
 	nKeys := len(c.costPerNamespace)
 	perNsSharedCPCosts := MONTHLY_TEAM_COST / float64(nKeys)
 	roundedCPCost := math.Round(perNsSharedCPCosts*100) / 100
@@ -266,13 +259,11 @@ func (c *costs) addSharedTeamCosts() error {
 	}
 
 	return nil
-
 }
 
 // buildCostsResourceMap build the resources Map for all namespaces
 // with the format required by HOODAW frontend
 func (c *costs) buildCostsResourceMap(nsList []v1.Namespace) resourceMap {
-
 	namespaces := make(map[string]interface{}, 0)
 
 	for _, ns := range nsList {
@@ -293,7 +284,6 @@ func (c *costs) buildCostsResourceMap(nsList []v1.Namespace) resourceMap {
 	}
 
 	return namespaces
-
 }
 
 // BuildJsonMap takes a slice of maps and return a json encoded map
@@ -330,7 +320,6 @@ func (c *costs) addResource(ns, resource string, cost float64) {
 		curCost = cost + curCost
 		resources[resource] = math.Round(curCost*100) / 100
 	}
-
 }
 
 // hasResource get the namespace name and resource name and checks if it has value in costPerNamespace
