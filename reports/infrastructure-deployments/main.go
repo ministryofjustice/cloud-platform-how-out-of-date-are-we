@@ -94,7 +94,7 @@ func main() {
 	}
 
 	// Post json to S3
-	client, err := utils.S3Client()
+	client, err := utils.S3Client("eu-west-1")
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
@@ -113,7 +113,7 @@ func main() {
 		log.Fatalln(err.Error())
 	}
 
-	//Post json to hoowdaw api
+	// Post json to hoowdaw api
 	err = hoodaw.PostToApi(jsonToPost, hoodawApiKey, &endPoint)
 	if err != nil {
 		log.Fatalln(err.Error())

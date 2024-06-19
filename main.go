@@ -8,12 +8,10 @@ import (
 	utils "github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/utils"
 )
 
-var (
-	bucket = "cloud-platform-hoodaw-reports"
-)
+var bucket = "cloud-platform-hoodaw-reports"
 
 func main() {
-	client, err := utils.S3Client()
+	client, err := utils.S3Client("eu-west-1")
 	if err != nil {
 		fmt.Println(err)
 	}
