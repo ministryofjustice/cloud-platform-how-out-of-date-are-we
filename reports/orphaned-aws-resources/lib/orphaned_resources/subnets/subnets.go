@@ -2,7 +2,7 @@ package subnets
 
 import (
 	"encoding/json"
-	"log"
+	"fmt"
 	"os"
 )
 
@@ -53,10 +53,9 @@ func GetFromTf(tfStateFiles []string) ([]string, error) {
 			return nil, unmarshalErr
 		}
 
-		log.Println("looping....", subnetsTfState)
-
 		// outputs -> external_subnets_ids || outputs -> internal_subnets_ids
-		if subnetsTfState.Outputs.ExternalSubnetIds.Value != nil && subnetsTfState.Outputs.InternalSubnetIds.Value != nil {
+		if len(subnetsTfState.Outputs.ExternalSubnetIds.Value) > 0 || len(subnetsTfState.Outputs.InternalSubnetIds.Value) > 0 {
+			fmt.Printf("looping.... %+v\n", subnetsTfState)
 			subnetIds = append(subnetIds, subnetsTfState.Outputs.ExternalSubnetIds.Value...)
 			subnetIds = append(subnetIds, subnetsTfState.Outputs.InternalSubnetIds.Value...)
 
@@ -72,7 +71,6 @@ func GetFromTf(tfStateFiles []string) ([]string, error) {
 		}
 	}
 
-	log.Println("subnets ", subnetIds)
 	// loop through resources -> instances -> attributes -> outputs -> value
 
 	// external = external_subnets_ids
