@@ -9,8 +9,9 @@ import (
 	"strings"
 	"time"
 
-	subnets "orphaned_resources/subnets"
-	vpc "orphaned_resources/vpc"
+	natgateways "orphaned_resources/nat_gateways"
+	// subnets "orphaned_resources/subnets"
+	// vpc "orphaned_resources/vpc"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
@@ -86,17 +87,25 @@ func getAllTfState() []string {
 func main() {
 	tfStateFiles := getAllTfState()
 
-	ec2Client, err := utils.Ec2Client()
-	if err != nil {
-		log.Fatal(err)
-	}
+	// ec2Client, err := utils.Ec2Client()
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
-	_, ec2Err := vpc.GetOrphaned(ec2Client, tfStateFiles)
-	if ec2Err != nil {
-		log.Fatal(ec2Err)
-	}
+	// _, ec2Err := vpc.GetOrphaned(ec2Client, tfStateFiles)
+	// if ec2Err != nil {
+	// 	log.Fatal(ec2Err)
+	// }
 
-	subnets.GetFromTf(tfStateFiles)
+	// _, subnetErr := subnets.GetOrphaned(ec2Client, tfStateFiles)
+	// if subnetErr != nil {
+	// 	log.Fatal(subnetErr)
+	// }
+
+	_, natErr := natgateways.GetFromTf(tfStateFiles)
+	if natErr != nil {
+		log.Fatal(natErr)
+	}
 
 	// construct the json from all the resource functions
 

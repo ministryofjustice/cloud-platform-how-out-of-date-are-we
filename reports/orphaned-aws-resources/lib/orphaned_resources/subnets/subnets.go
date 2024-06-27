@@ -1,9 +1,15 @@
 package subnets
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
+	"slices"
+
+	"github.com/aws/aws-sdk-go-v2/service/ec2"
+	"github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/utils"
 )
 
 type Value struct {
@@ -15,17 +21,8 @@ type SubnetIdsTfState struct {
 	InternalSubnetIds Value `json:"internal_subnets_ids"`
 }
 
-type ValueObj struct {
-	ExternalSubnetIds []string `json:"external_subnets_ids"`
-	InternalSubnetIds []string `json:"internal_subnets_ids"`
-}
-
-type Outputs struct {
-	Value ValueObj `json:"value"`
-}
-
 type Instances struct {
-	Attributes Outputs `json:"attributes"`
+	Attributes map[string]any `json:"attributes,omitempty"`
 }
 
 type Resource struct {
@@ -37,7 +34,12 @@ type SubnetsTfState struct {
 	Resources []Resource       `json:"resources"`
 }
 
-func GetFromTf(tfStateFiles []string) ([]string, error) {
+type OrphanedSubnet struct {
+	Cluster  string
+	SubnetId string
+}
+
+func getFromTf(tfStateFiles []string) ([]string, error) {
 	subnetIds := []string{}
 
 	for _, file := range tfStateFiles {
@@ -55,30 +57,66 @@ func GetFromTf(tfStateFiles []string) ([]string, error) {
 
 		// outputs -> external_subnets_ids || outputs -> internal_subnets_ids
 		if len(subnetsTfState.Outputs.ExternalSubnetIds.Value) > 0 || len(subnetsTfState.Outputs.InternalSubnetIds.Value) > 0 {
-			fmt.Printf("looping.... %+v\n", subnetsTfState)
 			subnetIds = append(subnetIds, subnetsTfState.Outputs.ExternalSubnetIds.Value...)
 			subnetIds = append(subnetIds, subnetsTfState.Outputs.InternalSubnetIds.Value...)
-
 		}
 
 		if len(subnetsTfState.Resources) > 0 {
+			// loop through resources -> instances -> attributes -> outputs -> value
 			for _, resource := range subnetsTfState.Resources {
 				for _, instance := range resource.Instances {
-					subnetIds = append(subnetIds, instance.Attributes.Value.ExternalSubnetIds...)
-					subnetIds = append(subnetIds, instance.Attributes.Value.InternalSubnetIds...)
+					if _, ok := instance.Attributes["value"]; ok {
+						externalIds, externalOk := instance.Attributes["value"].(map[string]any)
+						internalIds, internalOk := instance.Attributes["value"].(map[string]any)
+						if externalOk && internalOk {
+							subnetIds = append(subnetIds, externalIds["external_subnets_ids"].([]string)...)
+							subnetIds = append(subnetIds, internalIds["internal_subnets_ids"].([]string)...)
+
+						}
+					}
 				}
 			}
 		}
 	}
 
-	// loop through resources -> instances -> attributes -> outputs -> value
+	slices.Sort(subnetIds)
 
-	// external = external_subnets_ids
-	// internal = internal_subnets_ids
-
-	// sort and delete duplicates
-
-	return subnetIds, nil
+	return slices.Compact(subnetIds), nil
 }
 
-func GetOrphaned() {}
+func GetOrphaned(ec2Client *ec2.Client, tfStateFiles []string) ([]OrphanedSubnet, error) {
+	DEFAULT_SUBNET_IDS := []string{"subnet-4178f728", "subnet-cdf6e980", "subnet-a069a0da"}
+	orphanedSubnets := []OrphanedSubnet{}
+	subnetIds, tfStateErr := getFromTf(tfStateFiles)
+
+	subnetIds = append(subnetIds, DEFAULT_SUBNET_IDS...)
+
+	if tfStateErr != nil {
+		return nil, tfStateErr
+	}
+
+	awsSubnets, awsSubnetsErr := ec2Client.DescribeSubnets(context.TODO(), &ec2.DescribeSubnetsInput{})
+	if awsSubnetsErr != nil {
+		return nil, awsSubnetsErr
+	}
+
+	for _, subnet := range awsSubnets.Subnets {
+		if !utils.Contains(subnetIds, *subnet.SubnetId) {
+			clusterName := ""
+			for _, tag := range subnet.Tags {
+				if *tag.Key == "Cluster" {
+					clusterName = *tag.Value
+				}
+			}
+			orphanedSubnets = append(orphanedSubnets, OrphanedSubnet{clusterName, *subnet.SubnetId})
+		}
+	}
+
+	fmt.Printf("There are %d Oprhaned Subnets.\n", len(orphanedSubnets))
+
+	if len(orphanedSubnets) > 0 {
+		log.Println("Oprhaned Subnet Ids: ", orphanedSubnets)
+	}
+
+	return orphanedSubnets, nil
+}

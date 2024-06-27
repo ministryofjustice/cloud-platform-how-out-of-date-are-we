@@ -23,6 +23,11 @@ type VpcTfState struct {
 	Outputs NetworkIdTfState `json:"outputs"`
 }
 
+type OrhpanedVpc struct {
+	Cluster string
+	VpcId   string
+}
+
 func getFromTf(tfStateFiles []string) ([]string, error) {
 	vpcIds := []string{}
 
@@ -47,9 +52,9 @@ func getFromTf(tfStateFiles []string) ([]string, error) {
 	return vpcIds, nil
 }
 
-func GetOrphaned(ec2Client *ec2.Client, tfStateFiles []string) ([]string, error) {
+func GetOrphaned(ec2Client *ec2.Client, tfStateFiles []string) ([]OrhpanedVpc, error) {
 	DEFAULT_VPC_ID := "vpc-057ac86d"
-	orphanedVpcs := []string{}
+	orphanedVpcs := []OrhpanedVpc{}
 	vpcIds, tfStateErr := getFromTf(tfStateFiles)
 
 	vpcIds = append(vpcIds, DEFAULT_VPC_ID)
@@ -66,11 +71,17 @@ func GetOrphaned(ec2Client *ec2.Client, tfStateFiles []string) ([]string, error)
 
 	for _, vpc := range awsVpcs.Vpcs {
 		if !utils.Contains(vpcIds, *vpc.VpcId) {
-			orphanedVpcs = append(orphanedVpcs, *vpc.VpcId)
+			clusterName := ""
+			for _, tag := range vpc.Tags {
+				if *tag.Key == "Cluster" {
+					clusterName = *tag.Value
+				}
+			}
+			orphanedVpcs = append(orphanedVpcs, OrhpanedVpc{clusterName, *vpc.VpcId})
 		}
 	}
 
-	fmt.Printf("There are %d Oprhaned VPCs.", len(orphanedVpcs))
+	fmt.Printf("There are %d Oprhaned VPCs.\n", len(orphanedVpcs))
 
 	if len(orphanedVpcs) > 0 {
 		log.Println("Oprhaned VPC Ids:", orphanedVpcs)
