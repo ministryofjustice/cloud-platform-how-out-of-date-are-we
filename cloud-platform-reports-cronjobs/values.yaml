@@ -45,7 +45,7 @@ cronjobs:
     name: hosted-services-go
     schedule: "37 4 * * *"
   infraDeploymentsGo:
-    name: infrastructure-deployments
+    name: infrastructure-deployments-go
     schedule: "59 23 28-31 * *"
   namespaceCostsReportGo:
     name: namespace-costs-go

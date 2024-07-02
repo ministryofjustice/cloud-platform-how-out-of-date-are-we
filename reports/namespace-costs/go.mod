@@ -7,7 +7,6 @@ require (
 	github.com/aws/aws-sdk-go-v2/config v1.27.9
 	github.com/aws/aws-sdk-go-v2/service/costexplorer v1.16.0
 	github.com/ministryofjustice/cloud-platform-environments v1.1.4-0.20220303132524-8a18af4e4566
-	github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/reports/pkg/hoodaw v0.0.0-20211102114020-9ce4671b775b
 	github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/utils v0.0.0-20240404121232-8c189a349866
 	k8s.io/api v0.23.2
 	k8s.io/apimachinery v0.23.2
@@ -43,6 +42,7 @@ require (
 	github.com/imdario/mergo v0.3.12 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
+	github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/reports/pkg/hoodaw v0.0.0-20211102114020-9ce4671b775b // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect

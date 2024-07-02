@@ -18,22 +18,16 @@ import (
 	ceTypes "github.com/aws/aws-sdk-go-v2/service/costexplorer/types"
 	"github.com/ministryofjustice/cloud-platform-environments/pkg/authenticate"
 	"github.com/ministryofjustice/cloud-platform-environments/pkg/namespace"
-	"github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/reports/pkg/hoodaw"
 	"github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/utils"
 	v1 "k8s.io/api/core/v1"
 )
 
 var (
-	hoodawBucket   = flag.String("howdaw-bucket", os.Getenv("HOODAW_BUCKET"), "AWS S3 bucket for hoodaw json reports")
-	bucket         = flag.String("bucket", os.Getenv("KUBECONFIG_S3_BUCKET"), "AWS S3 bucket for kubeconfig")
-	ctx            = flag.String("context", "live.cloud-platform.service.justice.gov.uk", "Kubernetes context specified in kubeconfig")
-	hoodawApiKey   = flag.String("hoodawAPIKey", os.Getenv("HOODAW_API_KEY"), "API key to post data to the 'How out of date are we' API")
-	hoodawEndpoint = flag.String("hoodawEndpoint", "/costs_by_namespace", "Endpoint to send the data to")
-	hoodawHost     = flag.String("hoodawHost", os.Getenv("HOODAW_HOST"), "Hostname of the 'How out of date are we' API")
-	kubeconfig     = flag.String("kubeconfig", "kubeconfig", "Name of kubeconfig file in S3 bucket")
-	region         = flag.String("region", os.Getenv("AWS_REGION"), "AWS Region")
-
-	endPoint = *hoodawHost + *hoodawEndpoint
+	hoodawBucket = flag.String("howdaw-bucket", os.Getenv("HOODAW_BUCKET"), "AWS S3 bucket for hoodaw json reports")
+	bucket       = flag.String("bucket", os.Getenv("KUBECONFIG_S3_BUCKET"), "AWS S3 bucket for kubeconfig")
+	ctx          = flag.String("context", "live.cloud-platform.service.justice.gov.uk", "Kubernetes context specified in kubeconfig")
+	kubeconfig   = flag.String("kubeconfig", "kubeconfig", "Name of kubeconfig file in S3 bucket")
+	region       = flag.String("region", os.Getenv("AWS_REGION"), "AWS Region")
 )
 
 const SHARED_COSTS string = "SHARED_COSTS"
@@ -128,13 +122,7 @@ func main() {
 		log.Fatalf("Bucket %s does not exist\n", *hoodawBucket)
 	}
 
-	utils.ExportToS3(client, *hoodawBucket, "hosted_services.json", jsonToPost)
-	if err != nil {
-		log.Fatalln(err.Error())
-	}
-
-	// Post json to hoowdaw api
-	err = hoodaw.PostToApi(jsonToPost, hoodawApiKey, &endPoint)
+	utils.ExportToS3(client, *hoodawBucket, "namespace_usage.json", jsonToPost)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
