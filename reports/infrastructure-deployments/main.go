@@ -89,7 +89,7 @@ func main() {
 	}
 
 	// Post json to S3
-	client, err := utils.S3Client()
+	client, err := utils.S3Client("eu-west-1")
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
@@ -102,6 +102,7 @@ func main() {
 	if !b {
 		log.Fatalf("Bucket %s does not exist\n", *hoodawBucket)
 	}
+
 
 	utils.ExportToS3(client, *hoodawBucket, "infra_deployment.json", jsonToPost)
 	if err != nil {

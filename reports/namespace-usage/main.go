@@ -48,7 +48,6 @@ type UsageReport struct {
 }
 
 func main() {
-
 	flag.Parse()
 
 	// Get the kubeconfig file stored in an S3 bucket.
@@ -112,7 +111,7 @@ func main() {
 	}
 
 	// Post json to S3
-	client, err := utils.S3Client()
+	client, err := utils.S3Client("eu-west-1")
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
@@ -135,8 +134,8 @@ func main() {
 // getAllPodResourceDetails takes a clientset and return Pod resource details
 // of all namespaces in a map and map of container count of all namespaces
 func getAllPodResourceDetails(kclientset kubernetes.Interface) (
-	map[string]NamespaceResource, map[string]int, error) {
-
+	map[string]NamespaceResource, map[string]int, error,
+) {
 	// Get the list of pods from the cluster which is set in the kclientset
 	podsList, err := namespace.GetAllPodsFromCluster(kclientset)
 	if err != nil {
@@ -168,8 +167,8 @@ func getAllPodResourceDetails(kclientset kubernetes.Interface) (
 // getAllPodMetricsesDetails takes a clientset and return Pod usage details from the
 // pod metrics of all namespaces
 func getAllPodMetricsesDetails(mclientset versioned.Interface) (
-	map[string]NamespaceResource, error) {
-
+	map[string]NamespaceResource, error,
+) {
 	// Get top pods(resource used) of all namespaces from the cluster which is set in the mclientset
 	podMetricsList, err := namespace.GetAllPodMetricsesFromCluster(mclientset)
 	if err != nil {
@@ -189,14 +188,13 @@ func getAllPodMetricsesDetails(mclientset versioned.Interface) (
 		}
 	}
 	return nsUsedMap, nil
-
 }
 
 // getAllPodMetricsesDetails takes a clientset, get resourcequotas of all namespaces from the cluster
 // and return the hard limits set for the pods of all namespaces
 func getAllResourceQuotaDetails(kclientset kubernetes.Interface) (
-	map[string]NamespaceResource, error) {
-
+	map[string]NamespaceResource, error,
+) {
 	// get namespace quota of namespaces to find hard limits of pods from the cluster
 	rsQuotasList, err := namespace.GetAllResourceQuotasFromCluster(kclientset)
 	if err != nil {
