@@ -4,6 +4,8 @@ ingress:
   annotations:
     external-dns.alpha.kubernetes.io/set-identifier: "cloud-platform-reports-app-ingress-new-cloud-platform-reports-dev-green"
     external-dns.alpha.kubernetes.io/aws-weight: "100"
+  ingressClassName: default
+
 ruby_service:
   name: cloud-platform-reports-service
   port: 4567
