@@ -1,0 +1,39 @@
+<p>
+  This report is susceptible to changes in the structure of our terraform code, which can cause false-posititives.
+  Please be cautious about deleting resources listed here.
+</p>
+
+<% if list.is_a?(Hash) %>
+  <% kops_clusters = list.delete("kops_cluster") %>
+  <h2>Kops Cluster EC2 Instances</h2>
+  <ul>
+    <% kops_clusters.each do |k| %>
+      <li>
+        <a href="<%= k["href"] %>">
+          <%= %[#{k["cluster"]} (#{k["instances"]} instances)] %>
+        </a>
+      </li>
+    <% end %>
+  </ul>
+
+  <% list.keys.sort.each do |resource_type| %>
+    <h2><%= snake_case_to_capitalised(resource_type) %></h2>
+    <ul>
+      <% list[resource_type].each do |item| %>
+        <%
+          text = item["id"]
+          text = item["cluster"] == "" ? text : text + " (#{item["cluster"]})"
+        %>
+        <li>
+          <% if item["aws_console_url"].to_s != "" %>
+            <a href="<%= item["aws_console_url"] %>">
+              <%= text %>
+            </a>
+          <% else %>
+            <%= text %>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+<% end %>
