@@ -4,6 +4,12 @@ ingress:
   annotations:
     external-dns.alpha.kubernetes.io/set-identifier: "cloud-platform-reports-app-ingress-new-cloud-platform-reports-prod-green"
     external-dns.alpha.kubernetes.io/aws-weight: "100"
+    nginx.ingress.kubernetes.io/enable-modsecurity: "true"
+    nginx.ingress.kubernetes.io/modsecurity-snippet: |
+      SecRuleEngine On
+      SecDefaultAction "phase:2,pass,log,tag:github_team=webops"
+      SecDefaultAction "phase:4,pass,log,tag:github_team=webops"
+  ingressClassName: modsec
 
 ruby_service:
   name: cloud-platform-reports-service
