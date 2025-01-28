@@ -4,7 +4,7 @@ go 1.22.1
 
 require (
 	github.com/ministryofjustice/cloud-platform-environments v1.1.4-0.20220203124601-5370c388698b
-	github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/reports/pkg/hoodaw v0.0.0-20220203130017-4456e66c089f
+	github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/reports/pkg/hoodaw@main
 	github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/utils v0.0.0-20240404121232-8c189a349866
 	k8s.io/api v0.23.3
 	k8s.io/apimachinery v0.23.3
