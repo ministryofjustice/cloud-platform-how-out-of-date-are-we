@@ -1,7 +1,7 @@
-FROM golang:1.22.1 AS namespace_usage_builder
+FROM golang:1.23.5 AS namespace_usage_builder
 
 ENV CGO_ENABLED=0 \
-    GOOS=linux
+  GOOS=linux
 
 WORKDIR /app
 
