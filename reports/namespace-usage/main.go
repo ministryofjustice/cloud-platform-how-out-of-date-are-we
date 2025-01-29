@@ -9,8 +9,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/ministryofjustice/cloud-platform-environments/pkg/authenticate"
-	"github.com/ministryofjustice/cloud-platform-environments/pkg/namespace"
+	auth "github.com/ministryofjustice/cloud-platform-environments/pkg/authenticate"
+	ns "github.com/ministryofjustice/cloud-platform-environments/pkg/namespace"
 	"github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/reports/pkg/hoodaw"
 	"github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/utils"
 	v1 "k8s.io/api/core/v1"
@@ -56,25 +56,25 @@ func main() {
 	flag.Parse()
 
 	// Get the kubeconfig file stored in an S3 bucket.
-	err := authenticate.KubeConfigFromS3Bucket(*bucket, *kubeconfig, *region, *kubeCfgPath)
+	err := auth.KubeConfigFromS3Bucket(*bucket, *kubeconfig, *region, *kubeCfgPath)
 	if err != nil {
 		log.Fatalln("error in getting the kubeconfig from s3 bucket", err.Error())
 	}
 
 	// Get the clientset to access the k8s cluster
-	kclientset, err := authenticate.CreateClientFromConfigFile(*kubeCfgPath, *ctx)
+	kclientset, err := auth.CreateClientFromConfigFile(*kubeCfgPath, *ctx)
 	if err != nil {
 		log.Fatalln("error in creating clientset", err.Error())
 	}
 
 	// Get the clientset object to access cluster metrics
-	mclientset, err := authenticate.CreateMetricsClientFromConfigFile(*kubeCfgPath, *ctx)
+	mclientset, err := auth.CreateMetricsClientFromConfigFile(*kubeCfgPath, *ctx)
 	if err != nil {
 		log.Fatalln("error in creating metrics clientset", err.Error())
 	}
 
 	// Get the list of namespaces from the cluster which is set in the kclientset
-	nsList, err := namespace.GetAllNamespacesFromCluster(kclientset)
+	nsList, err := ns.GetAllNamespacesFromCluster(kclientset)
 	if err != nil {
 		log.Fatalln("error in getting all namespaces from cluster", err.Error())
 	}
@@ -148,7 +148,7 @@ func getAllPodResourceDetails(kclientset kubernetes.Interface) (
 	map[string]NamespaceResource, map[string]int, error,
 ) {
 	// Get the list of pods from the cluster which is set in the kclientset
-	podsList, err := namespace.GetAllPodsFromCluster(kclientset)
+	podsList, err := ns.GetAllPodsFromCluster(kclientset)
 	if err != nil {
 		return nil, nil, fmt.Errorf("error in getting all pods from cluster %s", err.Error())
 	}
@@ -181,7 +181,7 @@ func getAllPodMetricsesDetails(mclientset versioned.Interface) (
 	map[string]NamespaceResource, error,
 ) {
 	// Get top pods(resource used) of all namespaces from the cluster which is set in the mclientset
-	podMetricsList, err := namespace.GetAllPodMetricsesFromCluster(mclientset)
+	podMetricsList, err := ns.GetAllPodMetricsesFromCluster(mclientset)
 	if err != nil {
 		return nil, fmt.Errorf("error in getting all pods metrics from cluster %s", err.Error())
 	}
@@ -207,7 +207,7 @@ func getAllResourceQuotaDetails(kclientset kubernetes.Interface) (
 	map[string]NamespaceResource, error,
 ) {
 	// get namespace quota of namespaces to find hard limits of pods from the cluster
-	rsQuotasList, err := namespace.GetAllResourceQuotasFromCluster(kclientset)
+	rsQuotasList, err := ns.GetAllResourceQuotasFromCluster(kclientset)
 	if err != nil {
 		return nil, fmt.Errorf("error in getting all resourcequota from cluster %s", err.Error())
 	}

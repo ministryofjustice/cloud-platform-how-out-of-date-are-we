@@ -3,4 +3,4 @@ name: cloud-platform-reports-cronjobs
 description: Cronjobs to provide data to the Cloud Platform Reports web application
 type: application
 version: 0.11.3
-appVersion: "4.5.0"
+appVersion: "4.3.2"
