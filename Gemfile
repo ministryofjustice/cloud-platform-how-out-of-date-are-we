@@ -12,3 +12,5 @@ gem "racc", "~> 1.4.0"
 gem "nokogiri"
 gem 'puma'
 
+
+gem "rackup", "~> 2.2"
