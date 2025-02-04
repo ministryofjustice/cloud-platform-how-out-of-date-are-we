@@ -21,3 +21,5 @@ cronjobs:
     name: dev-helm-whatup
   githubRepositories:
     name: dev-github-repositories
+  helmReleasesGo:
+    name: dev-helm-releases-go
