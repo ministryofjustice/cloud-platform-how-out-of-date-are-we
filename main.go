@@ -30,7 +30,7 @@ func main() {
 	http.HandleFunc("/hosted_services", func(w http.ResponseWriter, r *http.Request) {
 		lib.HostedServicesPage(w, bucket, client)
 	})
-	http.HandleFunc("/helm_releases", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/helm_whatup", func(w http.ResponseWriter, r *http.Request) {
 		lib.HelmReleasesPage(w, bucket, client)
 	})
 	fmt.Println("Listening")
