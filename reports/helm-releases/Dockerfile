@@ -1,4 +1,4 @@
-FROM golang:1.21 AS helm_release_builder
+FROM golang:1.23.5 AS helm_release_builder
 
 ENV CGO_ENABLED=0 \
   GOOS=linux

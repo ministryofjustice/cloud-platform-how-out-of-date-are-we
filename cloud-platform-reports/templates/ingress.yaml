@@ -29,7 +29,7 @@ spec:
               name: {{ .Values.go_service.name }}
               port:
                 number: {{ .Values.go_service.port }}
-        - path: /helm_releases
+        - path: /helm_whatup
           pathType: ImplementationSpecific
           backend:
             service:
