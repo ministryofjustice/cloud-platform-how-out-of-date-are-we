@@ -108,7 +108,7 @@ func main() {
 		log.Fatalf("Bucket %s does not exist\n", *hoodawBucket)
 	}
 
-	utils.ExportToS3(client, *hoodawBucket, "hosted_services.json", jsonToPost)
+	utils.ExportToS3(client, *hoodawBucket, "infratructure_deployments.json", jsonToPost)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}

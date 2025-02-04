@@ -19,17 +19,18 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	cluster "github.com/ministryofjustice/cloud-platform-cli/pkg/cluster"
-	"github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/reports/pkg/hoodaw"
+	utils "github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/utils"
 )
 
 var (
-	hoodawApiKey   = flag.String("hoodawAPIKey", os.Getenv("HOODAW_API_KEY"), "API key to post data to the 'How out of date are we' API")
-	hoodawEndpoint = flag.String("hoodawEndpoint", "/helm_whatup", "Endpoint to send the data to")
-	hoodawHost     = flag.String("hoodawHost", os.Getenv("HOODAW_HOST"), "Hostname of the 'How out of date are we' API")
-	region         = flag.String("region", os.Getenv("AWS_REGION"), "AWS Region")
-	kubeCfgPath    = flag.String("kubeCfgPath", os.Getenv("KUBECONFIG"), "Path of the kube config file")
+	region      = flag.String("region", os.Getenv("AWS_REGION"), "AWS Region")
+	kubeCfgPath = flag.String("kubeCfgPath", os.Getenv("KUBECONFIG"), "Path of the kube config file")
 
-	endPoint = *hoodawHost + *hoodawEndpoint
+	hoodawBucket   = flag.String("howdaw-bucket", os.Getenv("HOODAW_BUCKET"), "AWS S3 bucket for hoodaw json reports")
+	bucket         = flag.String("bucket", os.Getenv("KUBECONFIG_S3_BUCKET"), "AWS S3 bucket for kubeconfig")
+	ctx            = flag.String("context", "live.cloud-platform.service.justice.gov.uk", "Kubernetes context specified in kubeconfig")
+	kubeconfig     = flag.String("kubeconfig", "kubeconfig", "Name of kubeconfig file in S3 bucket")
+	write_role_arn = flag.String("write-role-arn", os.Getenv("AWS_ROLE_ARN"), "AWS Role ARN to assume for writing to S3 bucket")
 )
 
 type helmNamespace struct {
@@ -87,8 +88,21 @@ func main() {
 		log.Fatalln(err.Error())
 	}
 
-	// Post json to hoowdaw api
-	err = hoodaw.PostToApi(jsonToPost, hoodawApiKey, &endPoint)
+	client, err := utils.S3Client("eu-west-1")
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	b, err := utils.CheckBucketExists(client, *hoodawBucket)
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	if !b {
+		log.Fatalf("Bucket %s does not exist\n", *hoodawBucket)
+	}
+
+	utils.ExportToS3(client, *hoodawBucket, "helm_releases.json", jsonToPost)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
@@ -116,7 +130,6 @@ func getCPNamespaces(clientset kubernetes.Interface) ([]string, error) {
 		if _, ok := ns.Annotations["cloud-platform-out-of-hours-alert"]; ok {
 			nsList = append(nsList, ns.Name)
 		}
-
 	}
 
 	return deduplicateList(nsList), nil
