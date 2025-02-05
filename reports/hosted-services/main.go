@@ -130,7 +130,7 @@ func BuildIngressesMap(ingressItems []networkingv1.Ingress) map[string][]string 
 	return ingressMap
 }
 
-// BuildJsonMap takes a map with namespce key and namespace struct as value, sort the map, flatten to a
+// BuildJsonMap takes a map with namespace key and namespace struct as value, sort the map, flatten to a
 // slice and return a json encoded map
 func BuildJsonMap(hostedservices map[string]namespace.Namespace) ([]byte, error) {
 	// To handle generics in the data type, we need to create a new map,

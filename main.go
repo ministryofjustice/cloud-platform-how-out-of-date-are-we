@@ -11,7 +11,7 @@ import (
 var bucket = "cloud-platform-hoodaw-reports"
 
 func main() {
-	client, err := utils.S3Client("eu-west-1")
+	client, err := utils.S3Client("eu-west-2")
 	if err != nil {
 		fmt.Println(err)
 	}
