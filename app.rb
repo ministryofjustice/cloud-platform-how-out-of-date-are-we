@@ -41,11 +41,9 @@ end
 def dashboard_data
   info = {
     documentation: get_data_from_json_file("documentation", "pages", Documentation),
-    helm_whatup: get_data_from_json_file("helm_whatup", "clusters", HelmWhatup),
     terraform_modules: get_data_from_json_file("terraform_modules", "out_of_date_modules", ItemList),
     orphaned_resources: get_data_from_json_file("orphaned_resources", "orphaned_aws_resources", OrphanedResources),
     orphaned_statefiles: get_data_from_json_file("orphaned_statefiles", "data", ItemList),
-    hosted_services: get_data_from_json_file("hosted_services", "namespace_details", ItemList),
     live_1_domains: get_data_from_json_file("live_1_domains", "live_1_domains", ItemList),
   }
 
@@ -226,19 +224,6 @@ end
 get "/hosted_services" do
   if accept_json?(request)
     serve_json_data(:hosted_services)
-  else
-    hs = hosted_services_from_json
-
-    locals = {
-      title: "Hosted Services",
-      total_ns: hs.total_ns,
-      total_apps: hs.unique_apps,
-      details: hs.namespaces,
-      updated_at: hs.updated_at,
-    }
-    erb :hosted_services, locals: locals
-
-  end
 end
 
 get "/live_1_domains" do

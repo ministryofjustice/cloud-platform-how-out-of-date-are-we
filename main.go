@@ -31,11 +31,15 @@ func main() {
 			http.FileServer(http.Dir("lib/static"))))
 
 	http.HandleFunc("/hosted_services", func(w http.ResponseWriter, r *http.Request) {
-		lib.HostedServicesPage(w, bucket, client)
+		accept := r.Header.Get("Accept")
+		wantJson := accept == "application/json"
+		lib.HostedServicesPage(w, bucket, wantJson, client)
 	})
 
 	http.HandleFunc("/helm_whatup", func(w http.ResponseWriter, r *http.Request) {
-		lib.HelmReleasesPage(w, bucket, client)
+		accept := r.Header.Get("Accept")
+		wantJson := accept == "application/json"
+		lib.HelmReleasesPage(w, bucket, wantJson, client)
 	})
 
 	fmt.Println("Listening on port :8080 ...")
