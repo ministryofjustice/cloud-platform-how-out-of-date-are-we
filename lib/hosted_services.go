@@ -52,7 +52,7 @@ func HostedServicesPage(w http.ResponseWriter, bucket string, client *s3.Client)
 		hostedServices.UniqueApplications = len(countApp)
 	}
 
-	// render template
+	fmt.Printf("hostedServices %+v\n", hostedServices)
 	if err := t.ExecuteTemplate(w, "hosted_services.html", hostedServices); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}

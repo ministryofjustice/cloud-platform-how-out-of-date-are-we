@@ -10,9 +10,14 @@ import (
 	"github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/utils"
 )
 
-type HelmReleases struct {
+type Cluster struct {
 	HelmReleases []HelmRelease `json:"apps"`
-	LastUpdated  string
+	ClusterName  string        `json:"name"`
+}
+
+type HelmReleases struct {
+	Clusters    []Cluster `json:"clusters"`
+	LastUpdated string
 }
 
 type HelmRelease struct {
@@ -27,7 +32,6 @@ type HelmRelease struct {
 func HelmReleasesPage(w http.ResponseWriter, bucket string, client *s3.Client) {
 	t := template.Must(template.ParseFiles("lib/templates/helm_releases.html"))
 
-	// import json data from s3
 	byteValue, filestamp, err := utils.ImportS3File(client, bucket, "helm_releases.json")
 	if err != nil {
 		fmt.Println(err)
@@ -38,12 +42,12 @@ func HelmReleasesPage(w http.ResponseWriter, bucket string, client *s3.Client) {
 
 	helmReleases.LastUpdated = filestamp
 
-	// compare installed and latest versions of helm releases traffic light system
-	for i := 0; i < len(helmReleases.HelmReleases); i++ {
-		helmReleases.HelmReleases[i].State = utils.CompareVersions(helmReleases.HelmReleases[i].InstalledVersion, helmReleases.HelmReleases[i].LatestVersion)
+	for i, c := range helmReleases.Clusters {
+		for j, h := range c.HelmReleases {
+			helmReleases.Clusters[i].HelmReleases[j].State = utils.CompareVersions(h.InstalledVersion, h.LatestVersion)
+		}
 	}
 
-	// render template
 	if err := t.ExecuteTemplate(w, "helm_releases.html", helmReleases); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}

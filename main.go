@@ -15,6 +15,7 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
+
 	exists, err := utils.CheckBucketExists(client, bucket)
 	if err != nil {
 		fmt.Println(err)

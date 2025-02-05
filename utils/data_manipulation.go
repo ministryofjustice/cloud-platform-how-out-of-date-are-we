@@ -1,6 +1,8 @@
 package utils
 
-import "strings"
+import (
+	"strings"
+)
 
 func SplitVersion(version string) []string {
 	versionSlice := strings.Split(version, ".")
@@ -9,25 +11,27 @@ func SplitVersion(version string) []string {
 }
 
 func CompareVersions(installedVersion string, latestVersion string) string {
-	installedVersionSlice := SplitVersion(installedVersion)
-	latestVersionSlice := SplitVersion(latestVersion)
+	if strings.Contains(installedVersion, ".") && strings.Contains(latestVersion, ".") {
+		installedVersionSlice := SplitVersion(installedVersion)
+		latestVersionSlice := SplitVersion(latestVersion)
 
-	var state string
+		major_diff := strings.Compare(installedVersionSlice[0], latestVersionSlice[0])
+		minor_diff := strings.Compare(installedVersionSlice[1], latestVersionSlice[1])
 
-	major_diff := strings.Compare(installedVersionSlice[0], latestVersionSlice[0])
-	minor_diff := strings.Compare(installedVersionSlice[1], latestVersionSlice[1])
+		if major_diff == 0 && minor_diff == 0 {
+			return "success"
+		}
 
-	if major_diff == 0 && minor_diff == 0 {
-		state = "SUCCESS"
+		if major_diff == 0 && minor_diff < 0 {
+			return "warning"
+		}
+
+		return "danger"
 	}
 
-	if major_diff < 0 {
-		state = "DANGER"
+	if installedVersion == latestVersion {
+		return "success"
 	}
 
-	if major_diff == 0 && minor_diff < 0 {
-		state = "WARNING"
-	}
-
-	return state
+	return "danger"
 }
