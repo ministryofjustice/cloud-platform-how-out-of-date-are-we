@@ -29,12 +29,18 @@ type HelmRelease struct {
 	State            string
 }
 
-func HelmReleasesPage(w http.ResponseWriter, bucket string, client *s3.Client) {
+func HelmReleasesPage(w http.ResponseWriter, bucket string, wantJson bool, client *s3.Client) {
 	t := template.Must(template.ParseFiles("lib/templates/helm_releases.html"))
 
 	byteValue, filestamp, err := utils.ImportS3File(client, bucket, "helm_releases.json")
 	if err != nil {
 		fmt.Println(err)
+	}
+
+	if wantJson {
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(byteValue)
+		return
 	}
 
 	var helmReleases HelmReleases
