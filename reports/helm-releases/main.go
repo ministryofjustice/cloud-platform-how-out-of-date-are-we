@@ -93,12 +93,12 @@ func main() {
 		log.Fatalln(err.Error())
 	}
 
-	utils.ExportToS3(client, *hoodawBucket, "helm_releases.json", jsonToPost)
-	if err != nil {
-		log.Fatalln(err.Error())
+	s3Err := utils.ExportToS3(client, *hoodawBucket, "helm_releases.json", jsonToPost)
+	if s3Err != nil {
+		log.Fatalln(s3Err.Error())
 	}
 
-	log.Println("successfully pushed json to bucket...", jsonToPost)
+	log.Println("successfully pushed json to bucket...", string(jsonToPost))
 }
 
 func getCredentials(awsRegion string) (*client.AwsCredentials, error) {
