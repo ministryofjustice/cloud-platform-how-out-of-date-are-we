@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 
 	lib "github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/lib"
@@ -28,12 +29,18 @@ func main() {
 	http.Handle("/static/",
 		http.StripPrefix("/static/",
 			http.FileServer(http.Dir("lib/static"))))
+
 	http.HandleFunc("/hosted_services", func(w http.ResponseWriter, r *http.Request) {
 		lib.HostedServicesPage(w, bucket, client)
 	})
+
 	http.HandleFunc("/helm_whatup", func(w http.ResponseWriter, r *http.Request) {
 		lib.HelmReleasesPage(w, bucket, client)
 	})
-	fmt.Println("Listening")
-	fmt.Println(http.ListenAndServe(":8080", nil))
+
+	fmt.Println("Listening on port :8080 ...")
+	serverErr := http.ListenAndServe(":8080", nil)
+	if serverErr != nil {
+		log.Fatal("Error starting server: ", serverErr)
+	}
 }

@@ -30,11 +30,12 @@ type HostedService struct {
 func HostedServicesPage(w http.ResponseWriter, bucket string, client *s3.Client) {
 	t := template.Must(template.ParseFiles("lib/templates/hosted_services.html"))
 
-	// import json data from s3
 	byteValue, filestamp, err := utils.ImportS3File(client, bucket, "hosted_services.json")
 	if err != nil {
 		fmt.Println(err)
 	}
+
+	// fmt.Printf("values %+v\n", string(byteValue))
 
 	var hostedServices HostedServices
 	json.Unmarshal(byteValue, &hostedServices)
@@ -52,7 +53,8 @@ func HostedServicesPage(w http.ResponseWriter, bucket string, client *s3.Client)
 		hostedServices.UniqueApplications = len(countApp)
 	}
 
-	fmt.Printf("hostedServices %+v\n", hostedServices)
+	// fmt.Printf("hostedServices %+v\n", hostedServices)
+
 	if err := t.ExecuteTemplate(w, "hosted_services.html", hostedServices); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}

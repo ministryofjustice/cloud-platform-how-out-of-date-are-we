@@ -79,8 +79,7 @@ func main() {
 		log.Fatalln(err.Error())
 	}
 
-	// Post json to S3
-	client, err := utils.S3Client("eu-west-1")
+	client, err := utils.S3Client("eu-west-2")
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
