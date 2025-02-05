@@ -97,6 +97,8 @@ func main() {
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
+
+	log.Println("successfully pushed json to bucket...", jsonToPost)
 }
 
 func getCredentials(awsRegion string) (*client.AwsCredentials, error) {
