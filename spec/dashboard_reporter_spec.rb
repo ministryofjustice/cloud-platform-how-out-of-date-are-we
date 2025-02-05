@@ -7,7 +7,6 @@ describe DashboardReporter do
       "data" => {
         "action_items" => {
           "documentation" => 1,
-          "helm_whatup" => 1,
           "repositories" => 3,
           "terraform_modules" => 0,
         },
@@ -21,7 +20,6 @@ describe DashboardReporter do
     Action items:
 ```
 documentation:     1
-helm_whatup:       1
 repositories:      3
 terraform_modules: 0
 ```

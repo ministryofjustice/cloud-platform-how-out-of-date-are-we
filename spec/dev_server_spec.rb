@@ -5,7 +5,6 @@ require "spec_helper"
 #     make dev-server
 #
 
-HELM_RELEASE_DATA_FILE = "data/helm_whatup.json"
 
 def expect_json_ok(url)
   response = fetch_url(url, "application/json")
@@ -17,35 +16,29 @@ describe "local dev server" do
   let(:api_key) { "soopersekrit" } # specified in makefile
 
   let(:dashboard_url) { [base_url, "dashboard"].join("/") }
-  let(:helm_whatup_url) { [base_url, "helm_whatup"].join("/") }
   let(:terraform_modules_url) { [base_url, "terraform_modules"].join("/") }
   let(:documentation_url) { [base_url, "documentation"].join("/") }
   let(:repositories_url) { [base_url, "repositories"].join("/") }
   let(:orphaned_resources_url) { [base_url, "orphaned_resources"].join("/") }
-  let(:hosted_services_url) { [base_url, "hosted_services"].join("/") }
   let(:namespace_usage_url) { [base_url, "namespace_usage"].join("/") }
   let(:namespace_usage_cpu_url) { [base_url, "namespace_usage_cpu"].join("/") }
 
   let(:urls) {
     [
       dashboard_url,
-      helm_whatup_url,
       terraform_modules_url,
       documentation_url,
       repositories_url,
       orphaned_resources_url,
-      hosted_services_url,
     ]
   }
 
   let(:pages) {
     [
-      "helm_whatup",
       "terraform_modules",
       "documentation",
       "repositories",
       "orphaned_resources",
-      "hosted_services",
       "dashboard",
       "namespace_usage_cpu",
       "namespace_usage_memory",
@@ -80,17 +73,6 @@ describe "local dev server" do
     end
   end
 
-  context "with malformed json data" do
-    before do
-      File.write(HELM_RELEASE_DATA_FILE, " ")
-    end
-
-    it "does not crash" do
-      response = fetch_url(helm_whatup_url)
-      expect(response.code).to eq("200")
-    end
-  end
-
   context "updating" do
     context "with no API key" do
       it "rejects" do
@@ -102,18 +84,6 @@ describe "local dev server" do
     end
 
     context "with correct API key" do
-      it "accepts helm_whatup json" do
-        json = {
-          clusters: [
-            name: "live-1",
-            apps: [],
-          ],
-          updated_at: Time.now,
-        }.to_json
-        response = post_to_url(helm_whatup_url, json, api_key)
-        expect(response.code).to eq("200")
-      end
-
       it "accepts terraform_modules json" do
         json = {
           out_of_date_modules: [],

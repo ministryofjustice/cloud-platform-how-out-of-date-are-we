@@ -55,7 +55,6 @@ def dashboard_data
     data: {
       action_items: {
         documentation: info[:documentation].todo_count,
-        helm_whatup: info[:helm_whatup].todo_count,
         terraform_modules: info[:terraform_modules].todo_count,
         orphaned_resources: info[:orphaned_resources].todo_count,
         orphaned_statefiles: info[:orphaned_statefiles].todo_count,
@@ -145,11 +144,6 @@ def namespace_usage_from_json
   NamespaceUsage.new(json: json)
 end
 
-def hosted_services_from_json
-  json = store.retrieve_file("data/hosted_services.json")
-  HostedServices.new(json: json)
-end
-
 def hosted_services_for_namespace(namespace)
   json = store.retrieve_file("data/hosted_services.json")
   data = JSON.parse(json)
@@ -178,14 +172,6 @@ get "/dashboard" do
     dashboard_data.to_json
   else
     erb :dashboard, locals: dashboard_data
-  end
-end
-
-get "/helm_whatup" do
-  if accept_json?(request)
-    serve_json_data(:helm_whatup)
-  else
-    render_item_list(title: "Helm Releases", docpath: "helm_whatup", key: "clusters", klass: HelmWhatup)
   end
 end
 
@@ -219,11 +205,6 @@ get "/orphaned_statefiles" do
   else
     render_item_list(title: "Orphaned Terraform Statefiles", docpath: "orphaned_statefiles", key: "data")
   end
-end
-
-get "/hosted_services" do
-  if accept_json?(request)
-    serve_json_data(:hosted_services)
 end
 
 get "/live_1_domains" do
