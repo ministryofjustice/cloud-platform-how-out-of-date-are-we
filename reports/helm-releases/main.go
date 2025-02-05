@@ -93,15 +93,6 @@ func main() {
 		log.Fatalln(err.Error())
 	}
 
-	b, err := utils.CheckBucketExists(client, *hoodawBucket)
-	if err != nil {
-		log.Fatalln(err.Error())
-	}
-
-	if !b {
-		log.Fatalf("Bucket %s does not exist\n", *hoodawBucket)
-	}
-
 	utils.ExportToS3(client, *hoodawBucket, "helm_releases.json", jsonToPost)
 	if err != nil {
 		log.Fatalln(err.Error())
