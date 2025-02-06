@@ -13,9 +13,11 @@ The main package in this report will perform the following steps:
 
 You can see from the codebase, a number of environment variables are required to run the program. These are:
 
-- AWS creds
+- AWS creds (region, aws_role_arn & the long lived secret keys are pulled at runtime)
 
-- bucket - The bucket name that hosts the json we will display.
+- hoodaw bucket - The bucket name that hosts the json we will display.
+
+- kubeconfig bucket - The bucket name to pullthe kubeconfig from
 
 - ctxLive/ctxManager - Context used to switch clusters
 

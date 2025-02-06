@@ -120,8 +120,7 @@ This section describes how to install and update the front-end app and scheduled
 * `cloud-platform-reports-cronjobs/secrets.yaml` file containing Docker Hub credentials and API key in double encoded format
 * `cloud-platform-reports/secrets.yaml` file defining the web application API key in encoded format
 
-The web application API key is required by both the web application and the
-cronjobs which post the report data.
+The web application API key is required by both the web application and the cronjobs which post the report data.
 
 ## API Key Secret
 
