@@ -33,11 +33,11 @@ func Test_costs_updatecostsByNamespace(t *testing.T) {
 			},
 			fields: fields{
 				costPerNamespace: map[string]map[string]float64{
-					"ns1": map[string]float64{
+					"ns1": {
 						"service 1": 16.40,
 						"service 2": 1.40,
 					},
-					"ns2": map[string]float64{
+					"ns2": {
 						"service 2": 12.90,
 					},
 				},
@@ -68,25 +68,24 @@ func Test_costs_getSharedCosts(t *testing.T) {
 		want   float64
 	}{
 		{
-
 			name: "get shared costs per namespace",
 			fields: fields{
 				costPerNamespace: map[string]map[string]float64{
-					"SHARED_COSTS": map[string]float64{
+					"SHARED_COSTS": {
 						"service 1": 36,
 						"service 2": 42,
 						"service 3": 21,
 					},
-					"ns1": map[string]float64{
+					"ns1": {
 						"service 3": 12.90,
 					},
-					"ns2": map[string]float64{
+					"ns2": {
 						"service 1": 12.90,
 					},
-					"ns3": map[string]float64{
+					"ns3": {
 						"service 2": 12.90,
 					},
-					"ns4": map[string]float64{
+					"ns4": {
 						"service 1": 12.90,
 					},
 				},
@@ -123,11 +122,11 @@ func Test_costs_buildCostsResourceMap(t *testing.T) {
 			name: "for given costPerNamespace build resourceMap",
 			fields: fields{
 				costPerNamespace: map[string]map[string]float64{
-					"ns1": map[string]float64{
+					"ns1": {
 						"service 1": 16.40,
 						"service 2": 1.40,
 					},
-					"ns2": map[string]float64{
+					"ns2": {
 						"service 2": 12.90,
 					},
 				},
@@ -184,7 +183,7 @@ func Test_costs_addResource(t *testing.T) {
 			name: "when one service and cost given, add resource map to ns",
 			fields: fields{
 				costPerNamespace: map[string]map[string]float64{
-					"ns1": map[string]float64{
+					"ns1": {
 						"service 1": 16.40,
 					},
 				},
@@ -196,7 +195,7 @@ func Test_costs_addResource(t *testing.T) {
 			},
 			want: fields{
 				costPerNamespace: map[string]map[string]float64{
-					"ns1": map[string]float64{
+					"ns1": {
 						"service 1": 16.40,
 						"service 2": 1.7,
 					},

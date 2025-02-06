@@ -61,24 +61,20 @@ type costs struct {
 func main() {
 	flag.Parse()
 
-	// Gain access to a Kubernetes cluster using a config file stored in an S3 bucket.
 	clientset, err := authenticate.CreateClientFromS3Bucket(*bucket, *kubeconfig, *region, *ctx)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
 
-	// Get the list of namespaces from the cluster which is set in the clientset
 	namespaces, err := namespace.GetAllNamespacesFromCluster(clientset)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
 
-	// create a new costs object
 	c := &costs{
 		costPerNamespace: map[string]map[string]float64{},
 	}
 
-	// get Cost and Usage data from aws cost explorer api
 	awsCostUsageData, err := getAwsCostAndUsageData()
 	if err != nil {
 		log.Fatalln(err.Error())
@@ -101,20 +97,16 @@ func main() {
 	// resources to the CP account e.g ec2 instances, elasticsearch
 	c.addSharedCosts()
 
-	// add shared CP team costs
 	c.addSharedTeamCosts()
 
-	// build the resources Map for all namespaces with the format required by HOODAW frontend
 	namespacesMap := c.buildCostsResourceMap(namespaces)
 
-	// build the final jsonMap
 	jsonToPost, err := BuildJsonMap(namespacesMap)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
 
-	// Post json to S3
-	client, err := utils.S3Client("eu-west-1")
+	client, err := utils.S3Client("eu-west-2")
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
@@ -128,12 +120,11 @@ func main() {
 		log.Fatalf("Bucket %s does not exist\n", *hoodawBucket)
 	}
 
-	utils.ExportToS3(client, *hoodawBucket, "namespace_costs.json", jsonToPost)
-	if err != nil {
-		log.Fatalln(err.Error())
+	exportErr := utils.ExportToS3(client, *hoodawBucket, "namespace_costs.json", jsonToPost)
+	if exportErr != nil {
+		log.Fatalln(exportErr.Error())
 	}
 
-	// Post json to hoowdaw api
 	err = hoodaw.PostToApi(jsonToPost, hoodawApiKey, &endPoint)
 	if err != nil {
 		log.Fatalln(err.Error())
