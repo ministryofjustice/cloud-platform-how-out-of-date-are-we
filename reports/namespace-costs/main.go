@@ -18,22 +18,16 @@ import (
 	ceTypes "github.com/aws/aws-sdk-go-v2/service/costexplorer/types"
 	"github.com/ministryofjustice/cloud-platform-environments/pkg/authenticate"
 	"github.com/ministryofjustice/cloud-platform-environments/pkg/namespace"
-	"github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/reports/pkg/hoodaw"
 	"github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/utils"
 	v1 "k8s.io/api/core/v1"
 )
 
 var (
-	hoodawBucket   = flag.String("howdaw-bucket", os.Getenv("HOODAW_BUCKET"), "AWS S3 bucket for hoodaw json reports")
-	bucket         = flag.String("bucket", os.Getenv("KUBECONFIG_S3_BUCKET"), "AWS S3 bucket for kubeconfig")
-	ctx            = flag.String("context", "live.cloud-platform.service.justice.gov.uk", "Kubernetes context specified in kubeconfig")
-	hoodawApiKey   = flag.String("hoodawAPIKey", os.Getenv("HOODAW_API_KEY"), "API key to post data to the 'How out of date are we' API")
-	hoodawEndpoint = flag.String("hoodawEndpoint", "/costs_by_namespace", "Endpoint to send the data to")
-	hoodawHost     = flag.String("hoodawHost", os.Getenv("HOODAW_HOST"), "Hostname of the 'How out of date are we' API")
-	kubeconfig     = flag.String("kubeconfig", "kubeconfig", "Name of kubeconfig file in S3 bucket")
-	region         = flag.String("region", os.Getenv("AWS_REGION"), "AWS Region")
-
-	endPoint = *hoodawHost + *hoodawEndpoint
+	hoodawBucket = flag.String("hoodaw-bucket", os.Getenv("HOODAW_BUCKET"), "AWS S3 bucket for hoodaw json reports")
+	bucket       = flag.String("bucket", os.Getenv("KUBECONFIG_S3_BUCKET"), "AWS S3 bucket for kubeconfig")
+	ctx          = flag.String("context", "live.cloud-platform.service.justice.gov.uk", "Kubernetes context specified in kubeconfig")
+	kubeconfig   = flag.String("kubeconfig", "kubeconfig", "Name of kubeconfig file in S3 bucket")
+	region       = flag.String("region", os.Getenv("AWS_REGION"), "AWS Region")
 )
 
 const SHARED_COSTS string = "SHARED_COSTS"
@@ -124,11 +118,6 @@ func main() {
 	if exportErr != nil {
 		log.Fatalln(exportErr.Error())
 	}
-
-	err = hoodaw.PostToApi(jsonToPost, hoodawApiKey, &endPoint)
-	if err != nil {
-		log.Fatalln(err.Error())
-	}
 }
 
 // getAwsCostAndUsageData get the data from aws cost explorer api and build a slice of [date,resourcename,namespacename,cost]
@@ -138,6 +127,7 @@ func getAwsCostAndUsageData() ([][]string, error) {
 		return nil, err
 	}
 	svc := costexplorer.NewFromConfig(cfg)
+
 	now, monthBefore := timeNow(DAYS_TOGET_DATA)
 
 	param := &costexplorer.GetCostAndUsageInput{
