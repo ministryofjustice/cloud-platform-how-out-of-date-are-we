@@ -26,7 +26,7 @@ var (
 	region      = flag.String("region", os.Getenv("AWS_REGION"), "AWS Region")
 	kubeCfgPath = flag.String("kubeCfgPath", os.Getenv("KUBECONFIG"), "Path of the kube config file")
 
-	hoodawBucket   = flag.String("howdaw-bucket", os.Getenv("HOODAW_BUCKET"), "AWS S3 bucket for hoodaw json reports")
+	hoodawBucket   = flag.String("hoodaw-bucket", os.Getenv("HOODAW_BUCKET"), "AWS S3 bucket for hoodaw json reports")
 	bucket         = flag.String("bucket", os.Getenv("KUBECONFIG_S3_BUCKET"), "AWS S3 bucket for kubeconfig")
 	ctx            = flag.String("context", "live.cloud-platform.service.justice.gov.uk", "Kubernetes context specified in kubeconfig")
 	kubeconfig     = flag.String("kubeconfig", "kubeconfig", "Name of kubeconfig file in S3 bucket")
