@@ -270,21 +270,6 @@ get "/infrastructure_deployments" do
   end
 end
 
-
-get "/costs_by_namespace" do
-  if accept_json?(request)
-    serve_json_data(:costs_by_namespace)
-  else
-    costs = namespace_costs
-    locals = {
-      title: "Costs by namespace",
-      updated_at: costs.updated_at,
-      costs: costs,
-    }
-    erb :costs_by_namespace, locals: locals
-  end
-end
-
 get "/namespace_usage" do
   redirect "/namespace_usage_cpu"
 end
