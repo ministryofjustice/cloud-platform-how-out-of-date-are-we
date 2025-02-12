@@ -27,7 +27,7 @@
       </div>
       <div class="govuk-header__content">
         <h1 href="#" class="govuk-header__link govuk-header__service-name">
-          Cloud Platform Reports: Hosted Services
+          Cloud Platform Reports: Costs by Namespace
         </h1>
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
           <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
@@ -74,68 +74,60 @@
       </div>
     </div>
   </header>
-  <h2 class="page_heading">Summary</h2>
-  <div class="row mb-3">
-    <div class="col-sm-4">
-      <div class="card">
-        <div class="card-body">
-          <b>Total Namespaces: </b>
-          {{.TotalNamespaces}}
-        </div>
-      </div>
-    </div>
-    <div class="col-sm-4">
-      <div class="card">
-        <div class="card-body">
-          <b>Unique Applications: </b>
-          {{.UniqueApplications}}
-        </div>
-      </div>
-    </div>
-    <div class="col-sm-4">
-      <div class="card">
-        <div class="card-body">
-          <b>Last Updated: </b>
-          {{.LastUpdated}}
-        </div>
-      </div>
-    </div>
-  </div>
   <div class="container-fluid">
-    <h2 class="page_heading">Service details</h2>
-    <p class="text">Type any business unit, application or any text to filter the list:</p>
+    <h2 class="page_heading">Summary</h2>
+    <div class="row mb-3">
+      <div class="col-sm-4">
+        <div class="card">
+          <div class="card-body">
+            <b>Last Updated: </b>
+            {{.LastUpdated}}
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-4">
+        <div class="card">
+          <div class="card-body">
+            <b>Total cost (all namespaces): </b>
+            ${{ printf "%.2f" .Total }}
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="text">
+      Shared costs, both AWS resources (i.e. Cloud Platform infrastructure), and the staff and ancillary costs of the
+      Cloud Platform team, are distributed evenly across all namespaces.
+    </p>
+    <p class="text">Type any namespace name to filter the list:</p>
     <input class="form-control" id="searchInput" type="text" placeholder="Search..">
     <br>
-
-    <table class="table table-striped d-table">
-      <thead class="thead">
+    <table class="table table-striped d-table" id="costs-by-namespace">
+      <thead>
         <tr>
-          <th scope="col">Namespace</th>
-          <th scope="col">Application</th>
-          <th scope="col">Business unit</th>
-          <th scope="col">Team name</th>
-          <th scope="col">Slack channel</th>
-          <th scope="col">Source code</th>
-          <th scope="col">Domain names</th>
+          <th>
+            <button type="button" class="btn btn-outline-primary info" onclick="sortTable(0, true)">Namespace</button>
+          </th>
+          <th>
+            <button type="button" class="btn btn-outline-primary info" onclick="sortTable(1, false)">Monthly Cost
+              ($)</button>
+          </th>
         </tr>
       </thead>
       <tbody id="namespaceTable">
-        {{ range .HostedServices }}
+        {{- range $key, $value := .Namespaces }}
         <tr>
-          <th scope="row">
-            <a href="/namespace/{{.Namespace}}">{{.Namespace}}</a>
-          </th>
-          <td>{{.Application}}</td>
-          <td>{{.BusinessUnit}}</td>
-          <td>{{.TeamName}}</td>
-          <td>{{.SlackChannel}}</td>
-          <td>{{.SourceCode}}</td>
-          <td>{{.DomainNames}}</td>
+          <td>
+            <a href="/namespace/{{$key}}">{{$key}}</a>
+          </td>
+          <td class="text-right">
+            {{ $value.Total }}
+          </td>
         </tr>
-        {{ end }}
+        {{- end }}
       </tbody>
     </table>
   </div>
+
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
     integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
     crossorigin="anonymous"></script>
@@ -155,6 +147,75 @@
         });
       });
     });
+
+    function isSortedAlphabetically(arr, n) {
+      const c = [];
+
+      for (let i = 1; i < arr.length; i++) {
+        c.push(arr[i - 1].cells[n].textContent.localeCompare(arr[i].cells[n].textContent));
+      }
+
+      if (c.every((n) => n <= 0)) {
+        return true
+      }
+
+      if (c.every((n) => n >= 0)) {
+        return true
+      };
+
+      return false;
+    }
+
+    function isAscending(arr, n, isLetter) {
+      return arr.every(function (x, i) {
+        return i === 0 || parseFloat(x.cells[n].textContent).toFixed(2) * 100 <= parseFloat(arr[i - 1].cells[n].textContent).toFixed(2) * 100;
+      });
+    }
+
+    function isDescending(arr, n) {
+      return arr.every(function (x, i) {
+        return i === 0 || parseFloat(x.cells[n].textContent).toFixed(2) * 100 >= parseFloat(arr[i - 1].cells[n].textContent).toFixed(2) * 100;
+      });
+    }
+
+    function sortTable(n, isLetter) {
+      table = document.getElementById("costs-by-namespace");
+
+      var rows = Array.prototype.slice.call(table.querySelectorAll("tbody > tr"));
+
+      rows = rows.slice(0, rows.length)
+
+      var isSorted = false
+
+      if (isLetter) {
+        isSorted = isSortedAlphabetically(rows, n)
+      } else {
+        isSorted = isAscending(rows, n) || isDescending(rows, n)
+      }
+
+
+      if (isSorted) {
+        rows.reverse()
+      } else {
+        rows.sort(function (rowA, rowB) {
+          var cellA = rowA.cells[n].textContent;
+          var cellB = rowB.cells[n].textContent;
+
+          // Handle numerical values
+          if (!isNaN(cellA) && !isNaN(cellB)) {
+            return parseFloat(cellA).toFixed(2) * 100 - parseFloat(cellB).toFixed(2) * 100;
+          }
+
+          // Default to string comparison
+          return cellA.localeCompare(cellB);
+        });
+
+      }
+
+      rows.forEach(function (row) {
+        table.querySelector("tbody").appendChild(row);
+      });
+    }
   </script>
 </body>
 
