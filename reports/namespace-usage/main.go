@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/ministryofjustice/cloud-platform-environments/pkg/authenticate"
 	auth "github.com/ministryofjustice/cloud-platform-environments/pkg/authenticate"
 	ns "github.com/ministryofjustice/cloud-platform-environments/pkg/namespace"
 	"github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/reports/pkg/hoodaw"
@@ -20,17 +21,12 @@ import (
 )
 
 var (
-	hoodawBucket   = flag.String("howdaw-bucket", os.Getenv("HOODAW_BUCKET"), "AWS S3 bucket for hoodaw json reports")
-	bucket         = flag.String("bucket", os.Getenv("KUBECONFIG_S3_BUCKET"), "AWS S3 bucket for kubeconfig")
-	ctx            = flag.String("context", "live.cloud-platform.service.justice.gov.uk", "Kubernetes context specified in kubeconfig")
-	hoodawApiKey   = flag.String("hoodawAPIKey", os.Getenv("HOODAW_API_KEY"), "API key to post data to the 'How out of date are we' API")
-	hoodawEndpoint = flag.String("hoodawEndpoint", "/namespace_usage", "Endpoint to send the data to")
-	hoodawHost     = flag.String("hoodawHost", os.Getenv("HOODAW_HOST"), "Hostname of the 'How out of date are we' API")
-	kubeconfig     = flag.String("kubeconfig", "kubeconfig", "Name of kubeconfig file in S3 bucket")
-	region         = flag.String("region", os.Getenv("AWS_REGION"), "AWS Region")
-	kubeCfgPath    = flag.String("kubeCfgPath", os.Getenv("KUBECONFIG"), "Path of the kube config file")
-
-	endPoint = *hoodawHost + *hoodawEndpoint
+	hoodawBucket = flag.String("howdaw-bucket", os.Getenv("HOODAW_BUCKET"), "AWS S3 bucket for hoodaw json reports")
+	bucket       = flag.String("bucket", os.Getenv("KUBECONFIG_S3_BUCKET"), "AWS S3 bucket for kubeconfig")
+	ctx          = flag.String("context", "live.cloud-platform.service.justice.gov.uk", "Kubernetes context specified in kubeconfig")
+	kubeconfig   = flag.String("kubeconfig", "kubeconfig", "Name of kubeconfig file in S3 bucket")
+	region       = flag.String("region", os.Getenv("AWS_REGION"), "AWS Region")
+	kubeCfgPath  = flag.String("kubeCfgPath", os.Getenv("KUBECONFIG"), "Path of the kube config file")
 )
 
 // NamespaceResource has the type of resource info
@@ -56,15 +52,9 @@ func main() {
 	flag.Parse()
 
 	// Get the kubeconfig file stored in an S3 bucket.
-	err := auth.KubeConfigFromS3Bucket(*bucket, *kubeconfig, *region, *kubeCfgPath)
+	clientset, err := authenticate.CreateClientFromS3Bucket(*bucket, *kubeconfig, *region, *ctx)
 	if err != nil {
-		log.Fatalln("error in getting the kubeconfig from s3 bucket", err.Error())
-	}
-
-	// Get the clientset to access the k8s cluster
-	kclientset, err := auth.CreateClientFromConfigFile(*kubeCfgPath, *ctx)
-	if err != nil {
-		log.Fatalln("error in creating clientset", err.Error())
+		log.Fatalln(err.Error())
 	}
 
 	// Get the clientset object to access cluster metrics
@@ -74,13 +64,13 @@ func main() {
 	}
 
 	// Get the list of namespaces from the cluster which is set in the kclientset
-	nsList, err := ns.GetAllNamespacesFromCluster(kclientset)
+	nsList, err := ns.GetAllNamespacesFromCluster(clientset)
 	if err != nil {
 		log.Fatalln("error in getting all namespaces from cluster", err.Error())
 	}
 
 	// Get pod requests requests and container count of all namespaces of a given cluster
-	nsReqMap, containerMap, err := getAllPodResourceDetails(kclientset)
+	nsReqMap, containerMap, err := getAllPodResourceDetails(clientset)
 	if err != nil {
 		log.Fatalln("error in getting all pod resources details", err.Error())
 	}
@@ -92,7 +82,7 @@ func main() {
 	}
 
 	// Get hard limit of pods of all namespaces of a given cluster
-	nsQuotaMap, err := getAllResourceQuotaDetails(kclientset)
+	nsQuotaMap, err := getAllResourceQuotaDetails(clientset)
 	if err != nil {
 		log.Fatalln("error in getting all resourcequota details", err.Error())
 	}
@@ -116,7 +106,7 @@ func main() {
 	}
 
 	// Post json to S3
-	client, err := utils.S3Client("eu-west-1")
+	client, err := utils.S3Client("eu-west-2")
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
@@ -131,12 +121,6 @@ func main() {
 	}
 
 	utils.ExportToS3(client, *hoodawBucket, "namespace_usage.json", jsonToPost)
-	if err != nil {
-		log.Fatalln(err.Error())
-	}
-
-	// Post json to hoowdaw api
-	err = hoodaw.PostToApi(jsonToPost, hoodawApiKey, &endPoint)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}

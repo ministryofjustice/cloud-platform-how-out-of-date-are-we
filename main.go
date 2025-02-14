@@ -65,6 +65,13 @@ func main() {
 		lib.ErroredNamespacesPage(w, errorNsBucket, wantJson, client)
 	})
 
+	http.HandleFunc("GET /namespace/{namespace}", func(w http.ResponseWriter, r *http.Request) {
+		namespace := r.PathValue("namespace")
+		accept := r.Header.Get("Accept")
+		wantJson := accept == "application/json"
+		lib.NamespaceUsagePage(w, bucket, namespace, wantJson, client)
+	})
+
 	fmt.Println("Listening on port :8080 ...")
 	serverErr := http.ListenAndServe(":8080", nil)
 	if serverErr != nil {
