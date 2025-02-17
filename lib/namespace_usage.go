@@ -93,11 +93,6 @@ func NamespaceUsagePage(w http.ResponseWriter, bucket, namespace string, wantJso
 	if err != nil {
 		fmt.Println(err)
 	}
-	if wantJson {
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(byteValue)
-		return
-	}
 
 	var namespaceCosts NamespaceCosts
 	json.Unmarshal(byteValue, &namespaceCosts)
@@ -105,11 +100,6 @@ func NamespaceUsagePage(w http.ResponseWriter, bucket, namespace string, wantJso
 	byteValue, filestamp, err = utils.ImportS3File(client, bucket, "namespace_usage.json")
 	if err != nil {
 		fmt.Println(err)
-	}
-	if wantJson {
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(byteValue)
-		return
 	}
 
 	var namespaceUsage NamespaceUsage
@@ -119,12 +109,6 @@ func NamespaceUsagePage(w http.ResponseWriter, bucket, namespace string, wantJso
 	byteValue, filestamp, err = utils.ImportS3File(client, bucket, "hosted_services.json")
 	if err != nil {
 		fmt.Println(err)
-	}
-
-	if wantJson {
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(byteValue)
-		return
 	}
 
 	var tags Tags
@@ -168,6 +152,12 @@ func NamespaceUsagePage(w http.ResponseWriter, bucket, namespace string, wantJso
 			usage.Tags.SourceCode = v.SourceCode
 			usage.Tags.DomainNames = v.DomainNames
 		}
+	}
+
+	if wantJson {
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(byteValue)
+		return
 	}
 
 	if err := t.ExecuteTemplate(w, "namespaces.html", usage); err != nil {
