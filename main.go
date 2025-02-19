@@ -11,6 +11,8 @@ import (
 
 var bucket = "cloud-platform-hoodaw-reports"
 
+var errorNsBucket = "cloud-platform-concourse-environments-live-reports"
+
 func main() {
 	client, err := utils.S3Client("eu-west-2")
 	if err != nil {
@@ -24,6 +26,15 @@ func main() {
 
 	if !exists {
 		fmt.Println("Bucket does not exist")
+	}
+
+	exists, err = utils.CheckBucketExists(client, errorNsBucket)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	if !exists {
+		fmt.Println("Erroring namespaces bucket does not exist")
 	}
 
 	http.Handle("/static/",
@@ -46,6 +57,12 @@ func main() {
 		accept := r.Header.Get("Accept")
 		wantJson := accept == "application/json"
 		lib.NamespaceCostsPage(w, bucket, wantJson, client)
+	})
+
+	http.HandleFunc("/erroring_namespaces", func(w http.ResponseWriter, r *http.Request) {
+		accept := r.Header.Get("Accept")
+		wantJson := accept == "application/json"
+		lib.ErroredNamespacesPage(w, errorNsBucket, wantJson, client)
 	})
 
 	fmt.Println("Listening on port :8080 ...")
