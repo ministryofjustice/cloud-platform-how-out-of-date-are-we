@@ -4,3 +4,4 @@ description: Cronjobs to provide data to the Cloud Platform Reports web applicat
 type: application
 version: 0.11.3
 appVersion: "4.15.0"
+
