@@ -9,9 +9,10 @@ import (
 	utils "github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/utils"
 )
 
-var bucket = "cloud-platform-hoodaw-reports"
-
-var errorNsBucket = "cloud-platform-concourse-environments-live-reports"
+var (
+	bucket        = "cloud-platform-hoodaw-reports"
+	errorNsBucket = "cloud-platform-concourse-environments-live-reports"
+)
 
 func main() {
 	client, err := utils.S3Client("eu-west-2")
@@ -19,22 +20,15 @@ func main() {
 		fmt.Println(err)
 	}
 
-	exists, err := utils.CheckBucketExists(client, bucket)
-	if err != nil {
-		fmt.Println(err)
-	}
+	for _, b := range []string{bucket, errorNsBucket} {
+		exists, err := utils.CheckBucketExists(client, b)
+		if err != nil {
+			fmt.Println(err)
+		}
 
-	if !exists {
-		fmt.Println("Bucket does not exist")
-	}
-
-	exists, err = utils.CheckBucketExists(client, errorNsBucket)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	if !exists {
-		fmt.Println("Erroring namespaces bucket does not exist")
+		if !exists {
+			fmt.Println("Bucket does not exist")
+		}
 	}
 
 	http.Handle("/static/",
@@ -63,6 +57,13 @@ func main() {
 		accept := r.Header.Get("Accept")
 		wantJson := accept == "application/json"
 		lib.ErroredNamespacesPage(w, errorNsBucket, wantJson, client)
+	})
+
+	http.HandleFunc("GET /namespace/{namespace}", func(w http.ResponseWriter, r *http.Request) {
+		namespace := r.PathValue("namespace")
+		accept := r.Header.Get("Accept")
+		wantJson := accept == "application/json"
+		lib.NamespaceUsagePage(w, bucket, namespace, wantJson, client)
 	})
 
 	fmt.Println("Listening on port :8080 ...")

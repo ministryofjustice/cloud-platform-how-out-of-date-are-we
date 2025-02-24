@@ -57,5 +57,10 @@ spec:
               name: {{ .Values.go_service.name }}
               port:
                 number: {{ .Values.go_service.port }}
-
-
+        - path: /namespace/.*
+          pathType: ImplementationSpecific
+          backend:
+            service:
+              name: {{ .Values.go_service.name }}
+              port:
+                number: {{ .Values.go_service.port }}
