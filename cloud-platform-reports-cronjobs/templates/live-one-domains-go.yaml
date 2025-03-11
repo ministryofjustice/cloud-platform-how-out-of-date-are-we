@@ -1,9 +1,9 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: {{ .Values.cronjobs.liveOneDomains.name }}
+  name: {{ .Values.cronjobs.liveOneDomainsGo.name }}
 spec:
-  schedule: "{{ .Values.cronjobs.liveOneDomains.schedule }}"
+  schedule: "{{ .Values.cronjobs.liveOneDomainsGo.schedule }}"
   successfulJobsHistoryLimit: 1
   failedJobsHistoryLimit: 1
   jobTemplate:
@@ -34,5 +34,5 @@ spec:
             command:
             - /bin/sh
             - -c
-            - ./live-1-domains
+            - ./live-one-domains
           restartPolicy: OnFailure
