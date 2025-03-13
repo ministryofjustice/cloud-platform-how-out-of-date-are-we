@@ -159,11 +159,6 @@ def hosted_services_for_namespace(namespace)
   ns.merge("updated_at" => DateTime.parse(data["updated_at"]))
 end
 
-def live_1_domains_from_json
-  json = store.retrieve_file("data/live_1_domains.json")
-  LiveOneDomains.new(json: json)
-end
-
 def infra_deployments_from_json
   json = store.retrieve_file("data/infrastructure_deployments.json")
   InfraDeployments.new(json: json)
@@ -238,21 +233,6 @@ get "/hosted_services" do
     }
     erb :hosted_services, locals: locals
 
-  end
-end
-
-get "/live_1_domains" do
-  if accept_json?(request)
-    serve_json_data(:live_1_domains)
-  else
-    lod = live_1_domains_from_json
-    locals = {
-      title: "Services with live-1 Domains",
-      total_ingress: lod.total_ingress,
-      updated_at: lod.updated_at,
-      details: lod.ingress,
-    }
-    erb :live_1_domains, locals: locals
   end
 end
 

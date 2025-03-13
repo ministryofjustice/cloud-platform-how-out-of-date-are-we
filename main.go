@@ -66,6 +66,12 @@ func main() {
 		lib.NamespaceUsagePage(w, bucket, namespace, wantJson, client)
 	})
 
+	http.HandleFunc("GET /live_one_domains", func(w http.ResponseWriter, r *http.Request) {
+		accept := r.Header.Get("Accept")
+		wantJson := accept == "application/json"
+		lib.LiveOneDomainsPage(w, bucket, wantJson, client)
+	})
+
 	fmt.Println("Listening on port :8080 ...")
 	serverErr := http.ListenAndServe(":8080", nil)
 	if serverErr != nil {

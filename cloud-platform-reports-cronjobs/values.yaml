@@ -27,9 +27,6 @@ cronjobs:
   githubRepositories:
     name: github-repositories
     schedule: "12 5 * * *"
-  liveOneDomains:
-    name: live-one-domains
-    schedule: "30 6 * * *"
   infraDeployments:
     name: infrastructure-deployments
     schedule: "59 23 28-31 * *"
@@ -53,3 +50,6 @@ cronjobs:
   namespaceUsageReportGo:
     name: namespace-usage-report-go
     schedule: "11 */6 * * *"
+  liveOneDomainsGo:
+    name: live-one-domains
+    schedule: "30 6 * * *"

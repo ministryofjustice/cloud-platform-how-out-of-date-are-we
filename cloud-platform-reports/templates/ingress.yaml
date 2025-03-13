@@ -64,3 +64,10 @@ spec:
               name: {{ .Values.go_service.name }}
               port:
                 number: {{ .Values.go_service.port }}
+        - path: /live_one_domains
+          pathType: ImplementationSpecific
+          backend:
+            service:
+              name: {{ .Values.go_service.name }}
+              port:
+                number: {{ .Values.go_service.port }}
