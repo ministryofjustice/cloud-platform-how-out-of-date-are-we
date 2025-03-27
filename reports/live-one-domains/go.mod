@@ -1,4 +1,4 @@
-module github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/reports/live-1-domains
+module github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/reports/live-one-domains
 
 go 1.23.5
 
