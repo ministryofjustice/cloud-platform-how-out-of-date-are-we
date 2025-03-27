@@ -1,4 +1,4 @@
-FROM golang:1.22.1 AS live_one_domains_builder
+FROM golang:1.23.5 AS live_one_domains_builder
 
 WORKDIR /app
 
