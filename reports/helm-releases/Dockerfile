@@ -1,6 +1,20 @@
-FROM alpine:3.21
+FROM golang:1.24.2 AS helm_release_builder
 
-ENV HELM_VERSION=3.12.3
+ENV CGO_ENABLED=0 \
+  GOOS=linux
+
+WORKDIR /app
+
+COPY go.mod ./
+COPY go.sum ./
+RUN go mod download
+COPY *.go ./
+RUN go build .
+
+FROM alpine:3.19.0
+
+ENV \
+  HELM_VERSION=3.12.3
 
 RUN \
   apk add \
@@ -11,10 +25,11 @@ RUN \
   curl \
   git
 
-WORKDIR /go/bin
+WORKDIR /app
 
-COPY ${COMMAND} /go/bin
+COPY --from=helm_release_builder /app/helm-releases ./
 
+# Install helm
 RUN curl -sL https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz \
   | tar -xzC /usr/local/bin --strip-components 1 linux-amd64/helm \
   && chmod 755 /usr/local/bin/helm
@@ -22,7 +37,7 @@ RUN curl -sL https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz \
 RUN addgroup -g 1000 -S appgroup \
   && adduser -u 1000 -S appuser -G appgroup
 
-RUN chown -R appuser:appgroup /go/bin
+RUN chown -R appuser:appgroup /app
 
 USER 1000
 

@@ -1,8 +1,8 @@
-FROM golang:1.23.6-alpine3.21
+FROM golang:1.24.2-alpine3.21
 
 ARG COMMAND
 
-ENV binary $COMMAND
+ENV binary=$COMMAND
 
 WORKDIR /go/bin
 
