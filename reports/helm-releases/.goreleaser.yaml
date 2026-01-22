@@ -1,0 +1,74 @@
+version: 2
+project_name: cloud-platform-helm-releases
+env:
+  - CGO_ENABLED=0
+  - DOCKERFILE=reports/Dockerfile
+  - HELM_VERSION=3.12.0
+before:
+  hooks:
+    - go mod download
+builds:
+  - dir: reports/helm-releases
+    main: main.go
+    binary: cloud-platform-helm-releases
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - Merge pull request
+      - Merge branch
+      - go mod tidy
+dockers:
+- image_templates: [ "ministryofjustice/{{ .ProjectName }}:{{ .Tag}}-amd64"]
+  goarch: amd64
+  dockerfile: '{{ .Env.DOCKERFILE }}'
+  use: buildx
+  build_flag_templates:
+  - --build-arg=COMMAND={{ .ProjectName }}
+  - --build-arg=HELM_VERSION={{ .Env.HELM_VERSION }}
+  - --platform=linux/amd64
+  - --label=org.opencontainers.image.title={{ .ProjectName }}
+  - --label=org.opencontainers.image.description={{ .ProjectName }}
+  - --label=org.opencontainers.image.url=https://github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/{{ .ProjectName }}
+  - --label=org.opencontainers.image.source=https://github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/{{ .ProjectName }}
+  - --label=org.opencontainers.image.version={{ .Version }}
+  - --label=org.opencontainers.image.created={{ time "2006-01-02T15:04:05Z07:00" }}
+  - --label=org.opencontainers.image.revision={{ .FullCommit }}
+  - --label=org.opencontainers.image.licenses=Apache-2.0 license
+- image_templates: [ "ministryofjustice/{{ .ProjectName }}:{{ .Tag}}-arm64"]
+  goarch: arm64
+  dockerfile: '{{ .Env.DOCKERFILE }}'
+  use: buildx
+  build_flag_templates:
+  - --build-arg=COMMAND={{ .ProjectName }}
+  - --platform=linux/arm64
+  - --label=org.opencontainers.image.title={{ .ProjectName }}
+  - --label=org.opencontainers.image.description={{ .ProjectName }}
+  - --label=org.opencontainers.image.url=https://github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/{{ .ProjectName }}
+  - --label=org.opencontainers.image.source=https://github.com/ministryofjustice/cloud-platform-how-out-of-date-are-we/{{ .ProjectName }}
+  - --label=org.opencontainers.image.version={{ .Version }}
+  - --label=org.opencontainers.image.created={{ time "2006-01-02T15:04:05Z07:00" }}
+  - --label=org.opencontainers.image.revision={{ .FullCommit }}
+  - --label=org.opencontainers.image.licenses=Apache-2.0 license
+docker_manifests:
+- name_template: ministryofjustice/{{ .ProjectName }}:{{ .Tag }}
+  image_templates:
+  - ministryofjustice/{{ .ProjectName }}:{{ .Tag}}-amd64
+  - ministryofjustice/{{ .ProjectName }}:{{ .Tag}}-arm64
+- name_template: ministryofjustice/{{ .ProjectName }}:latest
+  image_templates:
+  - ministryofjustice/{{ .ProjectName }}:{{ .Tag}}-amd64
+  - ministryofjustice/{{ .ProjectName }}:{{ .Tag}}-arm64
+
+announce:
+  slack:
+    enabled: true
+    message_template: '{{ .ProjectName }} {{ .Tag }} is now live: {{ .ReleaseURL }}'
