@@ -18,92 +18,44 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
       - name: Push ruby webapp to docker hub
-        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1 # v6.16.0
+        uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4 # v6.15.0
         with:
           push: true
           tags: ministryofjustice/cloud-platform-how-out-of-date-are-we:${{ github.event.release.tag_name }}
-      - name: Push go webapp to docker hub
-        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1 # v6.16.0
-        with:
-          push: true
-          file: Dockerfile_go
-          tags: ministryofjustice/cloud-platform-how-out-of-date-are-we-go:${{ github.event.release.tag_name }}
       - name: Compile the dashboard-reporter go script
         run: cd dashboard-reporter/; make
       - name: Push dashboard-reporter to docker hub
-        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1 # v6.16.0
+        uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4 # v6.15.0
         with:
           push: true
           context: ./dashboard-reporter
           file: ./dashboard-reporter/Dockerfile
           tags: ministryofjustice/cloud-platform-how-out-of-date-are-we-reporter:${{ github.event.release.tag_name }}
-      - name: Push namespace-usage-reporter to docker hub
-        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1 # v6.16.0
-        with:
-          push: true
-          context: ./reports/namespace-usage
-          file: ./reports/namespace-usage/Dockerfile
-          tags: ministryofjustice/cloud-platform-namespace-usage-reporter:${{ github.event.release.tag_name }}
       - name: Push terraform-module-checker to docker hub
-        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1 # v6.16.0
+        uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4 # v6.15.0
         with:
           push: true
           context: ./reports/terraform-modules
           file: ./reports/terraform-modules/Dockerfile
           tags: ministryofjustice/cloud-platform-terraform-modules-checker:${{ github.event.release.tag_name }}
       - name: Push overdue-documentation-checker to docker hub
-        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1 # v6.16.0
+        uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4 # v6.15.0
         with:
           push: true
           context: ./reports/documentation
           file: ./reports/documentation/Dockerfile
           tags: ministryofjustice/cloud-platform-overdue-documentation-checker:${{ github.event.release.tag_name }}
-      - name: Push helm-release-checker to docker hub
-        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1 # v6.16.0
-        with:
-          push: true
-          context: ./reports/helm-releases
-          file: ./reports/helm-releases/Dockerfile
-          tags: ministryofjustice/cloud-platform-helm-release-checker:${{ github.event.release.tag_name }}
       - name: Push orphaned-aws-resources checker to docker hub
-        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1 # v6.16.0
+        uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4 # v6.15.0
         with:
           push: true
           context: ./reports/orphaned-aws-resources
           file: ./reports/orphaned-aws-resources/Dockerfile
           tags: ministryofjustice/cloud-platform-report-orphaned-resources:${{ github.event.release.tag_name }}
       - name: Push orphaned-terraform-statefiles checker to docker hub
-        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1 # v6.16.0
+        uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4 # v6.15.0
         with:
           push: true
           context: ./reports/orphaned-terraform-statefiles
           file: ./reports/orphaned-terraform-statefiles/Dockerfile
           tags: ministryofjustice/cloud-platform-orphaned-terraform-statefiles:${{ github.event.release.tag_name }}
-      - name: Push namespace cost calculator to docker hub
-        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1 # v6.16.0
-        with:
-          push: true
-          context: ./reports/namespace-costs
-          file: ./reports/namespace-costs/Dockerfile
-          tags: ministryofjustice/cloud-platform-cost-calculator:${{ github.event.release.tag_name }}
-      - name: Push hosted-services image to docker hub
-        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1 # v6.16.0
-        with:
-          push: true
-          context: ./reports/hosted-services
-          file: ./reports/hosted-services/Dockerfile
-          tags: ministryofjustice/cloud-platform-hosted-services:${{ github.event.release.tag_name }}
-      - name: Push live-one-domains image to docker hub
-        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1 # v6.16.0
-        with:
-          push: true
-          context: ./reports/live-one-domains
-          file: ./reports/live-one-domains/Dockerfile
-          tags: ministryofjustice/cloud-platform-live-one-domains:${{ github.event.release.tag_name }}
-      - name: Push infrastructure deployments image to docker hub
-        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1 # v6.16.0
-        with:
-          push: true
-          context: ./reports/infrastructure-deployments
-          file: ./reports/infrastructure-deployments/Dockerfile
-          tags: ministryofjustice/cloud-platform-infrastructure-deployments:${{ github.event.release.tag_name }}
